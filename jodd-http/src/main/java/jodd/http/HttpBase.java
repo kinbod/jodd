@@ -47,6 +47,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -72,7 +73,8 @@ public abstract class HttpBase<T> {
 	public static final String HTTP_1_1 = "HTTP/1.1";
 
 	protected String httpVersion = HTTP_1_1;
-	protected HttpMultiMap<String> headers = HttpMultiMap.newCaseInsensitveMap();
+	protected boolean capitalizeHeaderKeys = JoddHttp.defaultCapitalizeHeaderKeys;
+	protected final HeadersMultiMap headers = new HeadersMultiMap();
 
 	protected HttpMultiMap<?> form;			// holds form data (when used)
 	protected String body;					// holds raw body string (always)
@@ -93,6 +95,24 @@ public abstract class HttpBase<T> {
 		this.httpVersion = httpVersion;
 		return (T) this;
 	}
+	
+	/**
+	 * Returns whether header keys should be strict or not, when they are
+	 * modified by changing them to PascalCase.
+	 * @see JoddHttp#defaultCapitalizeHeaderKeys
+	 */
+	public boolean capitalizeHeaderKeys() {
+		return capitalizeHeaderKeys;
+	}
+	
+	/**
+	 * Sets headers behavior.
+	 * @see JoddHttp#defaultCapitalizeHeaderKeys
+	 */
+	public T capitalizeHeaderKeys(boolean capitalizeHeaderKeys) {
+		this.capitalizeHeaderKeys = capitalizeHeaderKeys;
+		return (T) this;
+	}
 
 	// ---------------------------------------------------------------- headers
 
@@ -103,7 +123,7 @@ public abstract class HttpBase<T> {
 	 * if header doesn't exist.
 	 */
 	public String header(String name) {
-		return headers.get(name);
+		return headers.getHeader(name);
 	}
 
 	/**
@@ -117,9 +137,7 @@ public abstract class HttpBase<T> {
 	 * Removes all header parameters for given name.
 	 */
 	public void removeHeader(String name) {
-		String key = name.trim().toLowerCase();
-
-		headers.remove(key);
+		headers.remove(name.trim());
 	}
 
 	/**
@@ -140,20 +158,17 @@ public abstract class HttpBase<T> {
 	 * @see #header(String, String)
 	 */
 	public T header(String name, String value, boolean overwrite) {
-		String key = name.trim().toLowerCase();
-
-		value = value.trim();
+		String key = name.trim();
 
 		if (key.equalsIgnoreCase(HEADER_CONTENT_TYPE)) {
+			value = value.trim();
+
 			mediaType = HttpUtil.extractMediaType(value);
 			charset = HttpUtil.extractContentTypeCharset(value);
 		}
 
-		if (overwrite) {
-			headers.set(key, value);
-		} else {
-			headers.add(key, value);
-		}
+		_header(name, value, overwrite);
+
 		return (T) this;
 	}
 
@@ -161,12 +176,13 @@ public abstract class HttpBase<T> {
 	 * Internal direct header setting.
 	 */
 	protected void _header(String name, String value, boolean overwrite) {
-		String key = name.trim().toLowerCase();
+		name = name.trim();
 		value = value.trim();
+
 		if (overwrite) {
-			headers.set(key, value);
+			headers.setHeader(name, value);
 		} else {
-			headers.add(key, value);
+			headers.addHeader(name, value);
 		}
 	}
 
@@ -189,10 +205,11 @@ public abstract class HttpBase<T> {
 	}
 
 	/**
-	 * Returns {@link HttpMultiMap} of all headers.
+	 * Returns collection of all header names. Depends on
+	 * {@link #capitalizeHeaderKeys()} flag.
 	 */
-	public HttpMultiMap<String> headers() {
-		return headers;
+	public Collection<String> headerNames() {
+		return headers.names();
 	}
 
 	// ---------------------------------------------------------------- content type
@@ -325,7 +342,8 @@ public abstract class HttpBase<T> {
 
 	/**
 	 * Returns full "Content-Length" header or
-	 * <code>null</code> if not set.
+	 * <code>null</code> if not set. Returned value is raw and unchecked, exactly the same
+	 * as it was specified or received. It may be even invalid.
 	 */
 	public String contentLength() {
 		return header(HEADER_CONTENT_LENGTH);
@@ -383,7 +401,7 @@ public abstract class HttpBase<T> {
 	 */
 	protected void initForm() {
 		if (form == null) {
-			form = HttpMultiMap.newCaseInsensitveMap();
+			form = HttpMultiMap.newCaseInsensitiveMap();
 		}
 	}
 
@@ -774,17 +792,23 @@ public abstract class HttpBase<T> {
 	protected abstract Buffer buffer(boolean full);
 
 	protected void populateHeaderAndBody(Buffer target, Buffer formBuffer, boolean fullRequest) {
-		for (String key : headers.names()) {
-			List<String> values = headers.getAll(key);
+		for (String name : headers.names()) {
+			List<String> values = headers.getAll(name);
 
-			String headerName = HttpUtil.prepareHeaderParameterName(key);
+			String key = capitalizeHeaderKeys ? HttpUtil.prepareHeaderParameterName(name) : name;
+
+			target.append(key);
+			target.append(": ");
+			int count = 0;
 
 			for (String value : values) {
-				target.append(headerName);
-				target.append(": ");
+				if (count++ > 0) {
+					target.append(", ");
+				}
 				target.append(value);
-				target.append(CRLF);
 			}
+
+			target.append(CRLF);
 		}
 
 		if (fullRequest) {
@@ -940,7 +964,7 @@ public abstract class HttpBase<T> {
 		}
 
 		if (mediaType.equals("multipart/form-data")) {
-			form = HttpMultiMap.newCaseInsensitveMap();
+			form = HttpMultiMap.newCaseInsensitiveMap();
 
 			MultipartStreamParser multipartParser = new MultipartStreamParser();
 

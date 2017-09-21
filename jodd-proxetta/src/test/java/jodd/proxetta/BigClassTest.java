@@ -32,14 +32,14 @@ import jodd.proxetta.fixtures.data.*;
 import jodd.proxetta.impl.ProxyProxetta;
 import jodd.proxetta.pointcuts.ProxyPointcutSupport;
 import jodd.util.ClassLoaderUtil;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import jodd.asm5.Type;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class BigClassTest {
 
@@ -61,16 +61,16 @@ public class BigClassTest {
 					assertNotNull(anns);
 					assertEquals(3, anns.length);
 					AnnotationInfo ai = anns[0];
-					assertSame(ai, getAnnotation(ci, MadvocAction.class));
+					assertSame(ai, ci.getAnnotation(MadvocAction.class));
 					assertEquals(MadvocAction.class.getName(), ai.getAnnotationClassname());
 					assertEquals("L" + MadvocAction.class.getName().replace('.', '/') + ";", ai.getAnnotationSignature());
 					assertEquals("madvocAction", ai.getElement("value"));
 					ai = anns[1];
-					assertSame(ai, getAnnotation(ci, PetiteBean.class));
+					assertSame(ai, ci.getAnnotation(PetiteBean.class));
 					assertEquals(PetiteBean.class.getName(), ai.getAnnotationClassname());
 					assertEquals("L" + PetiteBean.class.getName().replace('.', '/') + ";", ai.getAnnotationSignature());
 					ai = anns[2];
-					assertSame(ai, getAnnotation(ci, InterceptedBy.class));
+					assertSame(ai, ci.getAnnotation(InterceptedBy.class));
 					assertEquals(InterceptedBy.class.getName(), ai.getAnnotationClassname());
 					assertEquals("L" + InterceptedBy.class.getName().replace('.', '/') + ";", ai.getAnnotationSignature());
 					assertTrue(ai.getElement("value") instanceof Object[]);
@@ -84,18 +84,18 @@ public class BigClassTest {
 					assertEquals(3, anns.length);
 
 					AnnotationInfo ai = anns[0];
-					assertSame(ai, getAnnotation(mi, Action.class));
+					assertSame(ai, mi.getAnnotation(Action.class));
 					assertEquals(Action.class.getName(), ai.getAnnotationClassname());
 					assertEquals("value", ai.getElement("value"));
 					assertEquals("alias", ai.getElement("alias"));
 
 					ai = anns[1];
-					assertSame(ai, getAnnotation(mi, PetiteInject.class));
+					assertSame(ai, mi.getAnnotation(PetiteInject.class));
 					assertEquals(PetiteInject.class.getName(), ai.getAnnotationClassname());
 					assertEquals(0, ai.getElementNames().size());
 
 					ai = anns[2];
-					assertSame(ai, getAnnotation(mi, Transaction.class));
+					assertSame(ai, mi.getAnnotation(Transaction.class));
 					assertEquals(Transaction.class.getName(), ai.getAnnotationClassname());
 					assertEquals(2, ai.getElementNames().size());
 					String s = (String) ai.getElement("propagation");
@@ -107,22 +107,22 @@ public class BigClassTest {
 					assertEquals(3, anns.length);
 
 					AnnotationInfo ai = anns[0];
-					assertSame(ai, getAnnotation(mi, Action.class));
+					assertSame(ai, mi.getAnnotation(Action.class));
 					assertEquals(Action.class.getName(), ai.getAnnotationClassname());
 					assertEquals(0, ai.getElementNames().size());
 
 					ai = anns[1];
-					assertSame(ai, getAnnotation(mi, PetiteInject.class));
+					assertSame(ai, mi.getAnnotation(PetiteInject.class));
 					assertEquals(PetiteInject.class.getName(), ai.getAnnotationClassname());
 					assertEquals(0, ai.getElementNames().size());
 
 					ai = anns[2];
-					assertSame(ai, getAnnotation(mi, Transaction.class));
+					assertSame(ai, mi.getAnnotation(Transaction.class));
 					assertEquals(Transaction.class.getName(), ai.getAnnotationClassname());
 					assertEquals(0, ai.getElementNames().size());
 				}
 				//System.out.println(!isRootMethod(mi) + " " + mi.getDeclaredClassName() + '#' + mi.getMethodName());
-				return !isRootMethod(mi);
+				return !mi.isRootMethod();
 			}
 		});
 

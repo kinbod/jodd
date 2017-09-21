@@ -26,9 +26,9 @@
 package jodd.http;
 
 import jodd.util.StringPool;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class HttpUtilTest {
 
@@ -103,7 +103,7 @@ public class HttpUtilTest {
 
 	@Test
 	public void testBuildQuery() {
-		HttpMultiMap<String> map = HttpMultiMap.newCaseInsensitveMap();
+		HttpMultiMap<String> map = HttpMultiMap.newCaseInsensitiveMap();
 
 		assertEquals("", HttpUtil.buildQuery(map, StringPool.UTF_8));
 

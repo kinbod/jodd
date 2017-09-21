@@ -71,6 +71,13 @@ public class JoddHttp {
 	 */
 	public static String defaultUserAgent = "Jodd HTTP";
 
+	/**
+	 * Flag that controls if headers should be rewritten and capitalized in PascalCase.
+	 * When disabled, header keys are used as they are passed.
+	 * When flag is enabled, header keys will be capitalized.
+	 */
+	public static boolean defaultCapitalizeHeaderKeys = true;
+
 	// ---------------------------------------------------------------- module
 
 	static {

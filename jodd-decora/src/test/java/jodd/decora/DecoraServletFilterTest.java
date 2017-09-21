@@ -25,27 +25,20 @@
 
 package jodd.decora;
 
-import static org.junit.Assert.assertNotNull;
-import static org.powermock.api.mockito.PowerMockito.mock;
+import jodd.decora.parser.DecoraParser;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.mock;
 
-import jodd.decora.parser.DecoraParser;
-import jodd.util.ClassLoaderUtil;
-
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ ClassLoaderUtil.class, DecoraResponseWrapper.class })
 public class DecoraServletFilterTest {
 
 	private DecoraServletFilter decoraServletFilter;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		decoraServletFilter = new DecoraServletFilter();
 	}
@@ -56,7 +49,7 @@ public class DecoraServletFilterTest {
 		DecoraManager decoraManager = decoraServletFilter.createDecoraManager();
 
 		// then
-		assertNotNull("New instance should be created.", decoraManager);
+		assertNotNull(decoraManager);
 	}
 
 	@Test
@@ -65,7 +58,7 @@ public class DecoraServletFilterTest {
 		DecoraParser decoraParser = decoraServletFilter.createDecoraParser();
 
 		// then
-		assertNotNull("New instance should be created.", decoraParser);
+		assertNotNull(decoraParser);
 	}
 
 	@Test
@@ -87,7 +80,7 @@ public class DecoraServletFilterTest {
 		HttpServletRequest httpServletRequest = decoraServletFilter.wrapRequest(httpServletRequestMock);
 
 		// then
-		assertNotNull("New instance should be created.", httpServletRequest);
+		assertNotNull(httpServletRequest);
 	}
 
 }

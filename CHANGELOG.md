@@ -2,16 +2,55 @@
 
 All notable changes to Jodd project are documented here.
 
-## [Unreleased](https://github.com/oblac/jodd/compare/v3.8.6...master)
+## [Unreleased](https://github.com/oblac/jodd/compare/v3.9...master)
+
+### Bug Fixes
+
++ **core** - fixed issue with `StringUtil` and empty strings.
+
+
+## [3.9.1](https://github.com/oblac/jodd/compare/v3.9...3.9.1)
+
+### Bug Fixes
+
++ **proxetta** - fixed the bug with nested generics.
++ **madvoc** - fixed bug with `move` result.
++ **dboom** - fixed the issue with the MSSQL and custom behaviour. 
 
 ### Features
 
++ **dboom** - Added support for SQLite.
+
+### Breaking changes
+
++ **db** - `DbDetector` now returns a new type.
++ **swingspy** - removed :)
+
+## [3.9](https://github.com/oblac/jodd/compare/v3.8.6...3.9)
+
+### Bug Fixes
+
++ **http** - fixed bug with multiple headers.
++ **db** - `CallableStatement` are supported in debug mode [#420](https://github.com/oblac/jodd/issues/420).
++ **proxetta** - added all interfaces while scanning the target class info.
++ **proxetta** - fixed generic array [#418](https://github.com/oblac/jodd/issues/418).
+
+### Features
+
++ **http** - Added strict headers flag for storing headers as they are passed to the engine.
++ **json** - Added two `JsonParser` methods for easier parsing to a map and a list. 
++ **json** - New generic JSON classes added: `JsonArray` and `JsonObject`.
++ **core** - Added `MapEntry` implementations.
 + **core** - Added `snapshot()` method to `Cache`.
++ **proxetta** - Added `TypeInfo` for tracking method arguments and return types.
 
 ## Breaking changes
 
++ **http** - Http `headers` was removed in favor of `headerNames()`.
++ **json** - strings are now not strictly parsed (`/` is not longer escaped). 
++ **proxetta** - all interfaces are scanned now when looking for the target info.
 + **core** - `iterator()` removed from the `Cache`.
-
++ **proxetta** - `MethodInfo` interface is changed.
 
 ## [3.8.6](https://github.com/oblac/jodd/compare/v3.8.5...3.8.6)
 

@@ -1468,7 +1468,7 @@ public class FileUtil {
 		byte[] bytes = readBytes(file, 128);
 
 		for (byte b : bytes) {
-			if (b < 32) {
+			if (b < 32 && b != 9 && b != 10 && b != 13) {
 				return true;
 			}
 		}

@@ -25,16 +25,16 @@
 
 package jodd.util;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import static jodd.util.ArraysUtil.*;
+import static jodd.util.ArraysUtil.array;
 import static jodd.util.StringPool.ISO_8859_1;
 import static jodd.util.StringPool.UTF_8;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class StringUtilTest {
 
@@ -189,6 +189,8 @@ public class StringUtilTest {
 		assertEquals("11221144", src);
 		src = StringUtil.replaceLast(src, "55", "11");
 		assertEquals("11221144", src);
+
+		assertEquals("qwerty", StringUtil.replace("qwerty", "", "xxxxxxxxxxxxx"));
 	}
 
 
@@ -567,10 +569,10 @@ public class StringUtilTest {
 
 	void checkInts(int x, int y, int z, int w, int[] arr) {
 		assertNotNull(arr);
-		assertEquals("1.arg", x, arr[0]);
-		assertEquals("2.arg", y, arr[1]);
-		assertEquals("3.arg", z, arr[2]);
-		assertEquals("4.arg", w, arr[3]);
+		assertEquals(x, arr[0], "1.arg");
+		assertEquals(y, arr[1], "2.arg");
+		assertEquals(z, arr[2], "3.arg");
+		assertEquals(w, arr[3], "4.arg");
 	}
 
 	@Test
@@ -805,7 +807,7 @@ public class StringUtilTest {
 
 		try {
 			StringUtil.toPrettyString(new char[]{'a','b'});
-			fail();
+			fail("error");
 		} catch (IllegalArgumentException e) {
 			// ignore
 		}
@@ -941,7 +943,7 @@ public class StringUtilTest {
 
 		try {
 			assertEquals("123", StringUtil.convertCharset("123", "yyy", "xxx"));
-			fail();
+			fail("error");
 		} catch (IllegalArgumentException e) {
 			// ignore
 		}
@@ -1030,7 +1032,7 @@ public class StringUtilTest {
 
 		try {
 			StringUtil.unescapeJava("\\r\\t\\b\\f\\q");
-			fail();
+			fail("error");
 		} catch (IllegalArgumentException e) {
 			// ignore
 		}
@@ -1163,7 +1165,7 @@ public class StringUtilTest {
 		assertArrayEquals(new String[] {"true", "false"}, StringUtil.toStringArray(new boolean[] {true, false}));
 		try {
 			StringUtil.toStringArray(new char[]{'a','b'});
-			fail();
+			fail("error");
 		} catch (IllegalArgumentException e) {
 			// ignore
 		}

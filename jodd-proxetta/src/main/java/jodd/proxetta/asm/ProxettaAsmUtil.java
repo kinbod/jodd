@@ -31,6 +31,7 @@ import jodd.asm5.MethodVisitor;
 import jodd.asm5.Type;
 import jodd.proxetta.MethodInfo;
 import jodd.proxetta.ProxettaException;
+import jodd.proxetta.TypeInfo;
 import jodd.util.ClassUtil;
 import jodd.util.StringBand;
 import jodd.util.StringPool;
@@ -99,12 +100,11 @@ public class ProxettaAsmUtil {
 		return methodPrefix + name + methodDivider + index;
 	}
 
-
-
 	// ---------------------------------------------------------------- load
 
 	public static void loadMethodArgumentClass(MethodVisitor mv, MethodInfo methodInfo, int index) {
-		loadClass(mv, methodInfo.getArgumentOpcodeType(index), methodInfo.getArgumentTypeName(index));
+		TypeInfo argument = methodInfo.getArgument(index);
+		loadClass(mv, argument.getOpcode(), argument.getRawName());
 	}
 
 	public static void loadClass(MethodVisitor mv, int type, String typeName) {
@@ -176,7 +176,7 @@ public class ProxettaAsmUtil {
 	 */
 	public static void loadMethodArgument(MethodVisitor mv, MethodInfo methodInfo, int index) {
 		int offset = methodInfo.getArgumentOffset(index);
-		int type = methodInfo.getArgumentOpcodeType(index);
+		int type = methodInfo.getArgument(index).getOpcode();
 		switch (type) {
 			case 'V':
 				break;
@@ -204,7 +204,7 @@ public class ProxettaAsmUtil {
 
 	public static void loadMethodArgumentAsObject(MethodVisitor mv, MethodInfo methodInfo, int index) {
 		int offset = methodInfo.getArgumentOffset(index);
-		int type = methodInfo.getArgumentOpcodeType(index);
+		int type = methodInfo.getArgument(index).getOpcode();
 		switch (type) {
 			case 'V':
 				break;
@@ -252,7 +252,7 @@ public class ProxettaAsmUtil {
 	 */
 	public static void storeMethodArgument(MethodVisitor mv, MethodInfo methodInfo, int index) {
 		int offset = methodInfo.getArgumentOffset(index);
-		int type = methodInfo.getArgumentOpcodeType(index);
+		int type = methodInfo.getArgument(index).getOpcode();
 		switch (type) {
 			case 'V':
 				break;
@@ -286,7 +286,7 @@ public class ProxettaAsmUtil {
 
 
 	public static void storeMethodArgumentFromObject(MethodVisitor mv, MethodInfo methodInfo, int index) {
-		int type = methodInfo.getArgumentOpcodeType(index);
+		int type = methodInfo.getArgument(index).getOpcode();
 		int offset = methodInfo.getArgumentOffset(index);
 		storeValue(mv, offset, type);
 	}
@@ -338,7 +338,7 @@ public class ProxettaAsmUtil {
 	 * Visits return opcodes.
 	 */
 	public static void visitReturn(MethodVisitor mv, MethodInfo methodInfo, boolean isLast) {
-		switch (methodInfo.getReturnOpcodeType()) {
+		switch (methodInfo.getReturnType().getOpcode()) {
 			case 'V':
 				if (isLast) {
 					mv.visitInsn(POP);
@@ -477,7 +477,7 @@ public class ProxettaAsmUtil {
 	 */
 	public static void prepareReturnValue(MethodVisitor mv, MethodInfo methodInfo, int varOffset) {
 		varOffset += methodInfo.getAllArgumentsSize();
-		switch (methodInfo.getReturnOpcodeType()) {
+		switch (methodInfo.getReturnType().getOpcode()) {
 			case 'V':
 				mv.visitInsn(ACONST_NULL);
 				break;
@@ -512,7 +512,7 @@ public class ProxettaAsmUtil {
 	public static void castToReturnType(MethodVisitor mv, MethodInfo methodInfo) {
 		final String returnType;
 
-		char returnOpcodeType = methodInfo.getReturnOpcodeType();
+		char returnOpcodeType = methodInfo.getReturnType().getOpcode();
 
 		switch (returnOpcodeType) {
 			case 'I':
@@ -540,12 +540,12 @@ public class ProxettaAsmUtil {
 				returnType = AsmUtil.SIGNATURE_JAVA_LANG_CHARACTER;
 				break;
 			case '[':
-				returnType = methodInfo.getReturnTypeName();
+				returnType = methodInfo.getReturnType().getRawName();
 				break;
 			default:
-				String rtname = methodInfo.getReturnTypeName();
+				String rtname = methodInfo.getReturnType().getRawName();
 				returnType = rtname.length() == 0 ?
-					AsmUtil.typeToSignature(methodInfo.getReturnType()) :
+					AsmUtil.typeToSignature(methodInfo.getReturnType().getType()) :
 					AsmUtil.typedesc2ClassName(rtname);
 				break;
 		}

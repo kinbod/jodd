@@ -29,16 +29,16 @@ import jodd.proxetta.fixtures.data.*;
 import jodd.proxetta.impl.WrapperProxetta;
 import jodd.proxetta.impl.WrapperProxettaBuilder;
 import jodd.proxetta.pointcuts.ProxyPointcutSupport;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class WrapperTest {
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		StatCounter.counter = 0;
 	}
@@ -49,7 +49,7 @@ public class WrapperTest {
 
 		WrapperProxetta proxetta = WrapperProxetta.withAspects(new ProxyAspect(StatCounterAdvice.class, new ProxyPointcutSupport() {
 			public boolean apply(MethodInfo methodInfo) {
-				return !isRootMethod(methodInfo) && isPublic(methodInfo);
+				return !methodInfo.isRootMethod() && methodInfo.isPublicMethod();
 			}
 		}));
 
@@ -94,11 +94,11 @@ public class WrapperTest {
 
 		WrapperProxetta proxetta = WrapperProxetta.withAspects(new ProxyAspect(StatCounterAdvice.class, new ProxyPointcutSupport() {
 			public boolean apply(MethodInfo methodInfo) {
-				return !isRootMethod(methodInfo) && isPublic(methodInfo);
+				return !methodInfo.isRootMethod() && methodInfo.isPublicMethod();
 			}
 		}));
 
-//		proxetta.setDebugFolder("d:\\");
+		//proxetta.setDebugFolder("/Users/igor");
 
 		// wrapper over CLASS casted to interface,
 		// resulting object has ONE interface
@@ -130,7 +130,7 @@ public class WrapperTest {
 
 		WrapperProxetta proxetta = WrapperProxetta.withAspects(new ProxyAspect(StatCounterAdvice.class, new ProxyPointcutSupport() {
 			public boolean apply(MethodInfo methodInfo) {
-				return isTopLevelMethod(methodInfo) && isPublic(methodInfo);
+				return methodInfo.isTopLevelMethod() && methodInfo.isPublicMethod();
 			}
 		}));
 
@@ -159,7 +159,7 @@ public class WrapperTest {
 
 		try {
 			calc2Class.getMethod("customMethod");
-			fail();
+			fail("error");
 		} catch (Exception ex) {
 		}
 	}
@@ -173,7 +173,7 @@ public class WrapperTest {
 		WrapperProxetta proxetta = WrapperProxetta.withAspects(new ProxyAspect(StatCounterAdvice.class, new ProxyPointcutSupport() {
 			public boolean apply(MethodInfo methodInfo) {
 				return
-						isPublic(methodInfo) &&
+						methodInfo.isPublicMethod() &&
 								(methodInfo.getMethodName().equals("hello") || methodInfo.getMethodName().equals("ola"));
 			}
 		}));

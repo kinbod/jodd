@@ -25,6 +25,9 @@
 
 package jodd.proxetta;
 
+import java.lang.annotation.Annotation;
+import java.util.Map;
+
 /**
  * Various target class information.
  */
@@ -51,8 +54,57 @@ public interface ClassInfo {
 	String getReference();
 
 	/**
+	 * Returns array of super classes.
+	 */
+	public String[] getSuperClasses();
+
+	/**
 	 * Returns annotation information or <code>null</code> if target class has no annotations.
 	 */
 	AnnotationInfo[] getAnnotations();
+
+	/**
+	 * Returns a map of generic definitions. Keys are map names and values are
+	 * raw types (after erasure).
+	 */
+	Map<String, String> getGenerics();
+
+	// ---------------------------------------------------------------- annotations
+
+	/**
+	 * Finds annotation in class info. Returns <code>null</code> if annotation doesn't exist.
+	 */
+	default AnnotationInfo getAnnotation(Class<? extends Annotation> an) {
+		AnnotationInfo[] anns = getAnnotations();
+		if (anns == null) {
+			return null;
+		}
+		String anName = an.getName();
+		for (AnnotationInfo ann : anns) {
+			if (ann.getAnnotationClassname().equals(anName)) {
+				return ann;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Returns <code>true</code> if class is annotated with one of provided annotation.
+	 */
+	default boolean hasAnnotation(Class<? extends Annotation>... an) {
+		AnnotationInfo[] anns = getAnnotations();
+		if (anns == null) {
+			return false;
+		}
+		for (Class<? extends Annotation> annotationClass : an) {
+			String anName = annotationClass.getName();
+			for (AnnotationInfo ann : anns) {
+				if (ann.getAnnotationClassname().equals(anName)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 
 }

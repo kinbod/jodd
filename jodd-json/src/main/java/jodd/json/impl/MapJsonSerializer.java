@@ -53,5 +53,4 @@ public class MapJsonSerializer extends KeyValueJsonSerializer<Map<?, ?>> {
 		jsonContext.writeCloseObject();
 	}
 
-
 }

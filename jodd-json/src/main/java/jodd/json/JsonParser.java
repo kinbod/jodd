@@ -246,6 +246,41 @@ public class JsonParser extends JsonParserBase {
 	}
 
 	/**
+	 * Parses input JSON to {@link JsonObject}, special case of {@link #parse(String, Class)}.
+	 */
+	public JsonObject parseAsJsonObject(String input) {
+		return new JsonObject(parse(input));
+	}
+
+	/**
+	 * Parses input JSON to {@link JsonArray}, special case of parsing.
+	 */
+	public JsonArray parseAsJsonArray(String input) {
+		return new JsonArray(parse(input));
+	}
+
+	/**
+	 * Parses input JSON to a list with specified component type.
+	 */
+	public <T> List<T> parseAsList(String string, Class<T> componentType) {
+		return new JsonParser()
+			.map(JsonParser.VALUES, componentType)
+			.parse(string);
+	}
+
+	/**
+	 * Parses input JSON to a list with specified key and value types.
+	 */
+	public <K, V> Map<K, V> parseAsMap(
+		String string, Class<K> keyType, Class<V> valueType) {
+
+		return new JsonParser()
+			.map(JsonParser.KEYS, keyType)
+			.map(JsonParser.VALUES, valueType)
+			.parse(string);
+	}
+
+	/**
 	 * Parses input JSON string.
 	 */
 	public <T> T parse(String input) {
@@ -257,7 +292,7 @@ public class JsonParser extends JsonParserBase {
 	 * Parses input JSON as given type.
 	 */
 	@SuppressWarnings("unchecked")
-	public <T> T parse(char[] input, Class<?> targetType) {
+	public <T> T parse(char[] input, Class<T> targetType) {
 		rootType = targetType;
 		return _parse(input);
 	}

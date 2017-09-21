@@ -24,7 +24,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 plugins {
-	id "com.jfrog.bintray" version "1.6"
+	id "com.jfrog.bintray" version "1.7.3"
 }
 
 description = '''
@@ -37,9 +37,8 @@ description = '''
 	simple, but not simpler.
 '''
 
-//version = '3.8.6-SNAPSHOT'
-//version = '3.8.2-' + date()
-version = '3.8.6'
+version = '3.9.1'
+//version = '3.9.1-' + date()
 
 // --- properties -------------------------------------------------------------
 
@@ -49,7 +48,6 @@ ext {
 	// libraries
 
 	tomcatVersion = '7.0.47'
-	jacocoVersion = '0.7.1.201405082137'
 
 	lib = [
 		mail:			[
@@ -69,18 +67,17 @@ ext {
 		log_log4j2_core:		  'org.apache.logging.log4j:log4j-core:[2.8,2.9)',
 
 //		asm:			'org.ow2.asm:asm:4.1',
+//		junit: 			'junit:junit:4.12',
 
-		junit: 			'junit:junit:4.12',
+		junit5:			'org.junit.jupiter:junit-jupiter-engine:5.0.0',
+		junit5_console: 'org.junit.platform:junit-platform-console:1.0.0',
 		hamcrest:       'org.hamcrest:hamcrest-core:1.3',
-		mockito:		'org.mockito:mockito-all:1.10.19',
-		powermock:		[
-							'org.powermock:powermock-module-junit4:1.6.4',
-							'org.powermock:powermock-api-mockito:1.6.4'
-						],
+		mockito:		'org.mockito:mockito-core:2.10.0',
 		hsqldb:			'org.hsqldb:hsqldb:2.2.9',
 		h2db:			'com.h2database:h2:1.1.111',
 		postgresql:		'org.postgresql:postgresql:9.4-1201-jdbc41',
 		mysql:			'mysql:mysql-connector-java:5.1.37',
+		mssql:			'com.microsoft.sqlserver:mssql-jdbc:6.1.0.jre8',
 		winstone:		'net.sourceforge.winstone:winstone:0.9.10',
 		greenmail:		'com.icegreen:greenmail:1.5.2',
 		//el_api:		'javax.el:el-api:2.2',
@@ -93,8 +90,6 @@ ext {
 							"org.apache.tomcat.embed:tomcat-embed-jasper:${tomcatVersion}",
 							"org.apache.tomcat.embed:tomcat-embed-logging-juli:${tomcatVersion}",
 							"org.apache.tomcat.embed:tomcat-embed-logging-log4j:${tomcatVersion}"],
-		jacoco_agent:	"org.jacoco:org.jacoco.agent:${jacocoVersion}:runtime@jar",
-		jacoco_ant:		"org.jacoco:org.jacoco.ant:${jacocoVersion}",
 		mockserver:		'org.mock-server:mockserver-netty:3.10.4',
 	]
 
@@ -136,7 +131,6 @@ def javaModules() {
 def javaBundleModules() {
 	rootProject.subprojects.findAll {
 		it.name.contains('jodd-') &&
-		!it.name.equals('jodd-swingspy') &&
 		!it.name.equals('jodd-joy') &&
 		!it.name.equals('jodd-bom') &&
 		!it.name.equals('jodd-all')
@@ -166,6 +160,7 @@ idea {
 
 configure(javaModules()) {
 	apply plugin: 'java'
+	apply plugin: 'jacoco'
 	apply plugin: 'osgi'
 	apply plugin: 'maven'
 	apply plugin: 'signing'
@@ -254,36 +249,71 @@ configure(javaModules()) {
 			// DONT: use separate output folders for idea, don't mess with gradle
 			inheritOutputDirs false
 
-			//
-			// put our custom test dependencies onto IDEA's TEST scope
-			// IT IS NOT WORKING !!!
-			// see: https://youtrack.jetbrains.com/issue/IDEA-151925
-			// see: fixIdeaTestScopes.sh
-			//
-			//scopes.TEST.plus += [ configurations.testIntCompile ]
-			//scopes.TEST.plus += [ configurations.perfCompile ]
+			// see: https://youtrack.jetbrains.com/issue/IDEA-151925#comment=27-2356605
+			// since IDEA 2017.2.3
+			testSourceDirs += project.sourceSets.testInt.java.srcDirs
+			testSourceDirs += project.sourceSets.testInt.resources.srcDirs
 		}
 	}
 
 	task perf(type:JavaExec) {
-		group 'Application'
+		group 'Verification'
 		description 'Execute benchmarks.'
 
 		main 'org.openjdk.jmh.Main'
 		classpath = sourceSets.perf.runtimeClasspath
 	}
 
-	task testIntegration(type: Test, dependsOn: jar) {
+	task testUnit(type: JavaExec, dependsOn: compileTestJava) {
+		group 'Verification'
+		description 'Runs the unit tests.'
+
+		dependencies {
+			testRuntime lib.junit5_console
+		}
+		classpath = sourceSets.test.runtimeClasspath
+
+		main 'org.junit.platform.console.ConsoleLauncher'
+		args = ['--scan-classpath', sourceSets.test.output.classesDirs.asPath,
+				'--reports-dir', "${buildDir}/test-results/test"
+		]
+	}
+	test.dependsOn testUnit
+
+	task testIntegration(type: JavaExec, dependsOn: jar) {
 		group 'Verification'
 		description 'Runs the integration tests.'
-		testLogging {
-			showStandardStreams = true
+
+		dependencies {
+			testRuntime lib.junit5_console
 		}
 
-		testClassesDir = sourceSets.testInt.output.classesDir
 		classpath = sourceSets.testInt.runtimeClasspath
 		systemProperties['jar.path'] = jar.archivePath
+
+		main 'org.junit.platform.console.ConsoleLauncher'
+		args = ['--scan-classpath', sourceSets.testInt.output.classesDirs.asPath,
+				'--reports-dir', "${buildDir}/test-results/testInt"
+		]
 	}
+
+	afterEvaluate {
+		jacoco {
+			applyTo testUnit
+			applyTo testIntegration
+		}
+		testUnit.extensions.getByName("jacoco").excludes        = ['*Test*', '*.?', '*Foo*', 'jodd.asm5.*', '*.fixtures.*']
+		testIntegration.extensions.getByName("jacoco").excludes = ['*Test*', '*.?', '*Foo*', 'jodd.asm5.*', '*.fixtures.*']
+	}
+	jacocoTestReport {
+		reports {
+			xml.enabled true
+			html.enabled true
+		}
+	}
+
+	//check.dependsOn testIntegration
+	//testIntegration.mustRunAfter test
 
 	// artifacts
 
@@ -326,59 +356,12 @@ configure(javaModules()) {
 			}
 		}
 	}
-
-	// JaCoCo
-
-	configurations {
-		jacoco
-	}
-
-	dependencies {
-		jacoco lib.jacoco_agent
-	}
-
-
-	// Test: configure all tests, including integration
-
-	tasks.withType(Test) { testTask ->
-		configure(testTask) {
-			beforeTest { descriptor ->
-				logger.lifecycle("\t" + descriptor)
-			}
-
-			reports.html.enabled = true
-
-			systemProperties = System.properties
-
-			// we need to exclude certain classes as jacoco changes them and may influence testing results
-			List<String> excludes = ['*Test*', '*.?', '*Foo*', '*.data.*', '*.tst*', 'jodd.asm5.*', 'jodd.json.mo*', 'jodd.json.db*', '*.fixtures.*']
-
-			jvmArgs "-javaagent:${configurations.jacoco.asPath}=destfile=${project.buildDir.path}/jacoco/${testTask.name}.exec," +
-					"sessionid=HSServ,append=false,excludes=${excludes.join(':')}",
-			 	'-Djacoco=true',
-			 	'-Xms128m',
-			 	'-Xmx512m',
-			 	'-Duser.timezone=GMT'
-		}
-	}
-
-	// add fancy test output
-	tasks.withType(Test) {
-		afterSuite { desc, result ->
-			if (!desc.parent) { // will match the outermost suite
-				def output = "Results: ${result.resultType} (${result.testCount} tests, ${result.successfulTestCount} successes, ${result.failedTestCount} failures, ${result.skippedTestCount} skipped)"
-				def startItem = '|  ', endItem = '  |'
-				def repeatLength = startItem.length() + output.length() + endItem.length()
-				println('\n' + ('-' * repeatLength) + '\n' + startItem + output + endItem + '\n' + ('-' * repeatLength))
-			}
-		}
-	}
-
 }
 
 // --- project ----------------------------------------------------------------
 
 apply plugin: 'project-report'
+apply plugin: 'jacoco'
 
 def javaBundleModulesSources = javaBundleModules().sourceSets.main
 
@@ -390,10 +373,8 @@ task testAll {
 	group 'Verification'
 	description 'Runs all the tests.'
 
-	//dependsOn javaTestModules().test
-
-	dependsOn javaModules().test
 	dependsOn javaModules().testIntegration
+	dependsOn javaModules().test
 }
 
 task clean(type: Delete) {
@@ -433,93 +414,6 @@ task javadocAll(type: Javadoc) {
 	outputs.dir destinationDir
 }
 
-task testReport(type: TestReport) {
-	group 'Reporting'
-	description 'Generates tests report.'
-
-	destinationDir = file("$buildDir/reports/tests")
-
-	//reportOn javaTestModules()*.test
-
-	reportOn javaBundleModules()*.test
-	reportOn javaBundleModules()*.testIntegration
-}
-
-configurations {
-    jacoco {
-        description 'JARs required for aggregate JacocoReport task.'
-    }
-}
-dependencies {
-    jacoco lib.jacoco_ant
-}
-
-task jacocoReport() {
-	dependsOn testAll
-	group = 'Reporting'
-	description = 'Generates JaCoCo coverage reports for unit tests.'
-
-	ant.taskdef(
-			name:'jacocoreport',
-			classname: 'org.jacoco.ant.ReportTask',
-			classpath: configurations.jacoco.asPath
-	)
-
-	def coverageDir = "$buildDir/reports/coverage"
-	ant.mkdir dir: coverageDir
-
-	inputs.files(javaBundleModulesSources.allSource + javaBundleModulesSources.compileClasspath)
-	outputs.dir file(coverageDir)
-
-	doLast {
-		ant.jacocoreport {
-			executiondata {
-				javaBundleModules().each {submodule ->
-					fileset(dir: "${submodule.buildDir}/jacoco") {
-						include name: '*.exec'
-					}
-				}
-			}
-			structure(name: 'Jodd Coverage Report') {
-				javaBundleModules().each {submodule ->
-					group(name: submodule.name) {
-						classfiles {
-							fileset dir: "${submodule.sourceSets.main.output.classesDir}", excludes: "**/jodd/asm5/**"
-						}
-					}
-				}
-			}
-			html destdir: coverageDir
-			xml destfile: coverageDir + '/jodd-coverage.xml'
-		}
-	}
-}
-
-// Coveralls task should be invoked manually, since we have integration tests
-// that are executed only locally. After the release is build,
-// go to Travis Build History: https://travis-ci.org/oblac/jodd/builds
-// and select one of the jobs, then copy the job id from the URL line.
-// Paste the job id into the .coverals.yml and invoke this task
-// After few minutes, the coverage will appear here:
-// https://coveralls.io/r/oblac/jodd
-task coveralls() {
-	//dependsOn jacocoReport
-	group = 'Reporting'
-	description = 'Submits Jacoco reports to Coveralls.'
-
-	doLast {
-		List<File> targetSrcDirs = new ArrayList<File>()
-
-		for (main in javaBundleModulesSources) {
-			targetSrcDirs += main.java.srcDirs
-		}
-
-		CoverallsReporter coverallsReporter = new CoverallsReporter();
-
-		coverallsReporter.send(targetSrcDirs, file("build/reports/coverage/jodd-coverage.xml"))
-	}
-}
-
 dependencyReport {
 	projects = javaModules()
 }
@@ -532,6 +426,25 @@ task bintray {
 	dependsOn(":jodd-bom:bintrayUpload")
 }
 
+task codeCoverageReport(type: JacocoReport) {
+	executionData fileTree(project.rootDir.absolutePath).include("**/build/jacoco/*.exec")
+	jacocoClasspath
+
+	javaModules().each {
+		sourceSets it.sourceSets.main
+	}
+
+	reports {
+		xml.enabled true
+		xml.destination file("${buildDir}/reports/jacoco/report.xml")
+		html.enabled false
+		csv.enabled false
+	}
+}
+
+codeCoverageReport.dependsOn testAll
+
+
 // --- release ----------------------------------------------------------------
 
 task release() {
@@ -541,10 +454,7 @@ task release() {
 	dependsOn buildModules
 	dependsOn testAll
 	dependsOn javadocAll
-	dependsOn testReport
-	dependsOn jacocoReport
 	dependsOn ':distribution:build'
-	dependsOn projectReport
 }
 
 gradle.taskGraph.whenReady { taskGraph ->
@@ -604,5 +514,5 @@ def date() {
 // --- wrapper ----------------------------------------------------------------
 
 task wrapper(type: Wrapper) {
-	gradleVersion = '3.5'
+	gradleVersion = '4.1'
 }

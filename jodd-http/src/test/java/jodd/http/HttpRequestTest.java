@@ -27,8 +27,7 @@ package jodd.http;
 
 import jodd.io.FileUtil;
 import jodd.upload.FileUpload;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -36,7 +35,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class HttpRequestTest {
 
@@ -220,7 +219,7 @@ public class HttpRequestTest {
 			HttpRequest request2 = HttpRequest.readFrom(new ByteArrayInputStream(bytes));
 			assertEquals("", request2.body());
 		} catch (Exception ex) {
-			Assert.fail(ex.toString());
+			fail(ex.toString());
 		}
 
 		// the same test but with missing content length
@@ -232,7 +231,7 @@ public class HttpRequestTest {
 			HttpRequest request2 = HttpRequest.readFrom(new ByteArrayInputStream(bytes));
 			assertEquals("", request2.body());
 		} catch (Exception ex) {
-			Assert.fail(ex.toString());
+			fail(ex.toString());
 		}
 	}
 
@@ -322,11 +321,53 @@ public class HttpRequestTest {
 		String badUrl = "httpsjodd.org/random link?q=1:// GET";
 		try {				
 			HttpRequest.get(badUrl).send();
-			fail();
+			fail("error");
 		}
 		catch (HttpException he) {
 			assertTrue(he.getMessage().contains(badUrl));
 		}
 
+	}
+	
+	@Test
+	public void testCapitalizeHeaders() {
+
+		// true
+
+		HttpRequest request = HttpRequest.get("")
+			.capitalizeHeaderKeys(true)
+			.header("key-tEST2", "value2");
+		assertTrue(request.toString(false).contains("Key-Test2: value2"), "Header key should have been modified");
+		assertEquals("value2", request.headers("KEY-TEST2").get(0));
+		assertEquals("value2", request.headers("key-test2").get(0));
+
+		request.header("key-test2", "value3");
+		assertTrue(request.toString(false).contains("Key-Test2: value2, value3"), "Header key should have been modified");
+		assertEquals(2, request.headers("KEY-TEST2").size());
+		assertEquals(2 + 2, request.headerNames().size());		// 2 default and 2 added
+
+		request.removeHeader("key-test2");
+		assertFalse(request.headers.contains("key-test2"));
+		assertFalse(request.headers.contains("key-tEST2"));
+
+
+		// false
+
+		request = HttpRequest.get("")
+			.capitalizeHeaderKeys(false)
+			.header("KEY-TEST1", "VALUE1");
+
+		assertTrue(request.toString(false).contains("KEY-TEST1: VALUE1"), "Header key should not have been modified");
+		assertEquals("VALUE1", request.headers("KEY-TEST1").get(0));
+		assertEquals("VALUE1", request.headers("key-test1").get(0));
+
+		request.header("key-test1", "value4");
+		assertTrue(request.toString(false).contains("key-test1: VALUE1, value4"), "Header key should not have been modified");
+		assertEquals(2, request.headers("KEY-TEST1").size());
+		assertEquals(2 + 2, request.headerNames().size());		// 2 default and 2 added
+
+		request.removeHeader("key-test1");
+		assertFalse(request.headers.contains("key-test1"));
+		assertFalse(request.headers.contains("KEY-TEST1"));
 	}
 }

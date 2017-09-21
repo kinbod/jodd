@@ -25,31 +25,20 @@
 
 package jodd.json;
 
-import jodd.json.meta.JSON;
-import jodd.json.meta.JsonAnnotationManager;
 import jodd.json.fixtures.model.FileMan;
 import jodd.json.fixtures.model.HitList;
 import jodd.json.fixtures.model.State;
-import jodd.util.StringUtil;
+import jodd.json.meta.JSON;
+import jodd.json.meta.JsonAnnotationManager;
 import jodd.util.SystemUtil;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static jodd.util.ArraysUtil.bytes;
 import static jodd.util.ArraysUtil.ints;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class JsonSerializerTest {
 
@@ -223,7 +212,7 @@ public class JsonSerializerTest {
 		JsonSerializer jsonSerializer = new JsonSerializer();
 		String json = jsonSerializer.serialize(rootMap);
 
-		Assert.assertEquals("{\"params\":{\"myid\":4343}}", json);
+		assertEquals("{\"params\":{\"myid\":4343}}", json);
 
 		// in bean
 		InBean inBean = new InBean();
@@ -233,7 +222,7 @@ public class JsonSerializerTest {
 		jsonSerializer = new JsonSerializer();
 		json = jsonSerializer.serialize(inBean);
 
-		Assert.assertEquals("{}", json);
+		assertEquals("{}", json);
 
 		// in list
 		ArrayList list = new ArrayList();
@@ -243,7 +232,7 @@ public class JsonSerializerTest {
 		jsonSerializer = new JsonSerializer();
 		json = jsonSerializer.serialize(inBean);
 
-		Assert.assertEquals("{}", json);
+		assertEquals("{}", json);
 	}
 
 	@Test
@@ -311,7 +300,7 @@ public class JsonSerializerTest {
 
 		assertEquals("1\" 2\\ 3/ 4\b 5\f 6\n 7\r 8\t", str);
 
-		String jsonStr = new JsonSerializer().serialize(str);
+		String jsonStr = new JsonSerializer().strictStringEncoding(true).serialize(str);
 
 		assertEquals(json, jsonStr);
 	}
@@ -553,7 +542,7 @@ public class JsonSerializerTest {
 
 		String json = JsonSerializer.create().serialize(fileMan);
 
-		assertTrue(json.contains(StringUtil.replace(SystemUtil.userHome(), "/", "\\/")));
+		assertTrue(json.contains(SystemUtil.userHome()));
 	}
 
 	@Test
@@ -587,6 +576,7 @@ public class JsonSerializerTest {
 
 		String json = JsonSerializer
 			.create()
+			.strictStringEncoding(true)
 			.serialize(path);
 
 		assertEquals("\"\\/foo\\/bar\"", json);

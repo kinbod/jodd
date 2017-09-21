@@ -32,11 +32,11 @@ import jodd.proxetta.fixtures.data.FooAnn;
 import jodd.proxetta.fixtures.data.FooProxyAdvice;
 import jodd.proxetta.impl.ProxyProxetta;
 import jodd.proxetta.impl.ProxyProxettaBuilder;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class MethodInfoTest {
 
@@ -69,19 +69,19 @@ public class MethodInfoTest {
 
 		assertEquals("p1", mi.getMethodName());
 		assertEquals(Foo.class.getName().replace('.', '/'), mi.getClassname());
-		assertEquals("(java.lang.String)", mi.getDeclaration());
+		assertEquals("(java.lang.String)java.lang.String", mi.getDeclaration());
 		assertEquals("(Ljava/lang/String;)Ljava/lang/String;", mi.getDescription());
-		assertEquals("java.lang.String", mi.getReturnType());
-		assertEquals("Ljava/lang/String;", mi.getReturnTypeName());
+		assertEquals("java.lang.String", mi.getReturnType().getType());
+		assertEquals("Ljava/lang/String;", mi.getReturnType().getName());
 
 		assertEquals("java.lang.String p1(java.lang.String)", mi.getSignature());
 
 		assertEquals(1, mi.getArgumentsCount());
-		assertEquals("Ljava/lang/String;", mi.getArgumentTypeName(1));
+		assertEquals("Ljava/lang/String;", mi.getArgument(1).getName());
 
 		assertTrue(mi.isTopLevelMethod());
 
-		AnnotationInfo[] anns = mi.getArgumentAnnotations(0);
+		AnnotationInfo[] anns = mi.getArgument(1).getAnnotations();
 
 		assertNotNull(anns);
 		assertEquals(1, anns.length);

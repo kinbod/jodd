@@ -26,17 +26,17 @@
 package jodd.db.oom;
 
 import jodd.db.DbSession;
-import jodd.db.oom.sqlgen.DbEntitySql;
 import jodd.db.oom.fixtures.Tester;
-import org.junit.Test;
+import jodd.db.oom.sqlgen.DbEntitySql;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * Live database test. Requires database services to be started.
- * There must exist the database: "jodd-test".
  */
 public class LiveDatabaseTest extends DbBaseTest {
 
@@ -44,10 +44,11 @@ public class LiveDatabaseTest extends DbBaseTest {
 	 * DATABASES TO TEST!
 	 */
 	DbAccess[] databases = new DbAccess[]{
-			new MySql(),
-			new PostgreSql(),
-			new HsqlDb(),
-	};
+				new MySql(),
+				new PostgreSql(),
+				new HsqlDb(),
+				//new MsSqlDb(),
+		};
 
 	/**
 	 * MySql.
@@ -83,6 +84,26 @@ public class LiveDatabaseTest extends DbBaseTest {
 						"VALUE		integer NULL," +
 						"primary key (ID)" +
 						')';
+		}
+
+		@Override
+		public String getTableName() {
+			return "TESTER";
+		}
+	}
+
+	/**
+	 * MsSql.
+	 */
+	public class MsSqlDb extends MsSqlDbAccess {
+
+		@Override
+		public String getCreateTableSql() {
+			return "create table TESTER (" +
+				"ID			INT NOT NULL IDENTITY PRIMARY KEY," +
+				"NAME		varchar(20)	NOT NULL," +
+				"VALUE		int NULL" +
+				')';
 		}
 
 		@Override

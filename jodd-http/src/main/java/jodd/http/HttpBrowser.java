@@ -40,8 +40,8 @@ public class HttpBrowser {
 	protected HttpConnectionProvider httpConnectionProvider;
 	protected HttpRequest httpRequest;
 	protected HttpResponse httpResponse;
-	protected HttpMultiMap<Cookie> cookies = HttpMultiMap.newCaseInsensitveMap();
-	protected HttpMultiMap<String> defaultHeaders = HttpMultiMap.newCaseInsensitveMap();
+	protected HttpMultiMap<Cookie> cookies = HttpMultiMap.newCaseInsensitiveMap();
+	protected HeadersMultiMap defaultHeaders = new HeadersMultiMap();
 	protected boolean keepAlive;
 	protected long elapsedTime;
 	protected boolean catchTransportExceptions = true;
@@ -94,7 +94,7 @@ public class HttpBrowser {
 	 * Adds default header to all requests.
 	 */
 	public HttpBrowser setDefaultHeader(String name, String value) {
-		defaultHeaders.add(name, value);
+		defaultHeaders.addHeader(name, value);
 		return this;
 	}
 
@@ -221,10 +221,9 @@ public class HttpBrowser {
 	 * default header will be ignored.
 	 */
 	protected void addDefaultHeaders(HttpRequest httpRequest) {
-		List<Map.Entry<String, String>> entries = defaultHeaders.entries();
-
-		for (Map.Entry<String, String> entry : entries) {
+		for (Map.Entry<String, String> entry : defaultHeaders.entries()) {
 			String name = entry.getKey();
+
 			if (!httpRequest.headers.contains(name)) {
 				httpRequest.headers.add(name, entry.getValue());
 			}

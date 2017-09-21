@@ -2,7 +2,6 @@
 ext.moduleName = 'Jodd DbOom'
 ext.moduleDescription = 'Jodd DB is efficient and thin database facade; DbOom is convenient database object mapper.'
 
-
 buildscript {
 	ext.kotlin_version = '1.1.1'
 	repositories {
@@ -22,18 +21,11 @@ dependencies {
 	compile project(':jodd-props'), optional
 	compile project(':jodd-log')
 
-	testCompile lib.junit
+	testCompile lib.junit5
 	testCompile lib.hsqldb
 	testCompile lib.h2db
 	testCompile lib.mysql
 	testCompile lib.postgresql
-    testCompile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
-}
-
-// run db integration tests only through the suite
-// so we can control the embedded web server
-
-testIntegration {
-	scanForTestClasses false
-	include 'jodd/db/oom/*Suite.class'
+	testCompile lib.mssql
+	testCompile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
 }

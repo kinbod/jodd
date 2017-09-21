@@ -25,11 +25,11 @@
 
 package jodd.vtor.constraint;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.stub;
+import static org.mockito.Mockito.when;
 
 public class WildcardPathMatchConstraintTest extends ConstraintTestBase {
 
@@ -51,7 +51,7 @@ public class WildcardPathMatchConstraintTest extends ConstraintTestBase {
         String pattern = "foo";
         wildcardPathMatchConstraint.setPattern(pattern);
 
-        assertEquals("method must return the same pattern as was given to set method", wildcardPathMatchConstraint.getPattern(), pattern);
+        assertEquals(pattern, wildcardPathMatchConstraint.getPattern());
     }
 
     @Test
@@ -59,10 +59,10 @@ public class WildcardPathMatchConstraintTest extends ConstraintTestBase {
         WildcardPathMatchConstraint wildcardPathMatchConstraint = new WildcardPathMatchConstraint();
         WildcardPathMatch annotation = mock(WildcardPathMatch.class);
         String pattern = "foo";
-        stub(annotation.value()).toReturn(pattern);
+        when(annotation.value()).thenReturn(pattern);
 
         wildcardPathMatchConstraint.configure(annotation);
-        assertEquals("method must return the same pattern as was set to annotation when configure", wildcardPathMatchConstraint.getPattern(), pattern);
+        assertEquals(pattern, wildcardPathMatchConstraint.getPattern());
     }
 
     @Test

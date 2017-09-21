@@ -27,17 +27,13 @@ package jodd.http;
 
 import jodd.io.FileUtil;
 import jodd.util.StringUtil;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class RawTest {
 
@@ -51,7 +47,7 @@ public class RawTest {
 
 		HttpResponse response = HttpResponse.readFrom(new ByteArrayInputStream(fileContent.getBytes("UTF-8")));
 
-		HttpMultiMap<String> headers = response.headers();
+		HttpMultiMap<String> headers = response.headers;
 		assertEquals(7, headers.size());
 
 		assertEquals("no-cache", headers.get("pragma"));
@@ -140,6 +136,9 @@ public class RawTest {
 		fileContent = StringUtil.replace(fileContent, "\r\r\n", "\r\n");
 
 		HttpResponse response = HttpResponse.readFrom(new ByteArrayInputStream(fileContent.getBytes("UTF-8")));
+
+		assertEquals(200, response.statusCode());
+		assertEquals("", response.statusPhrase);
 
 		String body = response.bodyText();
 

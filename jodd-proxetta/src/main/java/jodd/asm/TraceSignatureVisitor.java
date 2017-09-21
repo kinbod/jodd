@@ -25,7 +25,6 @@
 
 package jodd.asm;
 
-import jodd.util.StringUtil;
 import jodd.asm5.Opcodes;
 import jodd.asm5.signature.SignatureVisitor;
 
@@ -37,10 +36,10 @@ import jodd.asm5.signature.SignatureVisitor;
  * <ul>
  *    <li>removed <code>final</code> for the class</li>
  *    <li>some <code>private</code> scopes made <code>protected</code></li>
- *    <li>added method <code>getExceptionsArray()</code></li>
  *    <li>public constructor change to accept <code>boolean</code></li>
  *    <li>use <code>AsmUtil</code> constants</li>
  *    <li>use <code>StringBuilder</code> instead of <code>StringBuffer</code></li>
+ *    <li>getExceptions() removed</li>
  * </ul>
  *
  * @author Eugene Kuleshov
@@ -48,9 +47,9 @@ import jodd.asm5.signature.SignatureVisitor;
  */
 public class TraceSignatureVisitor extends SignatureVisitor {
 
-	protected final StringBuilder declaration;       // jodd
+	protected final StringBuilder declaration;       // jodd: made protected
 
-    protected boolean isInterface;                  // jodd
+    protected boolean isInterface;                   // jodd: made protected
 
     private boolean seenFormalParameter;
 
@@ -60,9 +59,9 @@ public class TraceSignatureVisitor extends SignatureVisitor {
 
     private boolean seenInterface;
 
-    protected StringBuilder returnType;              // jodd
+    private StringBuilder returnType;
 
-    protected StringBuilder exceptions;              // jodd
+    private StringBuilder exceptions;
 
     /**
      * Stack used to keep track of class types that have arguments. Each element
@@ -70,22 +69,30 @@ public class TraceSignatureVisitor extends SignatureVisitor {
      * the lowest order bit. Pushing false = *2, pushing true = *2+1, popping =
      * /2.
      */
-    protected int argumentStack;                    // jodd
+    protected int argumentStack;                    // jodd: made protected
 
     /**
      * Stack used to keep track of array class types. Each element of this stack
      * is a boolean encoded in one bit. The top of the stack is the lowest order
      * bit. Pushing false = *2, pushing true = *2+1, popping = /2.
      */
-    protected int arrayStack;                       // jodd
+    protected int arrayStack;                       // jodd: made protected
 
     private String separator = "";
 
-    public TraceSignatureVisitor(final StringBuilder buf, boolean isInterface) {		// jodd
+    public TraceSignatureVisitor(final StringBuilder buf, boolean isInterface) {		// jodd: no final
         super(Opcodes.ASM5);
         this.isInterface = isInterface;
         this.declaration = buf;
     }
+
+/*
+    public TraceSignatureVisitor(final int access) {
+        super(Opcodes.ASM5);
+        isInterface = (access & Opcodes.ACC_INTERFACE) != 0;
+        this.declaration = new StringBuilder();
+    }
+*/
 
     protected TraceSignatureVisitor(final StringBuilder buf) {	// jodd
         super(Opcodes.ASM5);
@@ -125,7 +132,7 @@ public class TraceSignatureVisitor extends SignatureVisitor {
     @Override
     public SignatureVisitor visitInterface() {
         separator = seenInterface ? ", " : isInterface ? " extends "
-                : " implements ";
+            : " implements ";
         seenInterface = true;
         startType();
         return this;
@@ -171,34 +178,34 @@ public class TraceSignatureVisitor extends SignatureVisitor {
     @Override
     public void visitBaseType(final char descriptor) {
         switch (descriptor) {
-        case 'V':
-            declaration.append("void");
-            break;
-        case 'B':
-            declaration.append("byte");
-            break;
-        case 'J':
-            declaration.append("long");
-            break;
-        case 'Z':
-            declaration.append("boolean");
-            break;
-        case 'I':
-            declaration.append("int");
-            break;
-        case 'S':
-            declaration.append("short");
-            break;
-        case 'C':
-            declaration.append("char");
-            break;
-        case 'F':
-            declaration.append("float");
-            break;
-        // case 'D':
-        default:
-            declaration.append("double");
-            break;
+            case 'V':
+                declaration.append("void");
+                break;
+            case 'B':
+                declaration.append("byte");
+                break;
+            case 'J':
+                declaration.append("long");
+                break;
+            case 'Z':
+                declaration.append("boolean");
+                break;
+            case 'I':
+                declaration.append("int");
+                break;
+            case 'S':
+                declaration.append("short");
+                break;
+            case 'C':
+                declaration.append("char");
+                break;
+            case 'F':
+                declaration.append("float");
+                break;
+            // case 'D':
+            default:
+                declaration.append("double");
+                break;
         }
         endType();
     }
@@ -290,24 +297,17 @@ public class TraceSignatureVisitor extends SignatureVisitor {
         return declaration.toString();
     }
 
-    public String getReturnType() {
-        return returnType == null ? null : returnType.toString();
-    }
+    // jodd: comment out the method
 
-    public String getExceptions() {
-        return exceptions == null ? null : exceptions.toString();
-    }
+//    public String getReturnType() {
+//        return returnType == null ? null : returnType.toString();
+//    }
 
-	public String[] getExceptionsArray() {		 // jodd
-		if (exceptions == null) {
-			return null;
-		}
-		String[] result = StringUtil.splitc(exceptions.toString(), ',');
+    // jodd: comment out the method
 
-		StringUtil.trimAll(result);
-
-		return result;
-	}
+//    public String getExceptions() {
+//        return exceptions == null ? null : exceptions.toString();
+//    }
 
     // -----------------------------------------------
 
@@ -318,11 +318,11 @@ public class TraceSignatureVisitor extends SignatureVisitor {
         }
     }
 
-    private void startType() {
+    protected void startType() {                    // jodd: made protected
         arrayStack *= 2;
     }
 
-    private void endType() {
+    protected void endType() {                      // jodd: made protected
         if (arrayStack % 2 == 0) {
             arrayStack /= 2;
         } else {

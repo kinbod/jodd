@@ -342,7 +342,7 @@ public class HttpRequest extends HttpBase<HttpRequest> {
 
 			query = HttpUtil.parseQuery(queryString, true);
 		} else {
-			query = HttpMultiMap.newCaseInsensitveMap();
+			query = HttpMultiMap.newCaseInsensitiveMap();
 		}
 
 		this.path = path;
@@ -419,7 +419,7 @@ public class HttpRequest extends HttpBase<HttpRequest> {
 			String name = parameters[i].toString();
 
 			String value = parameters[i + 1].toString();
-			query.add(name, value == null ? null : value);
+			query.add(name, value);
 		}
 		return this;
 	}
