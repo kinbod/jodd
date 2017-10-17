@@ -32,7 +32,13 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Properties;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class PropsTest extends BasePropsTest {
 
@@ -426,7 +432,7 @@ public class PropsTest extends BasePropsTest {
 		p.setValueTrimLeft(true);
 		p.load(readDataFile("test3.props"));
 
-		assertEquals("\r\n\tHello from\r\n\tthe multiline\r\n\tvalue\r\n", p.getValue("email.footer"));
+		assertEquals("\n\tHello from\n\tthe multiline\n\tvalue\n", p.getValue("email.footer"));
 		assertEquals("aaa", p.getValue("email.header"));
 	}
 
@@ -903,5 +909,29 @@ public class PropsTest extends BasePropsTest {
 
 		assertEquals("cn=accountname,ou=users,o=organization", props.getValue("account-dn"));
 	}
+
+
+	@Test
+	public void testDifferentLineEndings() {
+		Props props = new Props();
+		props.setIgnorePrefixWhitespacesOnNewLine(true);
+		props.load("text=line1\\\n   line2\\\r\n   line3\\\r   line4");
+
+		assertEquals("line1line2line3line4", props.getValue("text"));
+
+		props = new Props();
+		props.setIgnorePrefixWhitespacesOnNewLine(false);
+		props.load("text=line1\\\n   line2\\\r\n   line3\\\r   line4");
+
+		assertEquals("line1   line2   line3   line4", props.getValue("text"));
+
+		props = new Props();
+		props.setIgnorePrefixWhitespacesOnNewLine(false);
+		props.setEscapeNewLineValue("|");
+		props.load("text=line1\\\n   line2\\\r\n   line3\\\r   line4");
+
+		assertEquals("line1|   line2|   line3|   line4", props.getValue("text"));
+	}
+
 
 }

@@ -25,8 +25,9 @@
 
 package jodd;
 
+import jodd.Jodd.JoddModule;
 import org.junit.jupiter.api.Test;
-import static jodd.Jodd.*;
+
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -34,15 +35,15 @@ public class JoddServletTest {
 
 	@Test
 	public void testLoadedModules() {
-		assertTrue(Jodd.isModuleLoaded(BEAN));
-		assertFalse(Jodd.isModuleLoaded(HTTP));
-		assertFalse(Jodd.isModuleLoaded(MADVOC));
-		assertFalse(Jodd.isModuleLoaded(MAIL));
-		assertFalse(Jodd.isModuleLoaded(PETITE));
-		assertFalse(Jodd.isModuleLoaded(PROPS));
-		assertFalse(Jodd.isModuleLoaded(PROXETTA));
-		assertTrue(Jodd.isModuleLoaded(SERVLET));
-		assertTrue(Jodd.isModuleLoaded(UPLOAD));
-		assertFalse(Jodd.isModuleLoaded(VTOR));
+		assertTrue (Jodd.isModuleLoaded(JoddModule.BEAN));
+		assertFalse(Jodd.isModuleLoaded(JoddModule.HTTP));
+		assertFalse(Jodd.isModuleLoaded(JoddModule.MADVOC));
+		assertFalse(Jodd.isModuleLoaded(JoddModule.MAIL));
+		assertFalse(Jodd.isModuleLoaded(JoddModule.PETITE));
+		assertFalse(Jodd.isModuleLoaded(JoddModule.PROPS));
+		assertFalse(Jodd.isModuleLoaded(JoddModule.PROXETTA));
+		assertTrue (Jodd.isModuleLoaded(JoddModule.SERVLET));
+		assertTrue (Jodd.isModuleLoaded(JoddModule.UPLOAD));
+		assertFalse(Jodd.isModuleLoaded(JoddModule.VTOR));
 	}
 }

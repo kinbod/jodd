@@ -37,8 +37,8 @@ description = '''
 	simple, but not simpler.
 '''
 
-version = '3.9.1'
-//version = '3.9.1-' + date()
+//version = '3.9.1'
+version = '3.10-' + date()
 
 // --- properties -------------------------------------------------------------
 
@@ -312,6 +312,22 @@ configure(javaModules()) {
 		}
 	}
 
+	task codeCoverage(type: JacocoReport) {
+		group 'Verification'
+		description 'Generates code coverage reports for a single module'
+
+		executionData fileTree("${buildDir}/jacoco/").include("*.exec")
+		sourceSets sourceSets.main
+
+		reports {
+			html.enabled true
+			html.destination file("${buildDir}/reports/jacoco")
+		}
+	}
+
+	codeCoverage.dependsOn testUnit
+	codeCoverage.dependsOn testIntegration
+
 	//check.dependsOn testIntegration
 	//testIntegration.mustRunAfter test
 
@@ -362,6 +378,7 @@ configure(javaModules()) {
 
 apply plugin: 'project-report'
 apply plugin: 'jacoco'
+apply from: "${gradleScriptDir}/license.gradle"
 
 def javaBundleModulesSources = javaBundleModules().sourceSets.main
 
@@ -427,6 +444,9 @@ task bintray {
 }
 
 task codeCoverageReport(type: JacocoReport) {
+	group 'Verification'
+	description 'Generates code coverage reports for the whole project'
+
 	executionData fileTree(project.rootDir.absolutePath).include("**/build/jacoco/*.exec")
 	jacocoClasspath
 
@@ -437,7 +457,7 @@ task codeCoverageReport(type: JacocoReport) {
 	reports {
 		xml.enabled true
 		xml.destination file("${buildDir}/reports/jacoco/report.xml")
-		html.enabled false
+		html.enabled true
 		csv.enabled false
 	}
 }
@@ -514,5 +534,5 @@ def date() {
 // --- wrapper ----------------------------------------------------------------
 
 task wrapper(type: Wrapper) {
-	gradleVersion = '4.1'
+	gradleVersion = '4.2'
 }
