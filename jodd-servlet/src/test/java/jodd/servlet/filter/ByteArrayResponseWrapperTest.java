@@ -37,10 +37,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class ByteArrayResponseWrapperTest {
+class ByteArrayResponseWrapperTest {
 
 	@Test
-	public void testWrite() throws IOException {
+	void testWrite() throws IOException {
 		HttpServletResponseWrapper rw = mock(HttpServletResponseWrapper.class);
 		ServletOutputStream os = mock(ServletOutputStream.class);
 

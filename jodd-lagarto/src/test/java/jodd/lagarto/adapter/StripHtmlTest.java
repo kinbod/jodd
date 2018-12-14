@@ -31,12 +31,12 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class StripHtmlTest {
+class StripHtmlTest {
 
 	@Test
-	public void testStripHtml() {
+	void testStripHtml() {
 		LagartoParser lagartoParser = new LagartoParser(
-				"<html>  <div   id='a'>   x \n\n\n </div>  </html>", false);
+				"<html>  <div   id='a'>   x \n\n\n </div>  </html>");
 
 		StringBuilder out = new StringBuilder();
 		StripHtmlTagAdapter stripHtmlTagAdapter = new StripHtmlTagAdapter(new TagWriter(out));

@@ -1,145 +1,120 @@
-# Jodd Change Log
+# Jodd Changelog
 
 All notable changes to Jodd project are documented here.
 
-## [Unreleased](https://github.com/oblac/jodd/compare/v3.9...master)
+## [n/a](https://github.com/oblac/jodd/compare/v5.0.6...master)
 
-## Performance
+### New features
 
-+ **core** - `StringUtil#replace` optimized a bit.
++ **http** - added `EMLComposer.compose` for `ReceivedEmail`.
 
-### Bug Fixes
+### Bug fixes
 
-+ **core** - fixed issue with `StringUtil` and empty strings.
-+ **props** - fixed issue with multi-line strings and line endings.
++ **http** - allowing `contentTypeJson` to be used in any order.
++ **http** - fixed an issue with re-reading the request.
++ **http** - fixed an issue with query param parsing. 
 
-### System
+## [v5.0.6](https://github.com/oblac/jodd/compare/v5.0.5...master)
 
-+ **licenses** - added back headers for all 3rd party code.
-+ **files** - files line endings unified.
-+ **gradle** - updated to Gradle 4.2.
+### New features
 
-## [3.9.1](https://github.com/oblac/jodd/compare/v3.9...3.9.1)
++ **bean** - added special support for inner `Supplier` for `BeanUtil`.
++ **proxetta** - updated to ASM7.
 
-### Bug Fixes
+### Bug fixes
 
-+ **proxetta** - fixed the bug with nested generics.
-+ **madvoc** - fixed bug with `move` result.
-+ **dboom** - fixed the issue with the MSSQL and custom behaviour. 
++ **core** - fixed `java.version` parsing under Java 11.
 
-### Features
+## [v5.0.5](https://github.com/oblac/jodd/compare/v5.0.4...v5.0.5)
 
-+ **dboom** - Added support for SQLite.
+Just refreshing with some bug fixes and few new features.
 
-### Breaking changes
+### Bug fixes
 
-+ **db** - `DbDetector` now returns a new type.
-+ **swingspy** - removed :)
++ **json** - fixed particular case with lazy parsing and escaped chars.
++ **mail** - fixed special case with 1 body and 1 attachment.
++ **core** - fixed Zip slip vulnerability.
 
-## [3.9](https://github.com/oblac/jodd/compare/v3.8.6...3.9)
+### New features
 
-### Bug Fixes
++ **core** - `FileUtil.mkdirs` return created folder.
++ **email** - added new method for unsetting the email flags in builder. 
 
-+ **http** - fixed bug with multiple headers.
-+ **db** - `CallableStatement` are supported in debug mode [#420](https://github.com/oblac/jodd/issues/420).
-+ **proxetta** - added all interfaces while scanning the target class info.
-+ **proxetta** - fixed generic array [#418](https://github.com/oblac/jodd/issues/418).
+## [v5.0.4](https://github.com/oblac/jodd/compare/v5.0.3...v5.0.4)
 
-### Features
+Many little improvements plus one important fix for `jodd-mail`. Sorry for any inconvenience.
 
-+ **http** - Added strict headers flag for storing headers as they are passed to the engine.
-+ **json** - Added two `JsonParser` methods for easier parsing to a map and a list. 
-+ **json** - New generic JSON classes added: `JsonArray` and `JsonObject`.
-+ **core** - Added `MapEntry` implementations.
-+ **core** - Added `snapshot()` method to `Cache`.
-+ **proxetta** - Added `TypeInfo` for tracking method arguments and return types.
+### Bug fixes
 
-## Breaking changes
-
-+ **http** - Http `headers` was removed in favor of `headerNames()`.
-+ **json** - strings are now not strictly parsed (`/` is not longer escaped). 
-+ **proxetta** - all interfaces are scanned now when looking for the target info.
-+ **core** - `iterator()` removed from the `Cache`.
-+ **proxetta** - `MethodInfo` interface is changed.
-
-## [3.8.6](https://github.com/oblac/jodd/compare/v3.8.5...3.8.6)
-
-### Bug Fixes
-
-+ **core** - fixes `downloadFile` to download bigger files as well.
-+ **lagarto** - bug introduced in 3.8.5; bad parsing of pseudo-function arguments [#407](https://github.com/oblac/jodd/issues/407).
-
-### Features
-
-+ **http** - default user agent now can be set [#410](https://github.com/oblac/jodd/pull/410).
-+ **log** - added Log4j2 support.
-+ **jtx** - added `ReadWriteTransaction` annotation to codebase.
-
-## Breaking changes
-
-+ **log** - factories are now called "providers", now stored in each logger.
-+ **email** - Content-Disposition and Content-ID flags are now separate [#404](https://github.com/oblac/jodd/issues/404).
-
-
-## [3.8.5](https://github.com/oblac/jodd/compare/v3.8.1...v3.8.5)
-
-### Bug Fixes
-
-+ **db** - `SqlBuilder#generateQuery` may be called multiple times.
-+ **http** - `response#cookies()` does not throw exception on invalid cookies.
-+ **http** - fixed special case with `Cookie` parsing. 
-+ **core** - natural comparison has been fixed to follow comparator contracts.
-
-### Features
-
-+ **core** - added `FileLRUCache`.
-+ **proxetta** - added `AopProxy`, simple tool for aop using just java.
-+ **core** - added `AppendableWriter`.
-+ **email** - `SendMailSession` is now `AutoCloseable`.
-+ **db** - added Db detector [#401](https://github.com/oblac/jodd/issues/401).
-+ **db** - added basic callable support [#389](https://github.com/oblac/jodd/issues/389).
-+ **lagarto** - allow strings in css selector pseudo functions without quotation marks [#301](https://github.com/oblac/jodd/issues/301).
-+ **db** - added `resetAll` method for hard-resetting the queries.
-+ **http** - address parsing and exception message is much better.
-+ **http** - added optional encoding for `HttpRequest#readFrom`.
-+ **email** - email parser is improved.
-+ **core** - natural comparison improved and accents added.
-+ **core** - added `ThreadFactoryBuilder.
-+ **core** - added `Futures` utilities.
-+ **core** - added stream-related `Collection` utilities.
++ **core** - fixed special cases in `NaturalOrderComparator`, making rules a bit more strict.  
++ **mail** - fixed unused `debug` and `timeout`.
++ **mail** - `RFC2822AddressParser` methods `parseToXxx()` now returns `null` for invalid emails.
++ **http** - secure connection was sending `CONNECT` string twice.
 
 ### Breaking changes
 
-+ **core** - `ClassUtil#invoke` methods are gone.
-+ **core** - `ReflectUtil` is now `ClassUtil`: sorry, but the name was super ugly.
-+ **core** - `PreattyStringBuilder` simplified the interface.
-+ **core** - `DirWatcher` now accepts `Consumer`s instead of custom listener.
-+ **core** - `FindFile` interface changed to match Java8.
-+ **core** - renamed methods in `Cache` interface.
-+ **email** - renamed `EmailAddress`, it is used now as a Email parser.
-+ **dboom** - method `_` has been removed. Use `append` instead.
++ **mail** - `debug` and `timeout` are now applied before creating the mail server.
++ **http** - default security has been set to `TLSv1.1`.
 
-### System
+### New features
 
-+ **gradle** - updated to Gradle 3.4.1
++ **joy** - added excluded jars for faster scanning.
++ **mail** - added custom properties.
++ **json** - added `onValue` callback for JSON serializer.
++ **json** - added `excludeEmpty` flag for JSON serializer.
++ **json** - added `allowClass` for whitelisting class names.
++ **petite** - allow injection in the private fields of super types.
 
 
-## [3.8.1](https://github.com/oblac/jodd/compare/v3.8.0...v3.8.1)
 
-### Bug Fixes
+## [v5.0.3](https://github.com/oblac/jodd/compare/v5.0.2...v5.0.3)
 
-+ **core** - fixed issue with `StringBand` calculation.
+### New features
 
-## Performance
++ **dboom** - added detection of the quote names in annotations.
++ **dboom** - Added flags to column and table naming strategies for quote chars.
 
-+ **core** - added performance check for `StringBand`.
 
-### Features
 
-+ **lagarto** - added `contents`, `.after`, `replaceWith`, `unwrap`, `prepend`, `prevAll()`, `nextAll` to Jerry.
-+ **http** - added `trustAllCerts` to http client.
-+ **core** - added `Chalk` class.
+## [v5.0.2](https://github.com/oblac/jodd/compare/v5.0.1...v5.0.2)
 
-## Breaking changes
+One minor fix and one important change for the bootstrap usages.
 
-+ **core** - `CommandLine` removes custom shell execution code.
+### New features
+
++ **joy** - added static method for registering joy servlet context listener.
+
+### Bug fixes
+
++ **joy** - better output of the Joy configuration that does not cut of the values.  
+
+
+
+## [v5.0.1](https://github.com/oblac/jodd/compare/v5.0.0...v5.0.1)
+
+Minor fixes and improvements.
+
+### New features
+
++ **core*** - added the `Maybe.or(T)` method.
++ **mail** - added `receive()` and fluent builder.
++ **cli*** - parse values bundled with options (e.g. `--name=value`)
+
+### Bug fixes
+
++ **cli** - fixed the behaviour of parameters
+
+
+
+## [v5](https://github.com/oblac/jodd/compare/v4.3.2...v5.0.0)
+
+Welcome to Jodd 5.
+
+Version 5 contains a great number of new features, changes, bug fixes and performance improvements. It's all new Jodd: slick as before, just better. 
+
+High-five!
+
+## Previous releases
+
+[v4.x](CHANGELOG_v4.md)
+[v3.x](CHANGELOG_v3.md)

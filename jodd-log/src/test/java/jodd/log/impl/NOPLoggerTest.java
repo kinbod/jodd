@@ -34,28 +34,28 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.mock;
 
-public class NOPLoggerTest extends LoggerTestBase {
+class NOPLoggerTest extends LoggerTestBase {
 
 	private String name = "NOPLogger";
 
 	@BeforeEach
-	public void setUp() throws Exception {
+	void setUp() throws Exception {
 		logger = new NOPLogger(name);
 	}
 
 	@Override
 	@Test
-	public void testIsEnabled() {
+	void testIsEnabled() {
 		assertFalse(logger.isEnabled(Level.DEBUG));
 	}
 
 	@Test
-	public void testGetName() {
+	void testGetName() {
 		assertEquals(logger.getName(), name);
 	}
 
 	@Test
-	public void testLog() {
+	void testLog() {
 		//given
 		throwable = mock(Throwable.class);
 
@@ -73,7 +73,7 @@ public class NOPLoggerTest extends LoggerTestBase {
 	}
 
 	@Test
-	public void testNopLoggerFactory() {
+	void testNopLoggerFactory() {
 		//given
 		loggerProvider = NOPLogger.PROVIDER;
 

@@ -31,22 +31,22 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class VtorMatchProfilesTest {
+class VtorMatchProfilesTest {
     private Vtor vtor;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         vtor = new Vtor();
     }
 
     @Test
-    public void testAllProfiles() {
+    void testAllProfiles() {
         assertTrue(vtor.matchProfiles(new String[]{Vtor.ALL_PROFILES}));
         assertFalse(vtor.matchProfiles(new String[]{Vtor.ALL_PROFILES, "someProfile"}));
     }
 
     @Test
-    public void testMatchProfilesAgainstSomeProfile() {
+    void testMatchProfilesAgainstSomeProfile() {
         //when
         vtor.useProfile("testProfile1");
 
@@ -80,7 +80,7 @@ public class VtorMatchProfilesTest {
     }
 
     @Test
-    public void testDefaultProfile() {
+    void testDefaultProfile() {
         //when
         vtor.useProfile(Vtor.DEFAULT_PROFILE);
 

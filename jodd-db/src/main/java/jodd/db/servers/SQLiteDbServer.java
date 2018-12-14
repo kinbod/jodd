@@ -25,7 +25,7 @@
 
 package jodd.db.servers;
 
-import jodd.db.oom.DbOomManager;
+import jodd.db.oom.DbOomConfig;
 
 /**
  * SQLite.
@@ -34,13 +34,16 @@ public class SQLiteDbServer implements DbServer {
 
 	private final String version;
 
-	public SQLiteDbServer(String version) {
+	public SQLiteDbServer(final String version) {
 		this.version = version;
 	}
 
 	@Override
-	public void accept(DbOomManager dbOomManager) {
-		dbOomManager.getSqlGenConfig().setUpdateAcceptsTableAlias(false);
+	public void accept(final DbOomConfig dbOomConfig) {
+		dbOomConfig.setUpdateAcceptsTableAlias(false);
+
+		// quote character
+		dbOomConfig.getColumnNames().setQuoteChar('\"');
 	}
 
 	@Override

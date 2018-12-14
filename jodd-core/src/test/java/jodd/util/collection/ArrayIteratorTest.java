@@ -35,10 +35,10 @@ import java.util.NoSuchElementException;
 import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("AutoBoxing")
-public class ArrayIteratorTest {
+class ArrayIteratorTest {
 
 	@Test
-	public void testArrayIteration() {
+	void testArrayIteration() {
 		Integer[] i = new Integer[]{1, 2, 3, 4, 5};
 
 		ArrayIterator<Integer> ae = new ArrayIterator<>(i);
@@ -68,7 +68,7 @@ public class ArrayIteratorTest {
 	}
 
 	@Test
-	public void testArrayIterationFrom() {
+	void testArrayIterationFrom() {
 		Integer[] i = new Integer[]{1, 2, 3, 4, 5};
 
 		ArrayIterator<Integer> ae = new ArrayIterator<>(i, 2, 2);

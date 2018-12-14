@@ -30,10 +30,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class IntegerConverterTest {
+class IntegerConverterTest {
 
 	@Test
-	public void testConversion() {
+	void testConversion() {
 		IntegerConverter integerConverter = new IntegerConverter();
 
 		assertNull(integerConverter.convert(null));

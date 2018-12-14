@@ -26,8 +26,9 @@
 package jodd.proxetta;
 
 import jodd.asm.TraceSignatureVisitor;
-import jodd.asm5.signature.SignatureReader;
+import jodd.asm7.signature.SignatureReader;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,12 +41,13 @@ public class GenericsReader {
 	 * Parses signature for generic information and returns a map where key is generic name
 	 * and value is raw type. Returns an empty map if signature does not define any generics.
 	 */
-	public Map<String, String> parseSignatureForGenerics(String signature, boolean isInterface) {
-		Map<String, String> genericsMap = new HashMap<>();
+	public Map<String, String> parseSignatureForGenerics(final String signature, final boolean isInterface) {
 
 		if (signature == null) {
-			return genericsMap;
+			return Collections.emptyMap();
 		}
+
+		final Map<String, String> genericsMap = new HashMap<>();
 
 		SignatureReader sr = new SignatureReader(signature);
 		StringBuilder sb = new StringBuilder();
@@ -53,13 +55,13 @@ public class GenericsReader {
 			String genericName;
 
 			@Override
-			public void visitFormalTypeParameter(String name) {
+			public void visitFormalTypeParameter(final String name) {
 				genericName = name;
 				super.visitFormalTypeParameter(name);
 			}
 
 			@Override
-			public void visitClassType(String name) {
+			public void visitClassType(final String name) {
 				if (genericName != null) {
 					genericsMap.put(genericName, 'L' + name + ';');
 					genericName = null;

@@ -38,12 +38,12 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class WireBeansWithProxettaTest {
+class WireBeansWithProxettaTest {
 
     private PetiteContainer petiteContainer;
 
     @BeforeEach
-    public void setupPetiteContainer() {
+    void setupPetiteContainer() {
         PetiteConfig petiteConfig = PetiteHelper.createPetiteConfig();
 
         ProxyProxetta proxyProxetta = PetiteHelper.createProxyProxetta();
@@ -61,7 +61,7 @@ public class WireBeansWithProxettaTest {
     }
 
     @Test
-    public void testWireExternalBeanAndCheckInjectedBean2Reference(){
+    void testWireExternalBeanAndCheckInjectedBean2Reference(){
         ExternalBean externalBean = new ExternalBean();
 
         // --> inject

@@ -29,13 +29,16 @@ import jodd.mutable.MutableLong;
 import jodd.typeconverter.impl.MutableLongConverter;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
-public class MutableLongConverterTest {
+class MutableLongConverterTest {
 
 	@Test
-	public void testConversion() {
-		MutableLongConverter mutableLongConverter = (MutableLongConverter) TypeConverterManager.lookup(MutableLong.class);
+	void testConversion() {
+		MutableLongConverter mutableLongConverter =
+			(MutableLongConverter) TypeConverterManager.get().lookup(MutableLong.class);
 
 		assertNull(mutableLongConverter.convert(null));
 

@@ -31,19 +31,19 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class PetiteShutdownTest {
+class PetiteShutdownTest {
 
 	@Test
-	public void testShutdown() {
+	void testShutdown() {
 		PetiteContainer pc = new PetiteContainer();
 
-		pc.registerPetiteBean(SomeService.class, null, null, null, false);
-		pc.registerPetiteBean(PojoBean.class, "pojo", null, null, false);
+		pc.registerPetiteBean(SomeService.class, null, null, null, false, null);
+		pc.registerPetiteBean(PojoBean.class, "pojo", null, null, false, null);
 
-		assertEquals(2, pc.getTotalBeans());
+		assertEquals(2, pc.beansCount());
 
 		pc.shutdown();
 
-		assertEquals(0, pc.getTotalBeans());
+		assertEquals(0, pc.beansCount());
 	}
 }

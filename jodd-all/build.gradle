@@ -1,14 +1,11 @@
-
 ext.moduleName = 'Jodd Bundle'
 ext.moduleDescription = 'Jodd bundle - all classes in one jar'
 
 apply plugin: 'java'
-apply plugin: 'maven'
+apply plugin: 'maven-publish'
 apply plugin: 'signing'
 apply from: "${gradleScriptDir}/provided.gradle"
 apply from: "${gradleScriptDir}/publish-maven.gradle"
-apply plugin: 'com.jfrog.bintray'
-apply from: "${gradleScriptDir}/bintray.gradle"
 
 group = 'org.jodd'
 
@@ -33,51 +30,71 @@ task javadocJar(type: Jar, dependsOn: parent.javadocAll) {
     from "${parent.buildDir}/reports/javadoc"
 }
 
-configurations {
-    published
-}
-
 artifacts {
     archives jar
     archives sourcesJar
     archives javadocJar
-
-    published jar
-    published sourcesJar
-    published javadocJar
 }
 
-install {
-    repositories.mavenInstaller {
-        buildAllDependencies(pom)
-        addAllDependencies(pom)
-    }
-}
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            rebuildAllDependencies(pom)
 
-def buildAllDependencies(pom) {
-    pom.whenConfigured {
-        p -> p.dependencies = p.dependencies.findAll {
-            dep -> dep.groupId != "org.jodd"
+            // RE-sign the pom, as it has been modified
+
+            pom.withXml {
+                def pomFile = file("${project.buildDir}/generated-pom.xml")
+                writeTo(pomFile)
+                def pomAscFile = signing.sign(pomFile).signatureFiles[0]
+                pomFile.delete()
+            }
+
         }
     }
 }
 
-def addAllDependencies(pom) {
-    def deps = []
+def rebuildAllDependencies(pom) {
     pom.withXml {
-        def dependenciesNode = asNode().appendNode('dependencies')
+        def root = asNode()
 
-        javaBundleModules().configurations.compile.allDependencies.each {
-            it.each {
-                if (it.group != "org.jodd") {
-                    def fulldep = it.group + ':' + it.name + ':' + it.version
-                    if (!(fulldep in deps)) {
-                        deps += [ fulldep ]
-                        def dependencyNode = dependenciesNode.appendNode('dependency')
-                        dependencyNode.appendNode('groupId', it.group)
-                        dependencyNode.appendNode('artifactId', it.name)
-                        dependencyNode.appendNode('version', it.version)
-                        dependencyNode.appendNode('optional', true)
+        root.remove(root.get("dependencies"))
+
+        root.children().last() + {
+            delegate.dependencies {
+            }
+        }
+
+        def node = root.children().last()
+
+        def used = []
+
+        javaBundleModules().each { prj ->
+            prj.configurations.compile.allDependencies.each { dep ->
+                // ignore all Jodd dependencies
+                if (dep.group != "org.jodd") {
+                    def fulldep = dep.name + ':' + dep.group + ':' + dep.version
+
+
+                    if (!(fulldep in used)) {
+                        used << fulldep
+
+                        def provided = false
+                        prj.configurations.findByName("provided").allDependencies.each { depdep ->
+                            if (depdep.name == dep.name && depdep.group == dep.group && depdep.version == dep.version) {
+                                provided = true
+                            }
+                        }
+
+                        def depNode = new Node(node, "dependency")
+
+                        def groupNode = new Node(depNode, "groupId", dep.group)
+                        def artifcatNode = new Node(depNode, "artifactId", dep.name)
+                        def versionNode = new Node(depNode, "version", dep.version)
+                        def optionalNode = new Node(depNode, "optional", true)
+                        if (provided) {
+                            def scopeNode = new Node(depNode, "scope", "provided")
+                        }
                     }
                 }
             }

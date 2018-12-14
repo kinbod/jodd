@@ -25,6 +25,8 @@
 
 package jodd.mail;
 
+import jodd.util.StringPool;
+import jodd.net.MimeTypes;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -33,21 +35,21 @@ import java.net.URL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-public class EmailUtilTest {
+class EmailUtilTest {
 
 	protected String testDataRoot;
 
 	@BeforeEach
-	public void setUp() throws Exception {
+	void setUp() {
 		if (testDataRoot != null) {
 			return;
 		}
-		URL data = EmailUtilTest.class.getResource("test");
+		final URL data = EmailUtilTest.class.getResource("test");
 		testDataRoot = data.getFile();
 	}
 
 	@Test
-	public void testExtractContentType() {
+	void testExtractContentType() {
 		String contentType = "multipart/mixed;";
 		assertEquals("multipart/mixed", EmailUtil.extractMimeType(contentType));
 		assertNull(EmailUtil.extractEncoding(contentType));
@@ -57,12 +59,12 @@ public class EmailUtilTest {
 		assertNull(EmailUtil.extractEncoding(contentType));
 
 		contentType = "text/html;\n\tcharset=\"us-ascii\"";
-		assertEquals("text/html", EmailUtil.extractMimeType(contentType));
-		assertEquals("us-ascii", EmailUtil.extractEncoding(contentType));
+		assertEquals(MimeTypes.MIME_TEXT_HTML, EmailUtil.extractMimeType(contentType));
+		assertEquals(StringPool.US_ASCII.toLowerCase(), EmailUtil.extractEncoding(contentType));
 
 		contentType = "TEXT/PLAIN; charset=US-ASCII; name=example.eml";
-		assertEquals("TEXT/PLAIN", EmailUtil.extractMimeType(contentType));
-		assertEquals("US-ASCII", EmailUtil.extractEncoding(contentType));
+		assertEquals(MimeTypes.MIME_TEXT_PLAIN.toUpperCase(), EmailUtil.extractMimeType(contentType));
+		assertEquals(StringPool.US_ASCII, EmailUtil.extractEncoding(contentType));
 	}
 
 }

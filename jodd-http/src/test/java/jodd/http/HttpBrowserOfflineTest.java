@@ -29,10 +29,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class HttpBrowserOfflineTest {
+class HttpBrowserOfflineTest {
 
 	@Test
-	public void testDefaultParameters() {
+	void testDefaultParameters() {
 		HttpBrowser httpBrowser = new HttpBrowser();
 		httpBrowser.setDefaultHeader("aaa", "123");
 
@@ -47,7 +47,7 @@ public class HttpBrowserOfflineTest {
 	}
 
 	@Test
-	public void testDefaultParametersOverwrite() {
+	void testDefaultParametersOverwrite() {
 		HttpBrowser httpBrowser = new HttpBrowser();
 		httpBrowser.setDefaultHeader("aaa", "123");
 

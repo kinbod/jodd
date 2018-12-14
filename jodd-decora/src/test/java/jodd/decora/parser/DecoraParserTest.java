@@ -41,12 +41,12 @@ import java.net.URL;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class DecoraParserTest {
+class DecoraParserTest {
 
 	protected String testDataRoot;
 
 	@BeforeEach
-	public void setUp() throws Exception {
+	void setUp() throws Exception {
 		if (testDataRoot != null) {
 			return;
 		}
@@ -55,7 +55,7 @@ public class DecoraParserTest {
 	}
 
 	@Test
-	public void testDecoraParser() throws IOException {
+	void testDecoraParser() throws IOException {
 		DecoraParser decoraParser = new DecoraParser();
 
 		FindFile ff = new WildcardFindFile().include("*.*ml");

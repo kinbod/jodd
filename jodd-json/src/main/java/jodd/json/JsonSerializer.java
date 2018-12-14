@@ -25,20 +25,60 @@
 
 package jodd.json;
 
+import jodd.buffer.FastCharBuffer;
+import jodd.inex.InExRules;
 import jodd.util.ArraysUtil;
-import jodd.util.InExRules;
-import jodd.util.UnsafeUtil;
-import jodd.util.buffer.FastCharBuffer;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import static jodd.json.JoddJson.DEFAULT_CLASS_METADATA_NAME;
+import java.util.function.Function;
 
 /**
  * JSON serializer.
+ * @see PrettyJsonSerializer
  */
 public class JsonSerializer {
+
+	public static class Defaults {
+
+		public static final String DEFAULT_CLASS_METADATA_NAME = "__class";
+
+		/**
+		 * Defines default behavior of a {@link jodd.json.JsonSerializer}.
+		 * If set to <code>true</code>, objects will be serialized
+		 * deep, so all collections and arrays will get serialized.
+		 */
+		public static boolean deepSerialization = false;
+		/**
+		 * List of excluded types for serialization.
+		 */
+		public static Class[] excludedTypes = null;
+		/**
+		 * List of excluded types names for serialization. Type name
+		 * can contain wildcards (<code>*</code> and <code>?</code>).
+		 */
+		public static String[] excludedTypeNames = null;
+
+		/**
+		 * Sets the strict JSON encoding.
+		 * JSON specification specifies that certain characters should be
+		 * escaped (see: http://json.org/). However, in the real world, not all
+		 * needs to be escaped: especially the 'solidus' character (/). If this one
+		 * is escaped, many things can go wrong, from URLs to Base64 encodings.
+		 * This flag controls the behavior of strict encoding. By default, the
+		 * strict encoding is set to {@code false}.
+		 */
+		public static boolean strictStringEncoding = false;
+
+		/**
+		 * Specifies if 'class' metadata is used and its value. When set, class metadata
+		 * is used by {@link jodd.json.JsonSerializer} and all objects
+		 * will have additional field with the class type in the resulting JSON.
+		 * {@link jodd.json.JsonParser} will also consider this flag to build
+		 * correct object type. If <code>null</code>, class information is not used.
+		 */
+		public static String classMetadataName = null;
+	}
 
 	/**
 	 * Static ctor.
@@ -47,29 +87,38 @@ public class JsonSerializer {
 		return new JsonSerializer();
 	}
 
+	/**
+	 * Static ctor for {@link PrettyJsonSerializer}.
+	 */
+	public static PrettyJsonSerializer createPrettyOne() {
+		return new PrettyJsonSerializer();
+	}
+
 	// ---------------------------------------------------------------- config
 
 	protected Map<Path, TypeJsonSerializer> pathSerializersMap;
 	protected TypeJsonSerializerMap typeSerializersMap;
 
-	protected InExRules<Path, PathQuery> rules = new InExRules<Path, PathQuery>() {
+	protected InExRules<Path, PathQuery, PathQuery> rules = new InExRules<Path, PathQuery, PathQuery>() {
 		@Override
-		public boolean accept(Path value, PathQuery rule, boolean include) {
+		public boolean accept(final Path value, final PathQuery rule, final boolean include) {
 			return rule.matches(value);
 		}
 	};
 
-	protected String classMetadataName = JoddJson.classMetadataName;
-	protected boolean strictStringEncoding = JoddJson.strictStringEncoding;
-	protected boolean deep = JoddJson.deepSerialization;
-	protected Class[] excludedTypes = null;
-	protected String[] excludedTypeNames = null;
+	protected String classMetadataName = Defaults.classMetadataName;
+	protected boolean strictStringEncoding = Defaults.strictStringEncoding;
+	protected boolean deep = Defaults.deepSerialization;
+	protected Class[] excludedTypes = Defaults.excludedTypes;
+	protected String[] excludedTypeNames = Defaults.excludedTypeNames;
 	protected boolean excludeNulls = false;
+	protected boolean excludeEmpty = false;
+	protected Function<Object, TypeJsonSerializer> serializerResolver = null;
 
 	/**
 	 * Defines custom {@link jodd.json.TypeJsonSerializer} for given path.
 	 */
-	public JsonSerializer withSerializer(String pathString, TypeJsonSerializer typeJsonSerializer) {
+	public JsonSerializer withSerializer(final String pathString, final TypeJsonSerializer typeJsonSerializer) {
 		if (pathSerializersMap == null) {
 			pathSerializersMap = new HashMap<>();
 		}
@@ -82,9 +131,9 @@ public class JsonSerializer {
 	/**
 	 * Defines custom {@link jodd.json.TypeJsonSerializer} for given type.
 	 */
-	public JsonSerializer withSerializer(Class type, TypeJsonSerializer typeJsonSerializer) {
+	public JsonSerializer withSerializer(final Class type, final TypeJsonSerializer typeJsonSerializer) {
 		if (typeSerializersMap == null) {
-			typeSerializersMap = new TypeJsonSerializerMap(JoddJson.defaultSerializers);
+			typeSerializersMap = new TypeJsonSerializerMap(TypeJsonSerializerMap.get());
 		}
 
 		typeSerializersMap.register(type, typeJsonSerializer);
@@ -95,7 +144,7 @@ public class JsonSerializer {
 	/**
 	 * Adds include path query.
 	 */
-	public JsonSerializer include(String include) {
+	public JsonSerializer include(final String include) {
 		rules.include(new PathQuery(include, true));
 
 		return this;
@@ -104,7 +153,7 @@ public class JsonSerializer {
 	/**
 	 * Adds a list of included path queries.
 	 */
-	public JsonSerializer include(String... includes) {
+	public JsonSerializer include(final String... includes) {
 		for (String include : includes) {
 			include(include);
 		}
@@ -114,7 +163,7 @@ public class JsonSerializer {
 	/**
 	 * Adds exclude path query.
 	 */
-	public JsonSerializer exclude(String exclude) {
+	public JsonSerializer exclude(final String exclude) {
 		rules.exclude(new PathQuery(exclude, false));
 
 		return this;
@@ -123,7 +172,7 @@ public class JsonSerializer {
 	/**
 	 * Adds a list of excluded path queries.
 	 */
-	public JsonSerializer exclude(String... excludes) {
+	public JsonSerializer exclude(final String... excludes) {
 		for (String exclude : excludes) {
 			exclude(exclude);
 		}
@@ -135,7 +184,7 @@ public class JsonSerializer {
 	 * for each exclude query its parent will be included.
 	 * For example, exclude of 'aaa.bb.ccc' would include it's parent: 'aaa.bb'.
 	 */
-	public JsonSerializer exclude(boolean includeParent, String... excludes) {
+	public JsonSerializer exclude(final boolean includeParent, final String... excludes) {
 		for (String exclude : excludes) {
 			if (includeParent) {
 				int dotIndex = exclude.lastIndexOf('.');
@@ -157,7 +206,7 @@ public class JsonSerializer {
 	/**
 	 * Sets local class meta-data name.
 	 */
-	public JsonSerializer setClassMetadataName(String name) {
+	public JsonSerializer setClassMetadataName(final String name) {
 		classMetadataName = name;
 		return this;
 	}
@@ -165,9 +214,9 @@ public class JsonSerializer {
 	/**
 	 * Sets local class meta-data name.
 	 */
-	public JsonSerializer withClassMetadata(boolean useMetadata) {
+	public JsonSerializer withClassMetadata(final boolean useMetadata) {
 		if (useMetadata) {
-			classMetadataName = DEFAULT_CLASS_METADATA_NAME;
+			classMetadataName = Defaults.DEFAULT_CLASS_METADATA_NAME;
 		}
 		else {
 			classMetadataName = null;
@@ -179,7 +228,7 @@ public class JsonSerializer {
 	 * Defines if collections should be followed, i.e. to perform
 	 * deep serialization.
 	 */
-	public JsonSerializer deep(boolean includeCollections) {
+	public JsonSerializer deep(final boolean includeCollections) {
 		this.deep = includeCollections;
 		return this;
 	}
@@ -190,7 +239,7 @@ public class JsonSerializer {
 	 * For example, you can disable properties of <code>InputStream</code>.
 	 * You can use wildcards to describe type names.
 	 */
-	public JsonSerializer excludeTypes(String... typeNames) {
+	public JsonSerializer excludeTypes(final String... typeNames) {
 		if (excludedTypeNames == null) {
 			excludedTypeNames = typeNames;
 		} else {
@@ -202,7 +251,7 @@ public class JsonSerializer {
 	/**
 	 * Excludes types. Supports interfaces and subclasses as well.
 	 */
-	public JsonSerializer excludeTypes(Class... types) {
+	public JsonSerializer excludeTypes(final Class... types) {
 		if (excludedTypes == null) {
 			excludedTypes = types;
 		} else {
@@ -214,17 +263,33 @@ public class JsonSerializer {
 	/**
 	 * Excludes <code>null</code> values while serializing.
 	 */
-	public JsonSerializer excludeNulls(boolean excludeNulls) {
+	public JsonSerializer excludeNulls(final boolean excludeNulls) {
 		this.excludeNulls = excludeNulls;
 		return this;
 	}
 
 	/**
-	 * Specifies strict string encoding.
-	 * @see JoddJson#strictStringEncoding
+	 * Excludes empty maps and collections.
 	 */
-	public JsonSerializer strictStringEncoding(boolean strictStringEncoding) {
+	public JsonSerializer excludeEmpty(final boolean excludeEmpty) {
+		this.excludeEmpty = excludeEmpty;
+		return this;
+	}
+
+	/**
+	 * Specifies strict string encoding.
+	 */
+	public JsonSerializer strictStringEncoding(final boolean strictStringEncoding) {
 		this.strictStringEncoding = strictStringEncoding;
+		return this;
+	}
+
+	/**
+	 * Defines callback for value serialization. It defines the instance of {@link TypeJsonSerializer}
+	 * to be used with the value. If {@code null} is returned, default serializer will be resolved.
+	 */
+	public JsonSerializer onValue(final Function<Object, TypeJsonSerializer> function) {
+		this.serializerResolver = function;
 		return this;
 	}
 
@@ -233,7 +298,7 @@ public class JsonSerializer {
 	/**
 	 * Serializes object into provided appendable.
 	 */
-	public void serialize(Object source, Appendable target) {
+	public void serialize(final Object source, final Appendable target) {
 		JsonContext jsonContext = createJsonContext(target);
 
 		jsonContext.serialize(source);
@@ -242,12 +307,23 @@ public class JsonSerializer {
 	/**
 	 * Serializes object into source.
 	 */
-	public String serialize(Object source) {
+	public String serialize(final Object source) {
 		FastCharBuffer fastCharBuffer = new FastCharBuffer();
 
 		serialize(source, fastCharBuffer);
 
-		return UnsafeUtil.createString(fastCharBuffer.toArray());
+		return fastCharBuffer.toString();
+	}
+
+	/**
+	 * Serializes the object, but returns the {@link CharSequence}.
+	 */
+	public CharSequence serializeToCharSequence(final Object source) {
+		FastCharBuffer fastCharBuffer = new FastCharBuffer();
+
+		serialize(source, fastCharBuffer);
+
+		return fastCharBuffer;
 	}
 
 	// ---------------------------------------------------------------- json context
@@ -255,7 +331,7 @@ public class JsonSerializer {
 	/**
 	 * Creates new JSON context.
 	 */
-	public JsonContext createJsonContext(Appendable appendable) {
-		return new JsonContext(this, appendable, excludeNulls, strictStringEncoding);
+	public JsonContext createJsonContext(final Appendable appendable) {
+		return new JsonContext(this, appendable);
 	}
 }

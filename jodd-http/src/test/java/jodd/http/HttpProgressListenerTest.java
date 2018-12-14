@@ -29,10 +29,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class HttpProgressListenerTest {
+class HttpProgressListenerTest {
 
 	@Test
-	public void testHttpProgressListener() {
+	void testHttpProgressListener() {
 		HttpProgressListener hpl = new HttpProgressListener() {
 			@Override
 			public void transferred(int len) {

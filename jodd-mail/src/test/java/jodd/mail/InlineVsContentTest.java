@@ -30,36 +30,39 @@ import org.junit.jupiter.api.Test;
 
 import java.io.File;
 
-import static jodd.mail.EmailAttachment.attachment;
-
 @Disabled("Real email sending required")
-public class InlineVsContentTest {
+class InlineVsContentTest {
 
 	public static final String PNG = FileNameUtil.resolveHome("~/prj/oblac/jodd-site/content/jodd.png");
+	private static final String HOST = "mail.joddframework.org";
+	private static final String USERNAME = "t";
+	private static final String PASSWORD = "t";
 
 	@Test
-	public void testSendEmailWithVariousAttachaments() {
-		SmtpServer smtpServer = SmtpSslServer
-			.create("mail.joddframework.org")
-			.authenticateWith("t", "t");
+	void testSendEmailWithVariousAttachaments() {
+		final SmtpServer smtpServer =
+			MailServer.create()
+				.host(HOST)
+				.auth(USERNAME, PASSWORD)
+				.ssl(true)
+				.buildSmtpMailServer();
 
-		SendMailSession session = smtpServer.createSession();
+		final SendMailSession session = smtpServer.createSession();
 		session.open();
 
-		Email email = Email.create()
+		final Email email = Email.create()
 			.from("info@jodd.org")
 			.to("igor.spasic@gmail.com")
 			.subject("test-gmail")
-			.addText("Hello!")
-			.addHtml(
-				"<html><META http-equiv=Content-Type content=\"text/html; charset=utf-8\">"+
+			.textMessage("Hello!")
+			.htmlMessage(
+				"<html><META http-equiv=Content-Type content=\"text/html; charset=utf-8\">" +
 					"<body><h1>Hey!</h1><img src='cid:jodd.png'>" +
 					"<h2>Hay!</h2><img src='cid:jodd2.png'>" +
 					"<h3></h3></body></html>")
-			.embed(attachment().bytes(new File(PNG)).setInline(false))
-			.embed(attachment().bytes(new File(PNG)).setContentId("jodd2.png").setInline(true))
-			.attach(attachment().file(PNG))
-			;
+			.embeddedAttachment(EmailAttachment.with().content(new File(PNG)).inline(false))
+			.embeddedAttachment(EmailAttachment.with().content(new File(PNG)).contentId("jodd2.png").inline(true))
+			.attachment(EmailAttachment.with().content(PNG));
 
 		session.sendMail(email);
 		session.close();

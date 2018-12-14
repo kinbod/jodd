@@ -34,10 +34,10 @@ import java.io.PrintStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class Slf4jLogbackLoggerTest {
+class Slf4jLogbackLoggerTest {
 
 	@Test
-	public void testLogger() {
+	void testLogger() {
 		PrintStream original = System.out;
 
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();

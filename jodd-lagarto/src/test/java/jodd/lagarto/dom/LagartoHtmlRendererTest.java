@@ -33,15 +33,18 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 
-import static jodd.lagarto.dom.LagartoHtmlRendererNodeVisitor.Case.*;
+import static jodd.lagarto.dom.LagartoHtmlRendererNodeVisitor.Case.DEFAULT;
+import static jodd.lagarto.dom.LagartoHtmlRendererNodeVisitor.Case.LOWERCASE;
+import static jodd.lagarto.dom.LagartoHtmlRendererNodeVisitor.Case.RAW;
+import static jodd.lagarto.dom.LagartoHtmlRendererNodeVisitor.Case.UPPERCASE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class LagartoHtmlRendererTest {
+class LagartoHtmlRendererTest {
 
 	protected String testDataRoot;
 
 	@BeforeEach
-	public void setUp() throws Exception {
+	void setUp() throws Exception {
 		if (testDataRoot != null) {
 			return;
 		}
@@ -50,7 +53,7 @@ public class LagartoHtmlRendererTest {
 	}
 
 	@Test
-	public void simpleTest() {
+	void testSimple() {
 		String html = "<html><boDY><div id=\"z\" fooBar=\"aAa\">some Text</div></boDY></html>";
 		LagartoDOMBuilder domBuilder = new LagartoDOMBuilder();
 
@@ -67,7 +70,7 @@ public class LagartoHtmlRendererTest {
 	}
 
 	@Test
-	public void testCases() {
+	void testCases() {
 		String html = "<html><boDY><div id=\"z\" fooBar=\"aAa\">some Text</div></boDY></html>";
 		LagartoDOMBuilder domBuilder = new LagartoDOMBuilder();
 
@@ -250,7 +253,7 @@ public class LagartoHtmlRendererTest {
 	}
 
 	@Test
-	public void testVKSethi() throws IOException {
+	void testVKSethi() throws IOException {
 		String html = FileUtil.readString(new File(testDataRoot, "vksethi.html"));
 		String htmlExpected = FileUtil.readString(new File(testDataRoot, "vksethi-out.html"));
 

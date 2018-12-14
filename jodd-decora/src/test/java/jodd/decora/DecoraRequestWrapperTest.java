@@ -35,18 +35,18 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-public class DecoraRequestWrapperTest {
+class DecoraRequestWrapperTest {
 
 	private HttpServletRequest httpServletRequestMock;
 	private final String TEST_STRING = "TEST";
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		httpServletRequestMock = mock(HttpServletRequest.class);
 	}
 
 	@Test
-	public final void testConstructor() {
+	void testConstructor() {
 		// when
 		DecoraRequestWrapper decoraRequestWrapper = new DecoraRequestWrapper(httpServletRequestMock);
 
@@ -55,7 +55,7 @@ public class DecoraRequestWrapperTest {
 	}
 
 	@Test
-	public final void testGetHeaderString() {
+	void testGetHeaderString() {
 		// setup
 		DecoraRequestWrapper decoraRequestWrapper = new DecoraRequestWrapper(httpServletRequestMock);
 
@@ -67,7 +67,7 @@ public class DecoraRequestWrapperTest {
 	}
 
 	@Test
-	public final void testGetHeaderStringReturnNull() {
+	void testGetHeaderStringReturnNull() {
 		// setup
 		DecoraRequestWrapper decoraRequestWrapper = new DecoraRequestWrapper(httpServletRequestMock);
 		String nullRespondingString = "If-Modified-Since";
@@ -80,7 +80,7 @@ public class DecoraRequestWrapperTest {
 	}
 
 	@Test
-	public final void testGetDateHeaderString() {
+	void testGetDateHeaderString() {
 		// setup
 		DecoraRequestWrapper decoraRequestWrapper = new DecoraRequestWrapper(httpServletRequestMock);
 
@@ -92,7 +92,7 @@ public class DecoraRequestWrapperTest {
 	}
 
 	@Test
-	public final void testGetDateHeaderStringReturnMinusOne() {
+	void testGetDateHeaderStringReturnMinusOne() {
 		// setup
 		DecoraRequestWrapper decoraRequestWrapper = new DecoraRequestWrapper(httpServletRequestMock);
 		String nullRespondingString = "If-Modified-Since";

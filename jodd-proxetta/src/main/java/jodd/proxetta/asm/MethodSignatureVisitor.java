@@ -27,12 +27,17 @@ package jodd.proxetta.asm;
 
 import jodd.asm.AsmUtil;
 import jodd.asm.TraceSignatureVisitor;
-import jodd.asm5.Opcodes;
-import jodd.asm5.signature.SignatureVisitor;
-import jodd.proxetta.*;
+import jodd.asm7.Opcodes;
+import jodd.asm7.signature.SignatureVisitor;
+import jodd.buffer.FastIntBuffer;
+import jodd.proxetta.AnnotationInfo;
+import jodd.proxetta.ClassInfo;
+import jodd.proxetta.GenericsReader;
+import jodd.proxetta.MethodInfo;
+import jodd.proxetta.ProxettaException;
+import jodd.proxetta.TypeInfo;
 import jodd.util.StringPool;
 import jodd.util.StringUtil;
-import jodd.util.collection.IntArrayList;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,8 +57,9 @@ public class MethodSignatureVisitor extends TraceSignatureVisitor implements Met
 	protected final String methodName;
 	protected final String[] exceptionsArray;
 	protected final boolean isStatic;
+	protected final boolean isFinal;
 	protected final ClassInfo targetClassInfo;
-	protected final IntArrayList argumentsOffset;
+	protected final FastIntBuffer argumentsOffset;
 	protected final List<TypeInfoImpl> arguments;
 	protected final int access;
 	protected final String description;
@@ -65,15 +71,26 @@ public class MethodSignatureVisitor extends TraceSignatureVisitor implements Met
 	protected String asmMethodSignature;
 	protected AnnotationInfo[] annotations;
 	protected String declaredClassName;
-	protected Map<String, String> generics;
+	protected final Map<String, String> generics;
+	protected final Map<String, String> declaredTypeGeneric;
 
 
 	// ---------------------------------------------------------------- ctors
 
-	public MethodSignatureVisitor(String methodName, final int access, String classname, String description, String[] exceptions, String signature, ClassInfo targetClassInfo) {
-		super(new StringBuilder());
-		this.isInterface = (access & Opcodes.ACC_INTERFACE) != 0;
+	public MethodSignatureVisitor(
+			final String methodName,
+			final int access,
+			final String classname,
+			final String description,
+			final String[] exceptions,
+			final String signature,
+			final Map<String, String> declaredTypeGenerics,
+			final ClassInfo targetClassInfo) {
+
+		super(new StringBuilder(), (access & Opcodes.ACC_INTERFACE) != 0);
+//		this.isInterface = (access & Opcodes.ACC_INTERFACE) != 0;
 		this.isStatic = (access & Opcodes.ACC_STATIC) != 0;
+		this.isFinal = (access & Opcodes.ACC_FINAL) != 0;
 		this.methodName = methodName;
 		this.access = access;
 		this.classname = classname;
@@ -82,12 +99,13 @@ public class MethodSignatureVisitor extends TraceSignatureVisitor implements Met
 		this.asmMethodSignature = signature;
 		this.generics = new GenericsReader().parseSignatureForGenerics(signature, isInterface);
 		this.exceptionsArray = exceptions;
+		this.declaredTypeGeneric = declaredTypeGenerics;
 
 		this.arguments = new ArrayList<>();
 		this.arguments.add(new TypeInfoImpl('L', null, null, null));
 
-		this.argumentsOffset = new IntArrayList();
-		this.argumentsOffset.add(0);
+		this.argumentsOffset = new FastIntBuffer();
+		this.argumentsOffset.append(0);
 
 		this.annotations = NO_ANNOTATIONS;
 	}
@@ -104,7 +122,7 @@ public class MethodSignatureVisitor extends TraceSignatureVisitor implements Met
 			String retType = decl.substring(ndx);
 
 			StringBuilder methodDeclaration = new StringBuilder(50);
-			methodDeclaration.append(retType).append(' ').append(methodName).append(decl.substring(0, ndx));
+			methodDeclaration.append(retType).append(' ').append(methodName).append(decl, 0, ndx);
 
 			String exceptionsAsString = getExceptionsAsString();
 			if (exceptionsAsString != null) {
@@ -136,12 +154,12 @@ public class MethodSignatureVisitor extends TraceSignatureVisitor implements Met
 	}
 
 	@Override
-	public TypeInfoImpl getArgument(int ndx) {
+	public TypeInfoImpl getArgument(final int ndx) {
 		return arguments.get(ndx);
 	}
 
 	@Override
-	public int getArgumentOffset(int index) {
+	public int getArgumentOffset(final int index) {
 		return argumentsOffset.get(index);
 	}
 
@@ -183,7 +201,7 @@ public class MethodSignatureVisitor extends TraceSignatureVisitor implements Met
 		return declaredClassName;
 	}
 
-	public void setDeclaredClassName(String declaredClassName) {
+	public void setDeclaredClassName(final String declaredClassName) {
 		this.declaredClassName = declaredClassName;
 	}
 
@@ -244,7 +262,7 @@ public class MethodSignatureVisitor extends TraceSignatureVisitor implements Met
 	}
 
 	@Override
-	public void visitClassType(String name) {
+	public void visitClassType(final String name) {
 		if (isTopLevelType()) {
 			// mark type start
 			declarationTypeOffset = declaration.length();
@@ -272,7 +290,7 @@ public class MethodSignatureVisitor extends TraceSignatureVisitor implements Met
 		maybeUseType(type);
 	}
 
-	private void maybeUseType(String typeName) {
+	private void maybeUseType(final String typeName) {
 		if (!isTopLevelType()) {
 			return;
 		}
@@ -324,7 +342,7 @@ public class MethodSignatureVisitor extends TraceSignatureVisitor implements Met
 			arguments.add(typeInfo);
 
 			argumentsCount++;
-			argumentsOffset.add(argumentsWords + 1);
+			argumentsOffset.append(argumentsWords + 1);
 
 			if ((type == 'D') || (type == 'J')) {
 				argumentsWords += 2;
@@ -350,17 +368,34 @@ public class MethodSignatureVisitor extends TraceSignatureVisitor implements Met
 	}
 
 	private String resolveBytecodeName(String typeName) {
-		int ndx = typeName.indexOf('<');
-		if (ndx != -1) {
-			int ndx2 = typeName.indexOf('>', ndx);
-			ndx2++;
+		int ndx = 0;
+		int genericsStartNdx = -1;
+		int bracketCount = 0;
 
-			// it might be a nested generics, so skip all '>'
-			while (ndx2 < typeName.length() && typeName.charAt(ndx2) == '>') {
-				ndx2++;
+		while (ndx < typeName.length()) {
+			final char c = typeName.charAt(ndx);
+
+			if (c == '<') {
+				if (bracketCount == 0) {
+					genericsStartNdx = ndx;
+				}
+				bracketCount++;
+				ndx++;
+				continue;
 			}
 
-			typeName = typeName.substring(0, ndx) + typeName.substring(ndx2);
+			if (c == '>') {
+				bracketCount--;
+				if (bracketCount == 0) {
+					break;
+				}
+			}
+
+			ndx++;
+		}
+
+		if (genericsStartNdx != -1) {
+			typeName = typeName.substring(0, genericsStartNdx) + typeName.substring(ndx + 1);
 		}
 
 		if (isGenericType(typeName)) {
@@ -390,7 +425,7 @@ public class MethodSignatureVisitor extends TraceSignatureVisitor implements Met
 			rawTypeName = generics.get(typeName);
 		}
 		else {
-			rawTypeName = targetClassInfo.getGenerics().getOrDefault(typeName, typeName);
+			rawTypeName = declaredTypeGeneric.getOrDefault(typeName, typeName);
 		}
 
 		if (isArray) {
@@ -400,11 +435,11 @@ public class MethodSignatureVisitor extends TraceSignatureVisitor implements Met
 		return rawTypeName;
 	}
 
-	private boolean isGenericType(String typeName) {
+	private boolean isGenericType(final String typeName) {
 		if (generics.containsKey(typeName)) {
 			return true;
 		}
-		return targetClassInfo.getGenerics().containsKey(typeName);
+		return declaredTypeGeneric.containsKey(typeName);
 	}
 
 	// ---------------------------------------------------------------- toString

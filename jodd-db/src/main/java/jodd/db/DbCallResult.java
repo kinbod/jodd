@@ -24,23 +24,24 @@
 // POSSIBILITY OF SUCH DAMAGE.
 package jodd.db;
 
-import jodd.util.collection.IntArrayList;
-
 import java.sql.CallableStatement;
 import java.sql.SQLException;
 
+/**
+ * Result of a CALL statement.
+ */
 public class DbCallResult {
 	private final DbQueryParser query;
 	private final CallableStatement statement;
 
-	DbCallResult(DbQueryParser parser, CallableStatement callableStatement) {
+	DbCallResult(final DbQueryParser parser, final CallableStatement callableStatement) {
 		this.query = parser;
 		this.statement = callableStatement;
 	}
 
 	// ---------------------------------------------------------------- integer
 
-	public int getInteger(int index) {
+	public int getInteger(final int index) {
 		try {
 			return statement.getInt(index);
 		} catch (SQLException sex) {
@@ -48,11 +49,11 @@ public class DbCallResult {
 		}
 	}
 
-	public int getInteger(String param) {
-		IntArrayList positions = query.getNamedParameterIndices(param);
+	public int getInteger(final String param) {
+		final int[] positions = query.getNamedParameterIndices(param);
 		try {
-			if (positions.size() == 1) {
-				return statement.getInt(positions.get(0));
+			if (positions.length == 1) {
+				return statement.getInt(positions[0]);
 			}
 			throw newGetParamError(param);
 		} catch (SQLException sex) {
@@ -60,12 +61,12 @@ public class DbCallResult {
 		}
 	}
 
-	public int[] getAllInteger(String param) {
-		IntArrayList positions = query.getNamedParameterIndices(param);
-		int[] result = new int[positions.size()];
+	public int[] getAllInteger(final String param) {
+		final int[] positions = query.getNamedParameterIndices(param);
+		final int[] result = new int[positions.length];
 		try {
-			for (int i = 0; i < positions.size(); i++) {
-				result[i] = statement.getInt(positions.get(i));
+			for (int i = 0; i < positions.length; i++) {
+				result[i] = statement.getInt(positions[i]);
 			}
 			return result;
 		} catch (SQLException sex) {
@@ -75,7 +76,7 @@ public class DbCallResult {
 
 	// ---------------------------------------------------------------- boolean
 
-	public boolean getBoolean(int index) {
+	public boolean getBoolean(final int index) {
 		try {
 			return statement.getBoolean(index);
 		} catch (SQLException sex) {
@@ -83,11 +84,11 @@ public class DbCallResult {
 		}
 	}
 
-	public boolean getBoolean(String param) {
-		IntArrayList positions = query.getNamedParameterIndices(param);
+	public boolean getBoolean(final String param) {
+		final int[] positions = query.getNamedParameterIndices(param);
 		try {
-			if (positions.size() == 1) {
-				return statement.getBoolean(positions.get(0));
+			if (positions.length == 1) {
+				return statement.getBoolean(positions[0]);
 			}
 			throw newGetParamError(param);
 		} catch (SQLException sex) {
@@ -95,12 +96,12 @@ public class DbCallResult {
 		}
 	}
 
-	public boolean[] getAllBoolean(String param) {
-		IntArrayList positions = query.getNamedParameterIndices(param);
-		boolean[] result = new boolean[positions.size()];
+	public boolean[] getAllBoolean(final String param) {
+		final int[] positions = query.getNamedParameterIndices(param);
+		final boolean[] result = new boolean[positions.length];
 		try {
-			for (int i = 0; i < positions.size(); i++) {
-				result[i] = statement.getBoolean(positions.get(i));
+			for (int i = 0; i < positions.length; i++) {
+				result[i] = statement.getBoolean(positions[i]);
 			}
 			return result;
 		} catch (SQLException sex) {
@@ -110,7 +111,7 @@ public class DbCallResult {
 
 	// ---------------------------------------------------------------- byte
 
-	public byte getByte(int index) {
+	public byte getByte(final int index) {
 		try {
 			return statement.getByte(index);
 		} catch (SQLException sex) {
@@ -118,11 +119,11 @@ public class DbCallResult {
 		}
 	}
 
-	public byte getByte(String param) {
-		IntArrayList positions = query.getNamedParameterIndices(param);
+	public byte getByte(final String param) {
+		final int[] positions = query.getNamedParameterIndices(param);
 		try {
-			if (positions.size() == 1) {
-				return statement.getByte(positions.get(0));
+			if (positions.length == 1) {
+				return statement.getByte(positions[0]);
 			}
 			throw newGetParamError(param);
 		} catch (SQLException sex) {
@@ -130,12 +131,12 @@ public class DbCallResult {
 		}
 	}
 
-	public byte[] getAllByte(String param) {
-		IntArrayList positions = query.getNamedParameterIndices(param);
-		byte[] result = new byte[positions.size()];
+	public byte[] getAllByte(final String param) {
+		final int[] positions = query.getNamedParameterIndices(param);
+		final byte[] result = new byte[positions.length];
 		try {
-			for (int i = 0; i < positions.size(); i++) {
-				result[i] = statement.getByte(positions.get(i));
+			for (int i = 0; i < positions.length; i++) {
+				result[i] = statement.getByte(positions[i]);
 			}
 			return result;
 		} catch (SQLException sex) {
@@ -145,7 +146,7 @@ public class DbCallResult {
 
 	// ---------------------------------------------------------------- doublw
 
-	public double getDouble(int index) {
+	public double getDouble(final int index) {
 		try {
 			return statement.getDouble(index);
 		} catch (SQLException sex) {
@@ -153,11 +154,11 @@ public class DbCallResult {
 		}
 	}
 
-	public double getDouble(String param) {
-		IntArrayList positions = query.getNamedParameterIndices(param);
+	public double getDouble(final String param) {
+		final int[] positions = query.getNamedParameterIndices(param);
 		try {
-			if (positions.size() == 1) {
-				return statement.getDouble(positions.get(0));
+			if (positions.length == 1) {
+				return statement.getDouble(positions[0]);
 			}
 			throw newGetParamError(param);
 		} catch (SQLException sex) {
@@ -165,12 +166,12 @@ public class DbCallResult {
 		}
 	}
 
-	public double[] getAllDouble(String param) {
-		IntArrayList positions = query.getNamedParameterIndices(param);
-		double[] result = new double[positions.size()];
+	public double[] getAllDouble(final String param) {
+		final int[] positions = query.getNamedParameterIndices(param);
+		final double[] result = new double[positions.length];
 		try {
-			for (int i = 0; i < positions.size(); i++) {
-				result[i] = statement.getDouble(positions.get(i));
+			for (int i = 0; i < positions.length; i++) {
+				result[i] = statement.getDouble(positions[i]);
 			}
 			return result;
 		} catch (SQLException sex) {
@@ -180,7 +181,7 @@ public class DbCallResult {
 
 	// ---------------------------------------------------------------- float
 
-	public float getFloat(int index) {
+	public float getFloat(final int index) {
 		try {
 			return statement.getFloat(index);
 		} catch (SQLException sex) {
@@ -188,11 +189,11 @@ public class DbCallResult {
 		}
 	}
 
-	public float getFloat(String param) {
-		IntArrayList positions = query.getNamedParameterIndices(param);
+	public float getFloat(final String param) {
+		final int[] positions = query.getNamedParameterIndices(param);
 		try {
-			if (positions.size() == 1) {
-				return statement.getFloat(positions.get(0));
+			if (positions.length == 1) {
+				return statement.getFloat(positions[0]);
 			}
 			throw newGetParamError(param);
 		} catch (SQLException sex) {
@@ -200,12 +201,12 @@ public class DbCallResult {
 		}
 	}
 
-	public float[] getAllFloat(String param) {
-		IntArrayList positions = query.getNamedParameterIndices(param);
-		float[] result = new float[positions.size()];
+	public float[] getAllFloat(final String param) {
+		final int[] positions = query.getNamedParameterIndices(param);
+		final float[] result = new float[positions.length];
 		try {
-			for (int i = 0; i < positions.size(); i++) {
-				result[i] = statement.getFloat(positions.get(i));
+			for (int i = 0; i < positions.length; i++) {
+				result[i] = statement.getFloat(positions[i]);
 			}
 			return result;
 		} catch (SQLException sex) {
@@ -216,7 +217,7 @@ public class DbCallResult {
 
 	// ---------------------------------------------------------------- string
 
-	public String getString(int index) {
+	public String getString(final int index) {
 		try {
 			return statement.getString(index);
 		} catch (SQLException sex) {
@@ -224,11 +225,11 @@ public class DbCallResult {
 		}
 	}
 
-	public String getString(String param) {
-		IntArrayList positions = query.getNamedParameterIndices(param);
+	public String getString(final String param) {
+		final int[] positions = query.getNamedParameterIndices(param);
 		try {
-			if (positions.size() == 1) {
-				return statement.getString(positions.get(0));
+			if (positions.length == 1) {
+				return statement.getString(positions[0]);
 			}
 			throw newGetParamError(param);
 		} catch (SQLException sex) {
@@ -236,12 +237,12 @@ public class DbCallResult {
 		}
 	}
 
-	public String[] getAllString(String param) {
-		IntArrayList positions = query.getNamedParameterIndices(param);
-		String[] result = new String[positions.size()];
+	public String[] getAllString(final String param) {
+		final int[] positions = query.getNamedParameterIndices(param);
+		final String[] result = new String[positions.length];
 		try {
-			for (int i = 0; i < positions.size(); i++) {
-				result[i] = statement.getString(positions.get(i));
+			for (int i = 0; i < positions.length; i++) {
+				result[i] = statement.getString(positions[i]);
 			}
 			return result;
 		} catch (SQLException sex) {
@@ -249,16 +250,50 @@ public class DbCallResult {
 		}
 	}
 
+	// ---------------------------------------------------------------- long
+
+	public long getLong(final int index) {
+		try {
+			return statement.getLong(index);
+		} catch (SQLException sex) {
+			throw newGetParamError(index, sex);
+		}
+	}
+
+	public long getLong(final String param) {
+		final int[] positions = query.getNamedParameterIndices(param);
+		try {
+			if (positions.length == 1) {
+				return statement.getLong(positions[0]);
+			}
+			throw newGetParamError(param);
+		} catch (SQLException sex) {
+			throw newGetParamError(param, sex);
+		}
+	}
+
+	public long[] getAllLong(final String param) {
+		final int[] positions = query.getNamedParameterIndices(param);
+		final long[] result = new long[positions.length];
+		try {
+			for (int i = 0; i < positions.length; i++) {
+				result[i] = statement.getLong(positions[i]);
+			}
+			return result;
+		} catch (SQLException sex) {
+			throw newGetParamError(param, sex);
+		}
+	}
 
 	// ---------------------------------------------------------------- exception
 
-	private DbSqlException newGetParamError(int index, Exception ex) {
+	private DbSqlException newGetParamError(final int index, final Exception ex) {
 		return new DbSqlException("Invalid SQL parameter with index: " + index, ex);
 	}
-	private DbSqlException newGetParamError(String param, Exception ex) {
+	private DbSqlException newGetParamError(final String param, final Exception ex) {
 		return new DbSqlException("Invalid SQL parameter with name: " + param, ex);
 	}
-	private DbSqlException newGetParamError(String param) {
+	private DbSqlException newGetParamError(final String param) {
 		return new DbSqlException("Invalid number of parameter with name: " + param);
 	}
 

@@ -25,7 +25,7 @@
 
 package jodd.proxetta;
 
-import jodd.asm5.ClassReader;
+import jodd.asm7.ClassReader;
 import jodd.proxetta.asm.MethodSignatureVisitor;
 import jodd.proxetta.fixtures.TargetClassInfoReaderFixture;
 import jodd.proxetta.fixtures.data.FooAnn;
@@ -38,11 +38,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static jodd.asm.AsmUtil.*;
+import static jodd.asm.AsmUtil.SIGNATURE_JAVA_LANG_DOUBLE;
+import static jodd.asm.AsmUtil.SIGNATURE_JAVA_LANG_INTEGER;
+import static jodd.asm.AsmUtil.SIGNATURE_JAVA_LANG_LONG;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-public class MethodSignatureVisitorTest {
+class MethodSignatureVisitorTest {
 
 	private static final String CLASS_NAME = MethodSignatureVisitorTest.class.getName();
 	private static final String CLASS_SIGNATURE = CLASS_NAME.replace('.', '/');
@@ -55,7 +57,7 @@ public class MethodSignatureVisitorTest {
 	}
 
 	@Test
-	public void testMethodSignature1() throws IOException {
+	void testMethodSignature1() throws IOException {
 		MethodInfo mi = getMethodSignatureForSingleMethod(M1.class);
 
 		assertEquals(0, mi.getArgumentsCount());
@@ -82,7 +84,7 @@ public class MethodSignatureVisitorTest {
 	}
 
 	@Test
-	public void testMethodSignature2() throws IOException {
+	void testMethodSignature2() throws IOException {
 		MethodInfo mi = getMethodSignatureForSingleMethod(M2.class);
 
 		assertEquals(2, mi.getArgumentsCount());
@@ -118,7 +120,7 @@ public class MethodSignatureVisitorTest {
 	}
 
 	@Test
-	public void testMethodSignature3() throws IOException {
+	void testMethodSignature3() throws IOException {
 		MethodInfo msv = getMethodSignatureForSingleMethod(M3.class);
 
 		assertEquals(2, msv.getArgumentsCount());
@@ -154,7 +156,7 @@ public class MethodSignatureVisitorTest {
 	}
 
 	@Test
-	public void testMethodSignature4() throws IOException {
+	void testMethodSignature4() throws IOException {
 		MethodInfo msv = getMethodSignatureForSingleMethod(M4.class);
 
 		assertEquals(2, msv.getArgumentsCount());
@@ -190,7 +192,7 @@ public class MethodSignatureVisitorTest {
 	}
 
 	@Test
-	public void testMethodSignature5() throws IOException {
+	void testMethodSignature5() throws IOException {
 		MethodInfo msv = getMethodSignatureForSingleMethod(M5.class);
 
 		assertEquals(2, msv.getArgumentsCount());
@@ -225,7 +227,7 @@ public class MethodSignatureVisitorTest {
 	}
 
 	@Test
-	public void testMethodSignature6() throws IOException {
+	void testMethodSignature6() throws IOException {
 		MethodInfo msv = getMethodSignatureForSingleMethod(M6.class);
 
 		assertEquals(2, msv.getArgumentsCount());
@@ -261,7 +263,7 @@ public class MethodSignatureVisitorTest {
 	}
 
 	@Test
-	public void testMethodSignature7() throws IOException {
+	void testMethodSignature7() throws IOException {
 		MethodInfo msv = getMethodSignatureForSingleMethod(M7.class);
 
 		assertEquals(2, msv.getArgumentsCount());
@@ -297,7 +299,7 @@ public class MethodSignatureVisitorTest {
 	}
 
 	@Test
-	public void testMethodSignature8() throws IOException {
+	void testMethodSignature8() throws IOException {
 		MethodInfo msv = getMethodSignatureForSingleMethod(M8.class);
 
 		assertEquals(0, msv.getArgumentsCount());
@@ -319,7 +321,7 @@ public class MethodSignatureVisitorTest {
 	}
 
 	@Test
-	public void testMethodSignature9() throws IOException {
+	void testMethodSignature9() throws IOException {
 		MethodInfo msv = getMethodSignatureForSingleMethod(M9.class);
 
 		assertEquals(1, msv.getArgumentsCount());
@@ -346,7 +348,7 @@ public class MethodSignatureVisitorTest {
 	}
 
 	@Test
-	public void testMethodSignature10() throws IOException {
+	void testMethodSignature10() throws IOException {
 		MethodInfo msv = getMethodSignatureForSingleMethod(M10.class);
 
 		assertEquals(2, msv.getArgumentsCount());
@@ -367,7 +369,7 @@ public class MethodSignatureVisitorTest {
 	}
 
 	@Test
-	public void testMethodSignature11() throws IOException {
+	void testMethodSignature11() throws IOException {
 		MethodInfo msv = getMethodSignatureForSingleMethod(M11.class);
 
 		assertEquals(1, msv.getArgumentsCount());
@@ -388,6 +390,40 @@ public class MethodSignatureVisitorTest {
 		assertEquals("java.util.List<java.util.Map<java.lang.String, java.lang.Object>>", msv.getReturnType().getType());
 		assertEquals("Ljava/util/List;", msv.getReturnType().getName());
 		assertEquals("Ljava/util/List;", msv.getReturnType().getRawName());
+	}
+
+	// ---------------------------------------------------------------- 12
+
+	public static class Tupel<A, B> {
+		A a; B b;
+	}
+
+	public static class M12 {
+		public Map<Map<Set<Integer>, Long>, Byte> macka(Tupel<List<Integer>, Integer> in1) {return null;}
+	}
+
+	@Test
+	void testMethodSignature12() throws IOException {
+		MethodInfo msv = getMethodSignatureForSingleMethod(M12.class);
+
+		assertEquals(1, msv.getArgumentsCount());
+		assertEquals(CLASS_NAME + "$Tupel<java.util.List<java.lang.Integer>, java.lang.Integer>", msv.getArgument(1).getType());
+		assertEquals(L_CLASS_SIGNATURE + "$Tupel;", msv.getArgument(1).getName());
+		assertEquals(L_CLASS_SIGNATURE + "$Tupel;", msv.getArgument(1).getRawName());
+		assertEquals('L', msv.getArgument(1).getOpcode());
+
+		assertEquals(CLASS_SIGNATURE + "$M12", msv.getClassname());
+		assertEquals("macka#(" + L_CLASS_SIGNATURE + "$Tupel;)Ljava/util/Map;", msv.getCleanSignature());
+		assertEquals("(" + CLASS_NAME + "$Tupel<java.util.List<java.lang.Integer>, java.lang.Integer>)java.util.Map<java.util.Map<java.util.Set<java.lang.Integer>, java.lang.Long>, java.lang.Byte>", msv.getDeclaration());
+		assertEquals(CLASS_SIGNATURE + "$M12", msv.getDeclaredClassName());
+		assertEquals("(" + L_CLASS_SIGNATURE + "$Tupel;)Ljava/util/Map;", msv.getDescription());
+		assertNull(msv.getExceptions());
+		assertEquals("macka", msv.getMethodName());
+
+		assertEquals('L', msv.getReturnType().getOpcode());
+		assertEquals("java.util.Map<java.util.Map<java.util.Set<java.lang.Integer>, java.lang.Long>, java.lang.Byte>", msv.getReturnType().getType());
+		assertEquals("Ljava/util/Map;", msv.getReturnType().getName());
+		assertEquals("Ljava/util/Map;", msv.getReturnType().getRawName());
 	}
 
 	// ---------------------------------------------------------------- util

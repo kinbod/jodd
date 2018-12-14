@@ -25,9 +25,9 @@
 
 package jodd.paramo;
 
+import jodd.asm7.ClassReader;
 import jodd.io.StreamUtil;
 import jodd.util.ClassLoaderUtil;
-import jodd.asm5.ClassReader;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -48,7 +48,7 @@ public class Paramo {
 	 * No caching is involved in this process, i.e. class bytecode
 	 * is examined every time this method is called.
 	 */
-	public static MethodParameter[] resolveParameters(AccessibleObject methodOrCtor) {
+	public static MethodParameter[] resolveParameters(final AccessibleObject methodOrCtor) {
 		Class[] paramTypes;
 		Class declaringClass;
 		String name;

@@ -30,10 +30,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ShortConverterTest {
+class ShortConverterTest {
 
 	@Test
-	public void testConversion() {
+	void testConversion() {
 		ShortConverter shortConverter = new ShortConverter();
 
 		assertNull(shortConverter.convert(null));

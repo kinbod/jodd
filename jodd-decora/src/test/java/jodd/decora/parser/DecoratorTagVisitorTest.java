@@ -31,17 +31,17 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class DecoratorTagVisitorTest {
+class DecoratorTagVisitorTest {
 
 	private DecoratorTagVisitor decoraTagVisitor;
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		decoraTagVisitor = new DecoratorTagVisitor();
 	}
 
 	@Test
-	public final void testCheckNestedDecoraTagsDecoraTagNameNotNull() throws Exception {
+	void testCheckNestedDecoraTagsDecoraTagNameNotNull() throws Exception {
 		// setup
 		decoraTagVisitor.decoraTagName = "TEST";
 
@@ -53,7 +53,7 @@ public class DecoratorTagVisitorTest {
 	}
 
 	@Test
-	public final void testCheckNestedDecoraTagsDecoraTagNameNull() throws Exception {
+	void testCheckNestedDecoraTagsDecoraTagNameNull() throws Exception {
 		// setup
 		decoraTagVisitor.decoraTagName = null;
 

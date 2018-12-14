@@ -70,20 +70,20 @@ public class RFC2822AddressParser {
 	 * Changes the behavior of the domain parsing. If {@code true}, the parser will
 	 * allow 2822 domains, which include single-level domains (e.g. bob@localhost) as well
 	 * as domain literals, e.g.:
-	 *
+	 * <p>
 	 * <ul>
 	 * <li><code>someone@[192.168.1.100]</code> or</li>
 	 * <li><code>john.doe@[23:33:A2:22:16:1F]</code> or</li>
 	 * <li><code>me@[my computer]</code></li>
 	 * </ul>
-	 *
+	 * <p>
 	 * The RFC says these are valid email addresses, but many don't like
 	 * allowing them. If you don't want to allow them, and only want to allow valid domain names
 	 * (<a href="http://www.ietf.org/rfc/rfc1035.txt">RFC 1035</a>, x.y.z.com, etc),
 	 * and specifically only those with at least two levels ("example.com"), then
 	 * set this flag to {@code false}.
 	 */
-	public RFC2822AddressParser allowDomainLiterals(boolean allow) {
+	public RFC2822AddressParser allowDomainLiterals(final boolean allow) {
 		ALLOW_DOMAIN_LITERALS = allow;
 		resetPatterns();
 		return this;
@@ -92,17 +92,17 @@ public class RFC2822AddressParser {
 	/**
 	 * Defines if quoted identifiers are allowed.
 	 * Using quotes and angle brackets around the raw address may be allowed, e.g.:
-	 *
+	 * <p>
 	 * <ul>
 	 * <li><code>"John Smith" &lt;john.smith@somewhere.com&gt;</code></li>
 	 * </ul>
-	 * 
+	 * <p>
 	 * The RFC says this is a valid mailbox. If you don't want to
 	 * allow this, because for example, you only want users to enter in
 	 * a raw address (<code>john.smith@somewhere.com</code> - no quotes or angle
-	 * brackets), then set the flag <code>false</code>.
+	 * brackets), then set the flag {@code false}.
 	 */
-	public RFC2822AddressParser allowQuotedIdentifiers(boolean allow) {
+	public RFC2822AddressParser allowQuotedIdentifiers(final boolean allow) {
 		ALLOW_QUOTED_IDENTIFIERS = allow;
 		resetPatterns();
 		return this;
@@ -125,7 +125,7 @@ public class RFC2822AddressParser {
 	 * If this boolean is set to false, the parser will act per 2822 and will require
 	 * the quotes; if set to true, it will allow the use of &quot;.&quot; without quotes.
 	 */
-	public RFC2822AddressParser allowDotInAtext(boolean allow) {
+	public RFC2822AddressParser allowDotInAtext(final boolean allow) {
 		ALLOW_DOT_IN_ATEXT = allow;
 		resetPatterns();
 		return this;
@@ -136,7 +136,7 @@ public class RFC2822AddressParser {
 	 * <ul>
 	 * <li>&lt;bob@example.com&gt; (Bob Smith)</li>
 	 * </ul>
-	 *
+	 * <p>
 	 * In this case, &quot;Bob Smith&quot; is not technically the personal name, just a
 	 * comment. If this is set to true, the methods will convert this into:
 	 * <ul>
@@ -145,13 +145,13 @@ public class RFC2822AddressParser {
 	 * <p>
 	 * This also happens somewhat more often and appropriately with
 	 * <code>mailer-daemon@blah.com (Mail Delivery System)</code>.
-	 *
+	 * <p>
 	 * <p>
 	 * If a personal name appears to the left and CFWS appears to the right of an address,
 	 * the methods will favor the personal name to the left. If the methods need to use the
 	 * CFWS following the address, they will take the first comment token they find.
 	 */
-	public RFC2822AddressParser extractCfwsPersonalName(boolean extract) {
+	public RFC2822AddressParser extractCfwsPersonalName(final boolean extract) {
 		EXTRACT_CFWS_PERSONAL_NAMES = extract;
 		resetPatterns();
 		return this;
@@ -161,9 +161,9 @@ public class RFC2822AddressParser {
 	 * Allows &quot;[&quot; or &quot;]&quot; to appear in atext.
 	 * The address:
 	 * <ul><li><code>[Kayaks] &lt;kayaks@kayaks.org&gt;</code></li></ul>
-	 *
+	 * <p>
 	 * ...is not valid. It should be:
-	 *
+	 * <p>
 	 * <ul><li><code>&quot;[Kayaks]&quot; &lt;kayaks@kayaks.org&gt;</code></li></ul>
 	 * <p>
 	 * If this boolean is set to false, the parser will act per 2822 and will require
@@ -172,7 +172,7 @@ public class RFC2822AddressParser {
 	 * Use at your own risk. There may be some issue with enabling this feature in conjunction
 	 * with {@link #allowDomainLiterals(boolean)}.
 	 */
-	public RFC2822AddressParser allowSquareBracketsInAtext(boolean allow) {
+	public RFC2822AddressParser allowSquareBracketsInAtext(final boolean allow) {
 		ALLOW_SQUARE_BRACKETS_IN_ATEXT = allow;
 		resetPatterns();
 		return this;
@@ -184,7 +184,7 @@ public class RFC2822AddressParser {
 	 * The default (2822) behavior is to allow this, i.e. boolean true.
 	 * You can disallow it, but better to leave it true.
 	 */
-	public RFC2822AddressParser allowParentheseInLocalpart(boolean allow) {
+	public RFC2822AddressParser allowParentheseInLocalpart(final boolean allow) {
 		ALLOW_PARENS_IN_LOCALPART = allow;
 		resetPatterns();
 		return this;
@@ -205,13 +205,13 @@ public class RFC2822AddressParser {
 		private final String returnPathAddress;
 
 		private ParsedAddress(
-				boolean isValid,
-				String personalName,
-				String localPart,
-				String domain,
-				InternetAddress internetAddress,
-				boolean validReturnPath,
-				String returnPathAddress) {
+			final boolean isValid,
+			final String personalName,
+			final String localPart,
+			final String domain,
+			final InternetAddress internetAddress,
+			final boolean validReturnPath,
+			final String returnPathAddress) {
 
 			this.isValid = isValid;
 			this.personalName = personalName;
@@ -223,7 +223,7 @@ public class RFC2822AddressParser {
 		}
 
 		/**
-		 * Returns <code>true</code> if email is valid.
+		 * Returns {@code true} if email is valid.
 		 */
 		public boolean isValid() {
 			return isValid;
@@ -262,7 +262,7 @@ public class RFC2822AddressParser {
 		}
 
 		/**
-		 * Returns <code>true</code> if the email represents a valid return path.
+		 * Returns {@code true} if the email represents a valid return path.
 		 */
 		public boolean isValidReturnPath() {
 			return validReturnPath;
@@ -280,20 +280,19 @@ public class RFC2822AddressParser {
 	}
 
 	/**
-	 * Parses email address. Returns {@code null} if parsing fails for some reason.
-	 * Returns {@link ParsedAddress parsed address}, that might be valid or note.
+	 * Parses email address. Returns {@link ParsedAddress parsed address}, that might be valid or not.
 	 */
 	public ParsedAddress parse(String email) {
 		email = email.trim();
 
 		// match all
 
-		Matcher mailboxMatcher = MAILBOX_PATTERN().matcher(email);
-		boolean	mailboxMatcherMatches = mailboxMatcher.matches();
-		String[] mailboxMatcherParts = mailboxMatcherMatches ? _calcMatcherParts(mailboxMatcher) : null;
+		final Matcher mailboxMatcher = MAILBOX_PATTERN().matcher(email);
+		final boolean mailboxMatcherMatches = mailboxMatcher.matches();
+		final String[] mailboxMatcherParts = mailboxMatcherMatches ? _calcMatcherParts(mailboxMatcher) : null;
 
-		Matcher returnPathMatcher = RETURN_PATH_PATTERN().matcher(email);
-		boolean returnPathMatches = returnPathMatcher.matches();
+		final Matcher returnPathMatcher = RETURN_PATH_PATTERN().matcher(email);
+		final boolean returnPathMatches = returnPathMatcher.matches();
 
 		// extract
 
@@ -313,8 +312,7 @@ public class RFC2822AddressParser {
 		if (returnPathMatches) {
 			if (internetAddress != null) {
 				returnPathAddress = internetAddress.getAddress();
-			}
-			else {
+			} else {
 				returnPathAddress = StringPool.EMPTY;
 			}
 		}
@@ -325,10 +323,10 @@ public class RFC2822AddressParser {
 	/**
 	 * Convenient shortcut of {@link #parse(String)} that returns {@code InternetAddress} or {@code null}.
 	 */
-	public InternetAddress parseToInternetAddress(String email) {
-		ParsedAddress parsedAddress = parse(email);
+	public InternetAddress parseToInternetAddress(final String email) {
+		final ParsedAddress parsedAddress = parse(email);
 
-		if (parsedAddress == null) {
+		if (!parsedAddress.isValid()) {
 			return null;
 		}
 
@@ -338,10 +336,10 @@ public class RFC2822AddressParser {
 	/**
 	 * Convenient shortcut of {@link #parse(String)} that returns {@link EmailAddress} or {@code null}.
 	 */
-	public EmailAddress parseToEmailAddress(String email) {
-		ParsedAddress parsedAddress = parse(email);
+	public EmailAddress parseToEmailAddress(final String email) {
+		final ParsedAddress parsedAddress = parse(email);
 
-		if (parsedAddress == null) {
+		if (!parsedAddress.isValid()) {
 			return null;
 		}
 
@@ -353,9 +351,9 @@ public class RFC2822AddressParser {
 	private Pattern _MAILBOX_PATTERN;
 	private Pattern _RETURN_PATH_PATTERN;
 
-	private Pattern _ADDR_SPEC_PATTERN;				// internal
-	private Pattern _COMMENT_PATTERN;				// internal
-	private Pattern _QUOTED_STRING_WO_CFWS_PATTERN;	// internal
+	private Pattern _ADDR_SPEC_PATTERN;        // internal
+	private Pattern _COMMENT_PATTERN;        // internal
+	private Pattern _QUOTED_STRING_WO_CFWS_PATTERN;  // internal
 
 	private Pattern MAILBOX_PATTERN() {
 		if (_MAILBOX_PATTERN == null) {
@@ -363,6 +361,7 @@ public class RFC2822AddressParser {
 		}
 		return _MAILBOX_PATTERN;
 	}
+
 	private Pattern RETURN_PATH_PATTERN() {
 		if (_RETURN_PATH_PATTERN == null) {
 			buildPatterns();
@@ -380,7 +379,7 @@ public class RFC2822AddressParser {
 
 	/**
 	 * Builds all regexp patterns.
- 	 */
+	 */
 	private void buildPatterns() {
 
 		// http://tools.ietf.org/html/rfc2822
@@ -502,9 +501,9 @@ public class RFC2822AddressParser {
 
 	// ---------------------------------------------------------------- utilities
 
-	private InternetAddress pullFromGroups(Matcher m) {
+	private InternetAddress pullFromGroups(final Matcher m) {
 		InternetAddress currentInternetAddress;
-		String[] parts = _calcMatcherParts(m);
+		final String[] parts = _calcMatcherParts(m);
 
 		if (parts[1] == null || parts[2] == null) {
 			return null;
@@ -524,20 +523,19 @@ public class RFC2822AddressParser {
 			currentInternetAddress = new InternetAddress();
 			currentInternetAddress.setPersonal(parts[0]);
 			currentInternetAddress.setAddress(parts[1] + "@" + parts[2]);
-		}
-		catch (UnsupportedEncodingException uee) {
+		} catch (final UnsupportedEncodingException uee) {
 			currentInternetAddress = null;
 		}
 
 		return currentInternetAddress;
 	}
 
-	private String[] _calcMatcherParts(Matcher m) {
+	private String[] _calcMatcherParts(final Matcher m) {
 		String currentLocalpart = null;
 		String currentDomainpart = null;
-		String localPartDa;
+		final String localPartDa;
 		String localPartQs = null;
-		String domainPartDa;
+		final String domainPartDa;
 		String domainPartDl = null;
 		String personalString = null;
 
@@ -568,8 +566,7 @@ public class RFC2822AddressParser {
 						personalString = m.group(9);
 						personalString = removeAnyBounding('(', ')', getFirstComment(personalString));
 					}
-				}
-				else if (m.group(10) != null) {
+				} else if (m.group(10) != null) {
 					// addr-spec form
 
 					localPartDa = m.group(12);
@@ -591,8 +588,7 @@ public class RFC2822AddressParser {
 						personalString = removeAnyBounding('(', ')', getFirstComment(personalString));
 					}
 				}
-			}
-			else {
+			} else {
 				// yes quoted identifiers, no domain literals
 
 				if (m.group(1) != null) {
@@ -612,8 +608,7 @@ public class RFC2822AddressParser {
 						personalString = m.group(8);
 						personalString = removeAnyBounding('(', ')', getFirstComment(personalString));
 					}
-				}
-				else if (m.group(9) != null) {
+				} else if (m.group(9) != null) {
 					// addr-spec form
 
 					localPartDa = m.group(11);
@@ -631,8 +626,7 @@ public class RFC2822AddressParser {
 					}
 				}
 			}
-		}
-		else {
+		} else {
 			// no quoted identifiers, yes|no domain literals
 
 			localPartDa = m.group(3);
@@ -670,13 +664,13 @@ public class RFC2822AddressParser {
 
 		// remove any unnecessary bounding quotes from the localpart:
 
-		String testAddr = removeAnyBounding('"', '"', currentLocalpart) + "@" + currentDomainpart;
+		final String testAddr = removeAnyBounding('"', '"', currentLocalpart) + "@" + currentDomainpart;
 
 		if (_ADDR_SPEC_PATTERN.matcher(testAddr).matches()) {
 			currentLocalpart = removeAnyBounding('"', '"', currentLocalpart);
 		}
 
-		return (new String[] {personalString, currentLocalpart, currentDomainpart});
+		return (new String[]{personalString, currentLocalpart, currentDomainpart});
 	}
 
 	/**
@@ -688,18 +682,18 @@ public class RFC2822AddressParser {
 	 * find the CFWS personal name (see boolean option) then such a nested comment would
 	 * probably not be the one you were looking for?
 	 */
-	private String getFirstComment(String text) {
+	private String getFirstComment(final String text) {
 		if (text == null) {
 			return null; // important
 		}
 
-		Matcher m = _COMMENT_PATTERN.matcher(text);
+		final Matcher m = _COMMENT_PATTERN.matcher(text);
 
 		if (!m.find()) {
 			return null;
 		}
 
-		return m.group().trim();		// must trim
+		return m.group().trim();    // must trim
 	}
 
 	private String cleanupPersonalString(String text) {
@@ -708,7 +702,7 @@ public class RFC2822AddressParser {
 		}
 		text = text.trim();
 
-		Matcher m = _QUOTED_STRING_WO_CFWS_PATTERN.matcher(text);
+		final Matcher m = _QUOTED_STRING_WO_CFWS_PATTERN.matcher(text);
 
 		if (!m.matches()) {
 			return text;
@@ -726,7 +720,7 @@ public class RFC2822AddressParser {
 	 * If the string starts and ends with start and end char, remove them,
 	 * otherwise return the string as it was passed in.
 	 */
-	private static String removeAnyBounding(char s, char e, String str) {
+	private static String removeAnyBounding(final char s, final char e, final String str) {
 		if (str == null || str.length() < 2) {
 			return str;
 		}

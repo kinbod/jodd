@@ -25,8 +25,19 @@
 package jodd.db;
 
 import jodd.db.connection.ConnectionProvider;
-import jodd.db.oom.DbOomManager;
-import jodd.db.servers.*;
+import jodd.db.oom.DbOomConfig;
+import jodd.db.servers.Db2DbServer;
+import jodd.db.servers.DbServer;
+import jodd.db.servers.DerbyDbServer;
+import jodd.db.servers.GenericDbServer;
+import jodd.db.servers.HsqlDbServer;
+import jodd.db.servers.InformixDbServer;
+import jodd.db.servers.MySqlDbServer;
+import jodd.db.servers.OracleDbServer;
+import jodd.db.servers.PostgreSqlDbServer;
+import jodd.db.servers.SQLiteDbServer;
+import jodd.db.servers.SqlServerDbServer;
+import jodd.db.servers.SybaseDbServer;
 import jodd.log.Logger;
 import jodd.log.LoggerFactory;
 
@@ -35,7 +46,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 
 /**
- * Database detector.
+ * Database detector and DbOom configurator.
  */
 public class DbDetector {
 
@@ -44,16 +55,19 @@ public class DbDetector {
 	/**
 	 * Detects database and configure DbOom engine.
 	 */
-	public static DbServer detectDatabaseAndConfigureDbOom(ConnectionProvider cp) {
+	public DbServer detectDatabaseAndConfigureDbOom(
+			final ConnectionProvider cp,
+			final DbOomConfig dbOomConfig) {
+
 		cp.init();
 
-		Connection connection = cp.getConnection();
+		final Connection connection = cp.getConnection();
 
-		DbServer dbServer = detectDatabase(connection);
+		final DbServer dbServer = detectDatabase(connection);
 
 		cp.closeConnection(connection);
 
-		dbServer.accept(DbOomManager.getInstance());
+		dbServer.accept(dbOomConfig);
 
 		return dbServer;
 	}
@@ -61,7 +75,7 @@ public class DbDetector {
 	/**
 	 * Detects database and returns {@link DbServer}.
 	 */
-	public static DbServer detectDatabase(Connection connection) {
+	public DbServer detectDatabase(final Connection connection) {
 		final String dbName;
 		final int dbMajorVersion;
 		final String version;
@@ -72,7 +86,7 @@ public class DbDetector {
 			DatabaseMetaData databaseMetaData = connection.getMetaData();
 			dbName = databaseMetaData.getDatabaseProductName();
 			dbMajorVersion = databaseMetaData.getDatabaseMajorVersion();
-			int dbMinorVersion = databaseMetaData.getDatabaseMinorVersion();
+			final int dbMinorVersion = databaseMetaData.getDatabaseMinorVersion();
 			version = dbMajorVersion + "." + dbMinorVersion;
 
 			log.info("Database: " + dbName + " v" + dbMajorVersion + "." + dbMinorVersion);
@@ -84,7 +98,7 @@ public class DbDetector {
 				return new Db2DbServer();
 			}
 
-			return new GenericDbServer();
+			throw new DbSqlException(sex);
 		}
 
 		if (dbName.equals("Apache Derby")) {

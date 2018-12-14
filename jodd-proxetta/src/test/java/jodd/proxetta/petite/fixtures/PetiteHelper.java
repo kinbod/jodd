@@ -25,10 +25,11 @@
 package jodd.proxetta.petite.fixtures;
 
 import jodd.petite.PetiteConfig;
+import jodd.proxetta.Proxetta;
 import jodd.proxetta.ProxyAspect;
 import jodd.proxetta.ProxyPointcut;
 import jodd.proxetta.impl.ProxyProxetta;
-import jodd.proxetta.pointcuts.MethodAnnotationPointcut;
+import jodd.proxetta.pointcuts.MethodWithAnnotationPointcut;
 
 public class PetiteHelper {
 
@@ -45,12 +46,12 @@ public class PetiteHelper {
 
     public static ProxyProxetta createProxyProxetta() {
 
-        ProxyPointcut pointcut_logged = new MethodAnnotationPointcut(Logged.class);
+        ProxyPointcut pointcut_logged = new MethodWithAnnotationPointcut(Logged.class);
         ProxyAspect aspect_logged = new ProxyAspect(LogProxyAdvice.class, pointcut_logged);
         
         //proxetta.setDebugFolder(SystemUtil.userHome() + "\\inka\\proxetta");
 
-        return ProxyProxetta.withAspects(aspect_logged);
+        return Proxetta.proxyProxetta().withAspects(aspect_logged);
     }
 
 }

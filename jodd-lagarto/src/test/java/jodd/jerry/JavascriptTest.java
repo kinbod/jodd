@@ -34,12 +34,12 @@ import javax.script.ScriptException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class JavascriptTest {
+class JavascriptTest {
 
 	private ScriptEngine scriptEngine;
 
 	@BeforeEach
-	public void setUp() throws ScriptException {
+	void setUp() throws ScriptException {
 		ScriptEngineManager factory = new ScriptEngineManager();
 
 		scriptEngine = factory.getEngineByName("javascript");
@@ -58,7 +58,7 @@ public class JavascriptTest {
 	}
 
 	@Test
-	public void testEmbedded() throws ScriptException {
+	void testEmbedded() throws ScriptException {
 
 		String result = run(
 			"<div id='pizza'></div>",
@@ -68,7 +68,7 @@ public class JavascriptTest {
 	}
 
 	@Test
-	public void testEmbedded_each() throws ScriptException {
+	void testEmbedded_each() throws ScriptException {
 
 		String result = run(
 			"<div id='pizza'><span class='p'></span><span class='p'></span><span class='p'></span></div>",

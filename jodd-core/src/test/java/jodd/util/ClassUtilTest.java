@@ -25,6 +25,10 @@
 
 package jodd.util;
 
+import jodd.Jodd;
+import jodd.buffer.FastByteBuffer;
+import jodd.chalk.Chalk;
+import jodd.test.DisabledOnJava;
 import jodd.util.fixtures.subclass.IBase;
 import jodd.util.fixtures.subclass.IExtra;
 import jodd.util.fixtures.subclass.IOne;
@@ -38,8 +42,12 @@ import jodd.util.fixtures.testdata.C;
 import jodd.util.fixtures.testdata.JavaBean;
 import jodd.util.fixtures.testdata2.D;
 import jodd.util.fixtures.testdata2.E;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.platform.commons.util.StringUtils;
 
+import java.io.File;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -52,40 +60,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.jar.JarFile;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class ClassUtilTest {
-
-	@Test
-	public void testMethod0() {
-		TFooBean bean = new TFooBean();
-		Method m;
-		m = ClassUtil.getMethod0(TFooBean.class, "getMore", String.class, Integer.class);
-		assertNotNull(m);
-
-		m = ClassUtil.getMethod0(bean.getClass(), "getMore", String.class, Integer.class);
-		assertNotNull(m);
-
-		m = ClassUtil.getMethod0(bean.getClass(), "getXXX", String.class, Integer.class);
-		assertNull(m);
-
-		m = ClassUtil.getMethod0(bean.getClass(), "getPublic");
-		assertNotNull(m);
-
-		m = ClassUtil.getMethod0(bean.getClass(), "getDefault");
-		assertNull(m);
-
-		m = ClassUtil.getMethod0(bean.getClass(), "getProtected");
-		assertNull(m);
-
-		m = ClassUtil.getMethod0(bean.getClass(), "getPrivate");
-		assertNull(m);
-	}
-
+class ClassUtilTest {
 
 	@Test
-	public void testMethod() {
+	void testMethod() {
 		TFooBean bean = new TFooBean();
 		Method m;
 		m = ClassUtil.findMethod(TFooBean.class, "getMore");
@@ -100,7 +86,7 @@ public class ClassUtilTest {
 
 
 	@Test
-	public void testMatchClasses() {
+	void testMatchClasses() {
 		TFooBean a = new TFooBean();
 		TFooBean b = new TFooBean();
 		TFooBean2 c = new TFooBean2();
@@ -132,7 +118,7 @@ public class ClassUtilTest {
 	}
 
 	@Test
-	public void testMatchInterfaces() {
+	void testMatchInterfaces() {
 		assertTrue(ClassUtil.isTypeOf(HashMap.class, Map.class));
 		assertTrue(ClassUtil.isTypeOf(AbstractMap.class, Map.class));
 		assertTrue(ClassUtil.isTypeOf(Map.class, Map.class));
@@ -152,7 +138,7 @@ public class ClassUtilTest {
 
 
 	@Test
-	public void testAccessibleA() {
+	void testAccessibleA() {
 		Method[] ms = ClassUtil.getAccessibleMethods(A.class, null);
 		assertEquals(4 + 11, ms.length);            // there are 11 accessible Object methods (9 public + 2 protected)
 		ms = ClassUtil.getAccessibleMethods(A.class);
@@ -178,7 +164,7 @@ public class ClassUtilTest {
 	}
 
 	@Test
-	public void testAccessibleB() {
+	void testAccessibleB() {
 		Method[] ms = ClassUtil.getAccessibleMethods(B.class, null);
 		assertEquals(3 + 11, ms.length);
 		ms = ClassUtil.getAccessibleMethods(B.class);
@@ -204,7 +190,7 @@ public class ClassUtilTest {
 	}
 
 	@Test
-	public void testAccessibleC() {
+	void testAccessibleC() {
 		Method[] ms = ClassUtil.getAccessibleMethods(C.class, null);
 		assertEquals(5 + 11, ms.length);
 		ms = ClassUtil.getAccessibleMethods(C.class);
@@ -230,7 +216,7 @@ public class ClassUtilTest {
 	}
 
 	@Test
-	public void testAccessibleD() {
+	void testAccessibleD() {
 		Method[] ms = ClassUtil.getAccessibleMethods(D.class, null);
 		assertEquals(3 + 11, ms.length);
 		ms = ClassUtil.getAccessibleMethods(D.class);
@@ -255,7 +241,7 @@ public class ClassUtilTest {
 	}
 
 	@Test
-	public void testAccessibleE() {
+	void testAccessibleE() {
 		Method[] ms = ClassUtil.getAccessibleMethods(E.class, null);
 		assertEquals(5 + 11, ms.length);
 		ms = ClassUtil.getAccessibleMethods(E.class);
@@ -281,7 +267,7 @@ public class ClassUtilTest {
 
 
 	@Test
-	public void testIsSubclassAndInterface() {
+	void testIsSubclassAndInterface() {
 		assertTrue(ClassUtil.isTypeOf(SBase.class, SBase.class));
 
 		assertTrue(ClassUtil.isTypeOf(SOne.class, SBase.class));
@@ -307,7 +293,7 @@ public class ClassUtilTest {
 	}
 
 	@Test
-	public void testBeanPropertyNames() {
+	void testBeanPropertyNames() {
 		String name = ClassUtil.getBeanPropertyGetterName(ClassUtil.findMethod(JavaBean.class, "getOne"));
 		assertEquals("one", name);
 
@@ -352,13 +338,13 @@ public class ClassUtilTest {
 	}
 
 	@Test
-	public void testIsSubClassForCommonTypes() {
+	void testIsSubClassForCommonTypes() {
 		assertTrue(ClassUtil.isTypeOf(Long.class, Long.class));
 		assertFalse(ClassUtil.isTypeOf(Long.class, long.class));
 	}
 
 /*	@Test
-	public void testGetCallerClass() {
+	void testGetCallerClass() {
 		assertFalse(Reflection.getCallerClass(0).equals(ReflectUtil.getCallerClass(0)));
 
 		assertEquals(Reflection.getCallerClass(1), ReflectUtil.getCallerClass(1));
@@ -369,7 +355,7 @@ public class ClassUtilTest {
 	}
 
 	@Test
-	public void testGetCallerClass2() throws NoSuchFieldException, IllegalAccessException {
+	void testGetCallerClass2() throws NoSuchFieldException, IllegalAccessException {
 		Field field = ReflectUtil.class.getDeclaredField("SECURITY_MANAGER");
 		field.setAccessible(true);
 		Object value = field.get(null);
@@ -407,7 +393,7 @@ public class ClassUtilTest {
 	}
 
 	@Test
-	public void testGetFieldConcreteType() throws NoSuchFieldException {
+	void testGetFieldConcreteType() throws NoSuchFieldException {
 		Field f1 = BaseClass.class.getField("f1");
 		Field f2 = BaseClass.class.getField("f2");
 		Field f3 = BaseClass.class.getField("f3");
@@ -432,7 +418,7 @@ public class ClassUtilTest {
 	}
 
 	@Test
-	public void testGetFieldConcreteType2() throws Exception {
+	void testGetFieldConcreteType2() throws Exception {
 		Field array1 = BaseClass.class.getField("array1");
 		Field f2 = ConcreteClass2.class.getField("f2");
 
@@ -457,7 +443,7 @@ public class ClassUtilTest {
 	}
 
 	@Test
-	public void testGetRawAndComponentType() throws NoSuchFieldException {
+	void testGetRawAndComponentType() throws NoSuchFieldException {
 
 		Class<Soo> sooClass = Soo.class;
 
@@ -507,7 +493,7 @@ public class ClassUtilTest {
 	public static class Impl3 extends Impl2 {}
 
 	@Test
-	public void testGetRawWithImplClass() throws NoSuchFieldException {
+	void testGetRawWithImplClass() throws NoSuchFieldException {
 		Method number = ClassUtil.findMethod(Base2.class, "getNumber");
 		Method kiko = ClassUtil.findMethod(Base2.class, "getKiko");
 
@@ -543,7 +529,7 @@ public class ClassUtilTest {
 
 
 	@Test
-	public void testClassGenerics1() {
+	void testClassGenerics1() {
 		Class[] componentTypes = ClassUtil.getGenericSupertypes(Base2.class);
 		assertNull(componentTypes);
 
@@ -570,7 +556,7 @@ public class ClassUtilTest {
 	}
 
 	@Test
-	public void testClassGenerics2() {
+	void testClassGenerics2() {
 		Class[] componentTypes = ClassUtil.getGenericSupertypes(Base22.class);
 		assertNull(componentTypes);
 
@@ -594,7 +580,7 @@ public class ClassUtilTest {
 	public static class ImplAna4 extends ImplAna3 {}
 
 	@Test
-	public void testClassGenerics3() {
+	void testClassGenerics3() {
 		Class[] componentTypes = ClassUtil.getGenericSupertypes(BaseAna.class);
 		assertNull(componentTypes);
 
@@ -644,10 +630,11 @@ public class ClassUtilTest {
 	}
 
 	@Test
-	public void testFieldTypeToString() {
+	void testFieldTypeToString() {
 		Field[] fields = FieldType.class.getDeclaredFields();
 
 		Arrays.sort(fields, new Comparator<Field>() {
+			@Override
 			public int compare(Field o1, Field o2) {
 				return o1.getName().compareTo(o2.getName());
 			}
@@ -680,10 +667,11 @@ public class ClassUtilTest {
 	}
 
 	@Test
-	public void testMethodTypeToString() {
+	void testMethodTypeToString() {
 		Method[] methods = MethodReturnType.class.getDeclaredMethods();
 
 		Arrays.sort(methods, new Comparator<Method>() {
+			@Override
 			public int compare(Method o1, Method o2) {
 				return o1.getName().compareTo(o2.getName());
 			}
@@ -711,7 +699,7 @@ public class ClassUtilTest {
 	public static class Mimple extends MethodParameterType<Long>{}
 
 	@Test
-	public void testMethodParameterTypeToString() {
+	void testMethodParameterTypeToString() {
 		String result = "";
 		Method method = null;
 		for (Method m : MethodParameterType.class.getDeclaredMethods()) {
@@ -750,12 +738,12 @@ public class ClassUtilTest {
 	public interface Vigilante {}
 	public interface Flying extends Vigilante {}
 	public interface SuperMario extends Flying, Cool {}
-	public class User implements SomeGuy {}
-	public class SuperUser extends User implements Cool {}
-	public class SuperMan extends SuperUser implements Flying {}
+	class User implements SomeGuy {}
+	class SuperUser extends User implements Cool {}
+	class SuperMan extends SuperUser implements Flying {}
 
 	@Test
-	public void testResolveAllInterfaces() {
+	void testResolveAllInterfaces() {
 		Class[] interfaces = ClassUtil.resolveAllInterfaces(HashMap.class);
 
 		assertTrue(interfaces.length >= 3);
@@ -813,7 +801,7 @@ public class ClassUtilTest {
 	}
 
 	@Test
-	public void testResolveAllSuperclsses() {
+	void testResolveAllSuperclsses() {
 		Class[] subclasses = ClassUtil.resolveAllSuperclasses(User.class);
 		assertEquals(0, subclasses.length);
 
@@ -844,4 +832,161 @@ public class ClassUtilTest {
 		subclasses = ClassUtil.resolveAllSuperclasses(Integer[].class);
 		assertEquals(0, subclasses.length);
 	}
+
+
+	@Nested
+	@DisplayName("tests for ClassUtil#isUserDefinedMethod")
+	class IsUserDefinedMethod {
+
+		@Test
+		void notUserDefinedMethod() throws Exception {
+			final Method method = Object.class.getMethod("hashCode");
+
+			final boolean actual = ClassUtil.isUserDefinedMethod(method);
+
+			// asserts
+			assertEquals(false, actual);
+		}
+
+		@Test
+		void userDefinedMethod() throws Exception {
+			final Method method = StringBand.class.getMethod("toString");
+
+			final boolean actual = ClassUtil.isUserDefinedMethod(method);
+
+			// asserts
+			assertEquals(true, actual);
+		}
+
+		@Test
+		void customObjectButMethodFromObject() throws Exception {
+			final Method method = StringBand.class.getMethod("hashCode");
+
+			final boolean actual = ClassUtil.isUserDefinedMethod(method);
+
+			// asserts
+			assertEquals(false, actual);
+		}
+
+	}
+
+
+	@Nested
+	@DisplayName("ClassUtil#getClasses")
+	class GetClasses {
+
+		@Test
+		void emptyArgument() {
+			final Class[] actual = ClassUtil.getClasses(new Object[0]);
+
+			// asserts
+			assertNotNull(actual);
+			assertEquals(0, actual.length);
+		}
+
+		@Test
+		void noNullValueIncluded() {
+			final Class[] actual = ClassUtil.getClasses(new Object(), new Base32(), File.class, 3, 23L, 44.55F, 11.11D);
+
+			// asserts
+			assertNotNull(actual);
+			assertEquals(7, actual.length);
+			assertEquals(Object.class, actual[0]);
+			assertEquals(Base32.class, actual[1]);
+			assertEquals(Class.class, actual[2]);
+			assertEquals(Integer.class, actual[3]);
+			assertEquals(Long.class, actual[4]);
+			assertEquals(Float.class, actual[5]);
+			assertEquals(Double.class, actual[6]);
+		}
+
+		@Test
+		void onlyNullValuesIncluded() {
+			final Class[] actual = ClassUtil.getClasses(null, null, null, null);
+
+			// asserts
+			assertNotNull(actual);
+			assertEquals(4, actual.length);
+		}
+
+	}
+
+	@Nested
+	@DisplayName("tests for ClassUtil#isObjectMethod")
+	class IsObjectMethod {
+
+		@Test
+		void methodFromObject() throws Exception {
+			final Method method = Object.class.getMethod("hashCode");
+
+			final boolean actual = ClassUtil.isObjectMethod(method);
+
+			// asserts
+			assertEquals(true, actual);
+		}
+
+		@Test
+		void userDefinedMethod() throws Exception {
+			final Method method = StringBand.class.getMethod("toString");
+
+			final boolean actual = ClassUtil.isObjectMethod(method);
+
+			// asserts
+			assertEquals(false, actual);
+		}
+
+		@Test
+		void customObjectButMethodFromObject() throws Exception {
+			final Method method = StringBand.class.getMethod("hashCode");
+
+			final boolean actual = ClassUtil.isObjectMethod(method);
+
+			// asserts
+			assertEquals(true, actual);
+		}
+
+	}
+
+
+	@Nested
+	@DisplayName("tests for method jarFileOf")
+	class JarFileOf {
+
+		@Test
+		void checkClassFromExternalJar() {
+			final JarFile actual = ClassUtil.jarFileOf(StringUtils.class);
+
+			// asserts
+			assertNotNull(actual);
+			assertTrue(actual.getName().contains("junit-platform-commons"));
+		}
+
+		@Test
+		void checkWithClassFromThisModule() {
+			final JarFile actual = ClassUtil.jarFileOf(Chalk.class);
+
+			// asserts
+			assertNull(actual);
+		}
+
+		@Test
+		@DisabledOnJava(value = 9, description = "rt.jar does not exists in Java 9 anymore")
+		void checkWithClassFromJRE() {
+			final JarFile actual = ClassUtil.jarFileOf(Object.class);
+
+			// asserts
+			assertNotNull(actual);
+			assertTrue(actual.getName().contains("rt.jar"));
+		}
+	}
+
+	@Test
+	void testSimpleClassName() {
+		assertEquals("j.Jodd", ClassUtil.getShortClassName(Jodd.class));
+		assertEquals("j.b.FastByteBuffer", ClassUtil.getShortClassName(FastByteBuffer.class));
+		assertEquals("j.buffer.FastByteBuffer", ClassUtil.getShortClassName(FastByteBuffer.class, 2));
+		assertEquals("jodd.buffer.FastByteBuffer", ClassUtil.getShortClassName(FastByteBuffer.class, 3));
+		assertEquals("jodd.buffer.FastByteBuffer", ClassUtil.getShortClassName(FastByteBuffer.class, 4));
+	}
+
 }

@@ -35,16 +35,16 @@ import org.openjdk.jmh.annotations.Warmup;
 /**
  * Run:
  * <code>
- * gw :jodd-core:perf -PStringBandBenchmark
+ * gw :jodd-core:StringBandBenchmark
  * </code>
  * <p>
  * Results:
  * <pre>
- * string2: 300
- * string3: 148
- * ------------
- * stringBand2: 262 (it slower then Java, for strings <= 16 chars)
- * stringBand3: 191 (its faster for any longer strings)
+ * Benchmark                                                                      Mode  Cnt          Score          Error  Units
+ * StringBandBenchmark.string2                                                   thrpt   10   36780068.335 ±  1184388.514  ops/s
+ * StringBandBenchmark.string3                                                   thrpt   10   16942855.967 ±   853722.889  ops/s
+ * StringBandBenchmark.stringBand2                                               thrpt   10   27967094.903 ±   724524.916  ops/s
+ * StringBandBenchmark.stringBand3                                               thrpt   10   20909453.929 ±   788585.662  ops/s
  * </pre>
  */
 @Fork(1)

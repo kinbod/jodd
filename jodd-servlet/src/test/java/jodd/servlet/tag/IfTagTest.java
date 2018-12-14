@@ -32,10 +32,10 @@ import javax.servlet.jsp.tagext.JspFragment;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class IfTagTest {
+class IfTagTest {
 
 	@Test
-	public void testIfTag() throws JspException {
+	void testIfTag() throws JspException {
 
 		final MockJspFragment jspFragment = new MockJspFragment();
 

@@ -38,10 +38,10 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class CharArrayResponseWrapperTest {
+class CharArrayResponseWrapperTest {
 
 	@Test
-	public void testWriter() {
+	void testWriter() {
 		HttpServletResponse response = mock(HttpServletResponse.class);
 
 		CharArrayResponseWrapper wrappedResponse = new CharArrayResponseWrapper(response);
@@ -64,7 +64,7 @@ public class CharArrayResponseWrapperTest {
 	}
 
 	@Test
-	public void testBytes() throws IOException {
+	void testBytes() throws IOException {
 		HttpServletResponseWrapper rw = mock(HttpServletResponseWrapper.class);
 		ServletOutputStream os = mock(ServletOutputStream.class);
 		when(rw.getOutputStream()).thenReturn(os);

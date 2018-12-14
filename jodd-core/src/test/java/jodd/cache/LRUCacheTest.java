@@ -30,10 +30,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class LRUCacheTest extends BaseCacheTest {
+class LRUCacheTest extends BaseCacheTest {
 
 	@Test
-	public void testCache() {
+	void testCache() {
 		Cache<String, String> cache = new LRUCache<>(3);
 		cache.put("1", "1");
 		cache.put("2", "2");
@@ -52,7 +52,7 @@ public class LRUCacheTest extends BaseCacheTest {
 	}
 
 	@Test
-	public void testCache2() {
+	void testCache2() {
 		Cache<String, String> cache = new LRUCache<>(3);
 		cache.put("1", "1");
 		cache.put("2", "2");
@@ -75,7 +75,7 @@ public class LRUCacheTest extends BaseCacheTest {
 	}
 
 	@Test
-	public void testCacheTime() {
+	void testCacheTime() {
 		Cache<String, String> cache = new LRUCache<>(3);
 		cache.put("3", "3");
 		cache.put("2", "2");
@@ -90,7 +90,7 @@ public class LRUCacheTest extends BaseCacheTest {
 	}
 
 	@Test
-	public void testPrune() {
+	void testPrune() {
 		Cache<String, String> cache = new LRUCache<>(3);
 		cache.put("1", "1");
 		cache.put("2", "2");
@@ -105,7 +105,7 @@ public class LRUCacheTest extends BaseCacheTest {
 	}
 
 	@Test
-	public void testEndless() {
+	void testEndless() {
 		Cache<String, String> cache = new LRUCache<>(0);
 		assertFalse(cache.isFull());
 		cache.put("1", "1");

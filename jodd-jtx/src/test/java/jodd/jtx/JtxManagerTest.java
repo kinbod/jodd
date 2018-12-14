@@ -39,7 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class JtxManagerTest {
+class JtxManagerTest {
 
 	private JtxTransactionManager createManager() {
 		JtxTransactionManager jtxManager = new JtxTransactionManager();
@@ -54,9 +54,9 @@ public class JtxManagerTest {
 	// ---------------------------------------------------------------- ro
 
 	@Test
-	public void testReadOnly() {
+	void testReadOnly() {
 		JtxTransactionManager manager = createManager();
-		JtxTransaction jtx = manager.requestTransaction(new JtxTransactionMode().propagationRequired().readOnly(true));
+		JtxTransaction jtx = manager.requestTransaction(new JtxTransactionMode(JtxPropagationBehavior.PROPAGATION_REQUIRED, true));
 		WorkSession work = jtx.requestResource(WorkSession.class);
 
 		WorkSession work2 = jtx.requestResource(WorkSession.class);
@@ -75,9 +75,9 @@ public class JtxManagerTest {
 	// ---------------------------------------------------------------- rollback
 
 	@Test
-	public void testRollback() {
+	void testRollback() {
 		JtxTransactionManager manager = createManager();
-		JtxTransaction jtx = manager.requestTransaction(new JtxTransactionMode().propagationRequired().readOnly(false));
+		JtxTransaction jtx = manager.requestTransaction(new JtxTransactionMode(JtxPropagationBehavior.PROPAGATION_REQUIRED, false));
 		WorkSession work = jtx.requestResource(WorkSession.class);
 
 		work.writeValue("new value");
@@ -92,17 +92,17 @@ public class JtxManagerTest {
 	// ---------------------------------------------------------------- required
 
 	@Test
-	public void testPropagationRequired() {
+	void testPropagationRequired() {
 
 		JtxTransactionManager manager = createManager();
 
-		JtxTransaction jtx1 = manager.requestTransaction(new JtxTransactionMode().propagationRequired().readOnly(false));
+		JtxTransaction jtx1 = manager.requestTransaction(new JtxTransactionMode(JtxPropagationBehavior.PROPAGATION_REQUIRED, false));
 		WorkSession work1 = jtx1.requestResource(WorkSession.class);
 		assertEquals(1, manager.totalTransactions());
 		work1.writeValue("one");
 		assertEquals("[1] one", work1.readValue());
 
-		JtxTransaction jtx2 = manager.requestTransaction(new JtxTransactionMode().propagationRequired().readOnly(false));
+		JtxTransaction jtx2 = manager.requestTransaction(new JtxTransactionMode(JtxPropagationBehavior.PROPAGATION_REQUIRED, false));
 		assertEquals(1, manager.totalTransactions());
 		assertSame(jtx2, jtx1);
 
@@ -121,17 +121,17 @@ public class JtxManagerTest {
 	}
 
 	@Test
-	public void testPropagationRequiredWithWorker() {
+	void testPropagationRequiredWithWorker() {
 
 		LeanJtxWorker worker = createWorker();
 
-		JtxTransaction jtx1 = worker.maybeRequestTransaction(new JtxTransactionMode().propagationRequired().readOnly(false), null);
+		JtxTransaction jtx1 = worker.maybeRequestTransaction(new JtxTransactionMode(JtxPropagationBehavior.PROPAGATION_REQUIRED, false), null);
 		WorkSession work1 = jtx1.requestResource(WorkSession.class);
 		assertEquals(1, worker.getTransactionManager().totalTransactions());
 		work1.writeValue("one");
 		assertEquals("[1] one", work1.readValue());
 
-		JtxTransaction jtx2 = worker.maybeRequestTransaction(new JtxTransactionMode().propagationRequired().readOnly(false), null);
+		JtxTransaction jtx2 = worker.maybeRequestTransaction(new JtxTransactionMode(JtxPropagationBehavior.PROPAGATION_REQUIRED, false), null);
 		assertEquals(1, worker.getTransactionManager().totalTransactions());
 		assertNull(jtx2);
 
@@ -149,11 +149,11 @@ public class JtxManagerTest {
 	// ---------------------------------------------------------------- supports
 
 	@Test
-	public void testPropagationSupports() {
+	void testPropagationSupports() {
 
 		JtxTransactionManager manager = createManager();
 
-		JtxTransaction jtx1 = manager.requestTransaction(new JtxTransactionMode().propagationSupports().readOnly(false));
+		JtxTransaction jtx1 = manager.requestTransaction(new JtxTransactionMode(JtxPropagationBehavior.PROPAGATION_SUPPORTS, false));
 		WorkSession work1 = jtx1.requestResource(WorkSession.class);
 		assertEquals(1, manager.totalTransactions());
 		work1.writeValue("one");
@@ -168,17 +168,17 @@ public class JtxManagerTest {
 	// ---------------------------------------------------------------- required
 
 	@Test
-	public void testPropagationRequiresNew() {
+	void testPropagationRequiresNew() {
 
 		JtxTransactionManager manager = createManager();
 
-		JtxTransaction jtx1 = manager.requestTransaction(new JtxTransactionMode().propagationRequired().readOnly(false));
+		JtxTransaction jtx1 = manager.requestTransaction(new JtxTransactionMode(JtxPropagationBehavior.PROPAGATION_REQUIRED, false));
 		WorkSession work1 = jtx1.requestResource(WorkSession.class);
 		assertEquals(1, manager.totalTransactions());
 		work1.writeValue("one");
 		assertEquals("[1] one", work1.readValue());
 
-		JtxTransaction jtx2 = manager.requestTransaction(new JtxTransactionMode().propagationRequiresNew().readOnly(false));
+		JtxTransaction jtx2 = manager.requestTransaction(new JtxTransactionMode(JtxPropagationBehavior.PROPAGATION_REQUIRES_NEW, false));
 		assertEquals(2, manager.totalTransactions());
 		assertNotSame(jtx2, jtx1);
 

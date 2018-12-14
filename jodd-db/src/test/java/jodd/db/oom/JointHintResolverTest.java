@@ -31,10 +31,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class JointHintResolverTest {
+class JointHintResolverTest {
 
 	@Test
-	public void testHints() {
+	void testHints() {
 		Girl girl = new Girl();
 		BadBoy badBoy = new BadBoy();
 		Object[] data = new Object[]{girl, badBoy};

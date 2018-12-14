@@ -25,22 +25,21 @@
 
 package jodd.util.collection;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import jodd.util.RandomString;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
-import jodd.util.RandomString;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
-import org.junit.jupiter.api.Test;
-
-public class SortedArrayListTest {
+class SortedArrayListTest {
 
 	@Test
-	public void testList1() {
+	void testList1() {
 		SortedArrayList<String> list = new SortedArrayList<>();
 
 		list.add("aaa");
@@ -79,7 +78,7 @@ public class SortedArrayListTest {
 	}
 
 	@Test
-	public void testList2() {
+	void testList2() {
 		SortedArrayList<String> list = new SortedArrayList<>();
 
 		list.add("bbb");
@@ -101,12 +100,12 @@ public class SortedArrayListTest {
 	}
 
 	@Test
-	public void testRandom() {
+	void testRandom() {
 		int total = 100000;
 
 		ArrayList<String> randomList = new ArrayList<>();
 		for (int i = 0; i < total; i++) {
-			randomList.add(RandomString.getInstance().random(20, 'a', 'z'));
+			randomList.add(RandomString.get().random(20, 'a', 'z'));
 		}
 
 		SortedArrayList<String> sortedList = new SortedArrayList<>(randomList);
@@ -121,8 +120,9 @@ public class SortedArrayListTest {
 	}
 	
 	@Test
-	public void testComparator(){
+	void testComparator(){
 		Comparator<String> comparator = new Comparator<String>() {
+			@Override
 			public int compare(String str1, String str2) {
 				if (str1 == null && str2 == null) {
 					return 0;

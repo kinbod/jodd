@@ -29,10 +29,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class PathTest {
+class PathTest {
 
 	@Test
-	public void testPaths() {
+	void testPaths() {
 		Path path = new Path();
 
 		assertEquals(0, path.length());

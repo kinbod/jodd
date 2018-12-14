@@ -31,10 +31,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class AopProxyTest {
+class AopProxyTest {
 
 	@Test
-	public void testAspect() {
+	void testAspect() {
 		Helloable proxy = AopProxy.proxyOf(new LoggingAspect(new Simple()));
 
 		proxy.hello(3);

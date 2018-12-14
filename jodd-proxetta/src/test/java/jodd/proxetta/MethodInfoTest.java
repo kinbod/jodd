@@ -25,47 +25,45 @@
 
 package jodd.proxetta;
 
-import jodd.mutable.ValueHolder;
-import jodd.mutable.ValueHolderWrapper;
+import jodd.mutable.Value;
 import jodd.proxetta.fixtures.data.Foo;
 import jodd.proxetta.fixtures.data.FooAnn;
 import jodd.proxetta.fixtures.data.FooProxyAdvice;
 import jodd.proxetta.impl.ProxyProxetta;
-import jodd.proxetta.impl.ProxyProxettaBuilder;
+import jodd.proxetta.impl.ProxyProxettaFactory;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class MethodInfoTest {
+class MethodInfoTest {
 
 	@Test
-	public void testMethodInfo() {
+	void testMethodInfo() {
 
-		final ValueHolder<MethodInfo> valueHolder = ValueHolderWrapper.create();
+		final Value<MethodInfo> value = Value.of(null);
 
 		ProxyAspect proxyAspect = new ProxyAspect(
 				FooProxyAdvice.class,
-				new ProxyPointcut() {
-					public boolean apply(MethodInfo methodInfo) {
-						if (methodInfo.getMethodName().equals("p1")) {
-							valueHolder.set(methodInfo);
-							return true;
-						}
-						return false;
+				methodInfo -> {
+					if (methodInfo.getMethodName().equals("p1")) {
+						value.set(methodInfo);
+						return true;
 					}
-		});
+					return false;
+				}
+		);
 
-		ProxyProxetta proxyProxetta = ProxyProxetta.withAspects(proxyAspect);
+		ProxyProxetta proxyProxetta = Proxetta.proxyProxetta().withAspect(proxyAspect);
 		proxyProxetta.setClassNameSuffix("$$$Proxetta888");
-		ProxyProxettaBuilder pb = proxyProxetta.builder();
+		ProxyProxettaFactory pb = proxyProxetta.proxy();
 		pb.setTarget(Foo.class);
 		Foo foo = (Foo) pb.newInstance();
 
 		assertNotNull(foo);
 
-		MethodInfo mi = valueHolder.get();
+		MethodInfo mi = value.get();
 
 		assertEquals("p1", mi.getMethodName());
 		assertEquals(Foo.class.getName().replace('.', '/'), mi.getClassname());

@@ -24,6 +24,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 package jodd.json;
 
+import jodd.json.fixtures.JsonParsers;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -51,9 +52,9 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class JsonObjectTest {
+class JsonObjectTest {
 	@Test
-	public void testGetInteger() {
+	void testGetInteger() {
 		JsonObject jsonObject = new JsonObject();
 		jsonObject.put("foo", 123);
 		assertEquals(Integer.valueOf(123), jsonObject.getInteger("foo"));
@@ -82,7 +83,7 @@ public class JsonObjectTest {
 	}
 
 	@Test
-	public void testGetIntegerDefault() {
+	void testGetIntegerDefault() {
 		JsonObject jsonObject = new JsonObject();
 
 		jsonObject.put("foo", 123);
@@ -115,7 +116,7 @@ public class JsonObjectTest {
 	}
 
 	@Test
-	public void testGetLong() {
+	void testGetLong() {
 		JsonObject jsonObject = new JsonObject();
 
 		jsonObject.put("foo", 123L);
@@ -145,7 +146,7 @@ public class JsonObjectTest {
 	}
 
 	@Test
-	public void testGetLongDefault() {
+	void testGetLongDefault() {
 		JsonObject jsonObject = new JsonObject();
 
 		jsonObject.put("foo", 123L);
@@ -178,7 +179,7 @@ public class JsonObjectTest {
 	}
 
 	@Test
-	public void testGetFloat() {
+	void testGetFloat() {
 		JsonObject jsonObject = new JsonObject();
 
 		jsonObject.put("foo", 123f);
@@ -206,7 +207,7 @@ public class JsonObjectTest {
 	}
 
 	@Test
-	public void testGetFloatDefault() {
+	void testGetFloatDefault() {
 		JsonObject jsonObject = new JsonObject();
 
 		jsonObject.put("foo", 123f);
@@ -237,7 +238,7 @@ public class JsonObjectTest {
 	}
 
 	@Test
-	public void testGetDouble() {
+	void testGetDouble() {
 		JsonObject jsonObject = new JsonObject();
 
 		jsonObject.put("foo", 123d);
@@ -265,7 +266,7 @@ public class JsonObjectTest {
 	}
 
 	@Test
-	public void testGetDoubleDefault() {
+	void testGetDoubleDefault() {
 		JsonObject jsonObject = new JsonObject();
 
 		jsonObject.put("foo", 123d);
@@ -296,7 +297,7 @@ public class JsonObjectTest {
 	}
 
 	@Test
-	public void testGetString() {
+	void testGetString() {
 		JsonObject jsonObject = new JsonObject();
 
 		jsonObject.put("foo", "bar");
@@ -317,7 +318,7 @@ public class JsonObjectTest {
 	}
 
 	@Test
-	public void testGetStringDefault() {
+	void testGetStringDefault() {
 		JsonObject jsonObject = new JsonObject();
 
 		jsonObject.put("foo", "bar");
@@ -341,7 +342,7 @@ public class JsonObjectTest {
 	}
 
 	@Test
-	public void testGetBoolean() {
+	void testGetBoolean() {
 		JsonObject jsonObject = new JsonObject();
 
 		jsonObject.put("foo", true);
@@ -364,7 +365,7 @@ public class JsonObjectTest {
 	}
 
 	@Test
-	public void testGetBooleanDefault() {
+	void testGetBooleanDefault() {
 		JsonObject jsonObject = new JsonObject();
 
 		jsonObject.put("foo", true);
@@ -392,7 +393,7 @@ public class JsonObjectTest {
 
 
 	@Test
-	public void testGetBinary() {
+	void testGetBinary() {
 		JsonObject jsonObject = new JsonObject();
 
 		byte[] bytes = randomByteArray(100);
@@ -420,7 +421,7 @@ public class JsonObjectTest {
 	}
 
 	@Test
-	public void testGetBinaryDefault() {
+	void testGetBinaryDefault() {
 		JsonObject jsonObject = new JsonObject();
 
 		byte[] bytes = randomByteArray(100);
@@ -446,7 +447,7 @@ public class JsonObjectTest {
 	}
 
 	@Test
-	public void testGetJsonObject() {
+	void testGetJsonObject() {
 		JsonObject jsonObject = new JsonObject();
 
 		JsonObject obj = new JsonObject().put("blah", "wibble");
@@ -468,7 +469,7 @@ public class JsonObjectTest {
 	}
 
 	@Test
-	public void testGetJsonObjectDefault() {
+	void testGetJsonObjectDefault() {
 		JsonObject jsonObject = new JsonObject();
 
 		JsonObject obj = new JsonObject().put("blah", "wibble");
@@ -494,7 +495,7 @@ public class JsonObjectTest {
 	}
 
 	@Test
-	public void testGetJsonArray() {
+	void testGetJsonArray() {
 		JsonObject jsonObject = new JsonObject();
 
 		JsonArray arr = new JsonArray().add("blah").add("wibble");
@@ -516,7 +517,7 @@ public class JsonObjectTest {
 	}
 
 	@Test
-	public void testGetJsonArrayDefault() {
+	void testGetJsonArrayDefault() {
 		JsonObject jsonObject = new JsonObject();
 
 		JsonArray arr = new JsonArray().add("blah").add("wibble");
@@ -542,7 +543,7 @@ public class JsonObjectTest {
 	}
 
 	@Test
-	public void testGetValue() {
+	void testGetValue() {
 		JsonObject jsonObject = new JsonObject();
 
 		jsonObject.put("foo", 123);
@@ -590,7 +591,7 @@ public class JsonObjectTest {
 	}
 
 	@Test
-	public void testGetValueDefault() {
+	void testGetValueDefault() {
 		JsonObject jsonObject = new JsonObject();
 
 		jsonObject.put("foo", 123);
@@ -634,7 +635,7 @@ public class JsonObjectTest {
 	}
 
 	@Test
-	public void testContainsKey() {
+	void testContainsKey() {
 		JsonObject jsonObject = new JsonObject();
 
 		jsonObject.put("foo", "bar");
@@ -645,7 +646,7 @@ public class JsonObjectTest {
 	}
 
 	@Test
-	public void testFieldNames() {
+	void testFieldNames() {
 		JsonObject jsonObject = new JsonObject();
 
 		jsonObject.put("foo", "bar");
@@ -662,7 +663,7 @@ public class JsonObjectTest {
 	}
 
 	@Test
-	public void testSize() {
+	void testSize() {
 		JsonObject jsonObject = new JsonObject();
 
 		assertEquals(0, jsonObject.size());
@@ -683,7 +684,7 @@ public class JsonObjectTest {
 	}
 
 	@Test
-	public void testPutEnum() {
+	void testPutEnum() {
 		JsonObject jsonObject = new JsonObject();
 
 		assertSame(jsonObject, jsonObject.put("foo", SomeEnum.FOO));
@@ -699,7 +700,7 @@ public class JsonObjectTest {
 	}
 
 	@Test
-	public void testPutString() {
+	void testPutString() {
 		JsonObject jsonObject = new JsonObject();
 
 		assertSame(jsonObject, jsonObject.put("foo", "bar"));
@@ -721,7 +722,7 @@ public class JsonObjectTest {
 	}
 
 	@Test
-	public void testPutCharSequence() {
+	void testPutCharSequence() {
 		JsonObject jsonObject = new JsonObject();
 
 		assertSame(jsonObject, jsonObject.put("foo", new StringBuilder("bar")));
@@ -744,7 +745,7 @@ public class JsonObjectTest {
 	}
 
 	@Test
-	public void testPutInteger() {
+	void testPutInteger() {
 		JsonObject jsonObject = new JsonObject();
 
 		assertSame(jsonObject, jsonObject.put("foo", 123));
@@ -766,7 +767,7 @@ public class JsonObjectTest {
 	}
 
 	@Test
-	public void testPutLong() {
+	void testPutLong() {
 		JsonObject jsonObject = new JsonObject();
 
 		assertSame(jsonObject, jsonObject.put("foo", 123L));
@@ -789,7 +790,7 @@ public class JsonObjectTest {
 	}
 
 	@Test
-	public void testPutFloat() {
+	void testPutFloat() {
 		JsonObject jsonObject = new JsonObject();
 
 		assertSame(jsonObject, jsonObject.put("foo", 123f));
@@ -812,7 +813,7 @@ public class JsonObjectTest {
 	}
 
 	@Test
-	public void testPutDouble() {
+	void testPutDouble() {
 		JsonObject jsonObject = new JsonObject();
 
 		assertSame(jsonObject, jsonObject.put("foo", 123d));
@@ -834,7 +835,7 @@ public class JsonObjectTest {
 	}
 
 	@Test
-	public void testPutBoolean() {
+	void testPutBoolean() {
 		JsonObject jsonObject = new JsonObject();
 
 		assertSame(jsonObject, jsonObject.put("foo", true));
@@ -856,7 +857,7 @@ public class JsonObjectTest {
 	}
 
 	@Test
-	public void testPutJsonObject() {
+	void testPutJsonObject() {
 		JsonObject jsonObject = new JsonObject();
 
 		JsonObject obj1 = new JsonObject().put("blah", "wibble");
@@ -881,7 +882,7 @@ public class JsonObjectTest {
 	}
 
 	@Test
-	public void testPutJsonArray() {
+	void testPutJsonArray() {
 		JsonObject jsonObject = new JsonObject();
 
 		JsonArray obj1 = new JsonArray().add("parp");
@@ -910,7 +911,7 @@ public class JsonObjectTest {
 	}
 
 	@Test
-	public void testPutBinary() {
+	void testPutBinary() {
 		JsonObject jsonObject = new JsonObject();
 
 		byte[] bin1 = randomByteArray(100);
@@ -938,7 +939,7 @@ public class JsonObjectTest {
 	}
 
 	@Test
-	public void testPutNull() {
+	void testPutNull() {
 		JsonObject jsonObject = new JsonObject();
 
 		assertSame(jsonObject, jsonObject.putNull("foo"));
@@ -955,7 +956,7 @@ public class JsonObjectTest {
 	}
 
 	@Test
-	public void testPutValue() {
+	void testPutValue() {
 		JsonObject jsonObject = new JsonObject();
 
 		jsonObject.put("str", (Object) "bar");
@@ -997,7 +998,7 @@ public class JsonObjectTest {
 	}
 
 	@Test
-	public void testMergeIn1() {
+	void testMergeIn1() {
 		JsonObject jsonObject = new JsonObject();
 
 		JsonObject obj1 = new JsonObject().put("foo", "bar");
@@ -1011,7 +1012,7 @@ public class JsonObjectTest {
 	}
 
 	@Test
-	public void testMergeIn2() {
+	void testMergeIn2() {
 		JsonObject obj1 = new JsonObject().put("foo", "bar");
 		JsonObject obj2 = new JsonObject().put("foo", "flurb");
 		obj1.mergeIn(obj2);
@@ -1022,96 +1023,133 @@ public class JsonObjectTest {
 	}
 
 	@Test
-	public void testMergeInDepth0() {
-		JsonObject obj1 = JsonParser.create().parseAsJsonObject("{ \"foo\": { \"bar\": \"flurb\" }}");
-		JsonObject obj2 = JsonParser.create().parseAsJsonObject("{ \"foo\": { \"bar\": \"eek\" }}");
-		obj1.mergeIn(obj2, 0);
-		assertEquals(1, obj1.size());
-		assertEquals(1, obj1.getJsonObject("foo").size());
-		assertEquals("flurb", obj1.getJsonObject("foo").getString("bar"));
+	void testMergeInDepth0() {
+		{
+			JsonObject obj1 = JsonParser.create().parseAsJsonObject("{ \"foo\": { \"bar\": \"flurb\" }}");
+			JsonObject obj2 = JsonParser.create().parseAsJsonObject("{ \"foo\": { \"bar\": \"eek\" }}");
+			obj1.mergeIn(obj2, 0);
+			assertEquals(1, obj1.size());
+			assertEquals(1, obj1.getJsonObject("foo").size());
+			assertEquals("flurb", obj1.getJsonObject("foo").getString("bar"));
+		}
+		{
+			JsonObject obj1 = JsonParser.createLazyOne().parseAsJsonObject("{ \"foo\": { \"bar\": \"flurb\" }}");
+			JsonObject obj2 = JsonParser.createLazyOne().parseAsJsonObject("{ \"foo\": { \"bar\": \"eek\" }}");
+			obj1.mergeIn(obj2, 0);
+			assertEquals(1, obj1.size());
+			assertEquals(1, obj1.getJsonObject("foo").size());
+			assertEquals("flurb", obj1.getJsonObject("foo").getString("bar"));
+		}
 	}
 
 	@Test
-	public void testMergeInFlat() {
-		JsonObject obj1 = JsonParser.create().parseAsJsonObject("{ \"foo\": { \"bar\": \"flurb\", \"eek\": 32 }}");
-		JsonObject obj2 = JsonParser.create().parseAsJsonObject("{ \"foo\": { \"bar\": \"eek\" }}");
-		obj1.mergeIn(obj2);
-		assertEquals(1, obj1.size());
-		assertEquals(1, obj1.getJsonObject("foo").size());
-		assertEquals("eek", obj1.getJsonObject("foo").getString("bar"));
+	void testMergeInFlat() {
+		JsonParsers.forEachParser(jsonParser -> {
+			JsonObject obj1 = jsonParser.parseAsJsonObject("{ \"foo\": { \"bar\": \"flurb\", \"eek\": 32 }}");
+			JsonObject obj2 = jsonParser.parseAsJsonObject("{ \"foo\": { \"bar\": \"eek\" }}");
+			obj1.mergeIn(obj2);
+			assertEquals(1, obj1.size());
+			assertEquals(1, obj1.getJsonObject("foo").size());
+			assertEquals("eek", obj1.getJsonObject("foo").getString("bar"));
+		});
 	}
 
 	@Test
-	public void testMergeInDepth1() {
-		JsonObject obj1 = JsonParser.create().parseAsJsonObject("{ \"foo\": \"bar\", \"flurb\": { \"eek\": \"foo\", \"bar\": \"flurb\"}}");
-		JsonObject obj2 = JsonParser.create().parseAsJsonObject("{ \"flurb\": { \"bar\": \"flurb1\" }}");
-		obj1.mergeIn(obj2, 1);
-		assertEquals(2, obj1.size());
-		assertEquals(1, obj1.getJsonObject("flurb").size());
-		assertEquals("flurb1", obj1.getJsonObject("flurb").getString("bar"));
+	void testMergeInDepth1() {
+		{
+			JsonObject obj1 = JsonParser.create().parseAsJsonObject("{ \"foo\": \"bar\", \"flurb\": { \"eek\": \"foo\", \"bar\": \"flurb\"}}");
+			JsonObject obj2 = JsonParser.create().parseAsJsonObject("{ \"flurb\": { \"bar\": \"flurb1\" }}");
+			obj1.mergeIn(obj2, 1);
+			assertEquals(2, obj1.size());
+			assertEquals(1, obj1.getJsonObject("flurb").size());
+			assertEquals("flurb1", obj1.getJsonObject("flurb").getString("bar"));
+		}
+		{
+			JsonObject obj1 = JsonParser.createLazyOne().parseAsJsonObject("{ \"foo\": \"bar\", \"flurb\": { \"eek\": \"foo\", \"bar\": \"flurb\"}}");
+			JsonObject obj2 = JsonParser.createLazyOne().parseAsJsonObject("{ \"flurb\": { \"bar\": \"flurb1\" }}");
+			obj1.mergeIn(obj2, 1);
+			assertEquals(2, obj1.size());
+			assertEquals(1, obj1.getJsonObject("flurb").size());
+			assertEquals("flurb1", obj1.getJsonObject("flurb").getString("bar"));
+		}
 	}
 
 	@Test
-	public void testMergeInDepth2() {
-		JsonObject obj1 = new JsonObject(JsonParser.create().parse("{ \"foo\": \"bar\", \"flurb\": { \"eek\": \"foo\", \"bar\": \"flurb\"}}"));
-		JsonObject obj2 = new JsonObject(JsonParser.create().parse("{ \"flurb\": { \"bar\": \"flurb1\" }}"));
-		obj1.mergeIn(obj2, 2);
-		assertEquals(2, obj1.size());
-		assertEquals(2, obj1.getJsonObject("flurb").size());
-		assertEquals("foo", obj1.getJsonObject("flurb").getString("eek"));
-		assertEquals("flurb1", obj1.getJsonObject("flurb").getString("bar"));
+	void testMergeInDepth2() {
+		{
+			JsonObject obj1 = new JsonObject(JsonParser.create().parse("{ \"foo\": \"bar\", \"flurb\": { \"eek\": \"foo\", \"bar\": \"flurb\"}}"));
+			JsonObject obj2 = new JsonObject(JsonParser.create().parse("{ \"flurb\": { \"bar\": \"flurb1\" }}"));
+			obj1.mergeIn(obj2, 2);
+			assertEquals(2, obj1.size());
+			assertEquals(2, obj1.getJsonObject("flurb").size());
+			assertEquals("foo", obj1.getJsonObject("flurb").getString("eek"));
+			assertEquals("flurb1", obj1.getJsonObject("flurb").getString("bar"));
+		}
+		{
+			JsonObject obj1 = new JsonObject(JsonParser.createLazyOne().parse("{ \"foo\": \"bar\", \"flurb\": { \"eek\": \"foo\", \"bar\": \"flurb\"}}"));
+			JsonObject obj2 = new JsonObject(JsonParser.createLazyOne().parse("{ \"flurb\": { \"bar\": \"flurb1\" }}"));
+			obj1.mergeIn(obj2, 2);
+			assertEquals(2, obj1.size());
+			assertEquals(2, obj1.getJsonObject("flurb").size());
+			assertEquals("foo", obj1.getJsonObject("flurb").getString("eek"));
+			assertEquals("flurb1", obj1.getJsonObject("flurb").getString("bar"));
+		}
 	}
 
 	@Test
-	public void testEncode() throws Exception {
-		JsonObject jsonObject = new JsonObject();
+	void testEncode() {
+		JsonParsers.forEachParser(jsonParser -> {
+			JsonObject jsonObject = new JsonObject();
 
-		jsonObject.put("mystr", "foo");
-		jsonObject.put("mycharsequence", new StringBuilder("oob"));
-		jsonObject.put("myint", 123);
-		jsonObject.put("mylong", 1234L);
-		jsonObject.put("myfloat", 1.23f);
-		jsonObject.put("mydouble", 2.34d);
-		jsonObject.put("myboolean", true);
-		byte[] bytes = randomByteArray(10);
-		jsonObject.put("mybinary", bytes);
-		jsonObject.putNull("mynull");
-		jsonObject.put("myobj", new JsonObject().put("foo", "bar"));
-		jsonObject.put("myarr", new JsonArray().add("foo").add(123));
+			jsonObject.put("mystr", "foo");
+			jsonObject.put("mycharsequence", new StringBuilder("oob"));
+			jsonObject.put("myint", 123);
+			jsonObject.put("mylong", 1234L);
+			jsonObject.put("myfloat", 1.23f);
+			jsonObject.put("mydouble", 2.34d);
+			jsonObject.put("myboolean", true);
+			byte[] bytes = randomByteArray(10);
+			jsonObject.put("mybinary", bytes);
+			jsonObject.putNull("mynull");
+			jsonObject.put("myobj", new JsonObject().put("foo", "bar"));
+			jsonObject.put("myarr", new JsonArray().add("foo").add(123));
 
-		String json = JsonSerializer.create().serialize(jsonObject);
+			String json = JsonSerializer.create().serialize(jsonObject);
 
-		JsonObject expectedParsedJsonObject = JsonParser.create().parseAsJsonObject(json);
+			JsonObject expectedParsedJsonObject = jsonParser.parseAsJsonObject(json);
 
-		// need to replace float with double, as decoding will do so
-		jsonObject.put("myfloat", 1.23d);
-		assertEquals(expectedParsedJsonObject, jsonObject);
+			// need to replace float with double, as decoding will do so
+			jsonObject.put("myfloat", 1.23d);
+			assertEquals(expectedParsedJsonObject, jsonObject);
+		});
 	}
 
 	@Test
-	public void testDecode() throws Exception {
-		byte[] bytes = randomByteArray(10);
-		String strBytes = Base64.getEncoder().encodeToString(bytes);
-		String json = "{\"mystr\":\"foo\",\"myint\":123,\"mylong\":1234,\"myfloat\":1.23,\"mydouble\":2.34,\"" +
-			"myboolean\":true,\"mybinary\":\"" + strBytes + "\",\"mynull\":null,\"myobj\":{\"foo\":\"bar\"},\"myarr\":[\"foo\",123]}";
-		JsonObject obj = new JsonObject(JsonParser.create().parse(json));
-		assertEquals("foo", obj.getString("mystr"));
-		assertEquals(Integer.valueOf(123), obj.getInteger("myint"));
-		assertEquals(Long.valueOf(1234), obj.getLong("mylong"));
-		assertEquals(Float.valueOf(1.23f), obj.getFloat("myfloat"));
-		assertEquals(Double.valueOf(2.34d), obj.getDouble("mydouble"));
-		assertTrue(obj.getBoolean("myboolean"));
-		assertArrayEquals(bytes, obj.getBinary("mybinary"));
-		assertTrue(obj.containsKey("mynull"));
-		JsonObject nestedObj = obj.getJsonObject("myobj");
-		assertEquals("bar", nestedObj.getString("foo"));
-		JsonArray nestedArr = obj.getJsonArray("myarr");
-		assertEquals("foo", nestedArr.getString(0));
-		assertEquals(Integer.valueOf(123), Integer.valueOf(nestedArr.getInteger(1)));
+	void testDecode() {
+		JsonParsers.forEachParser(jsonParser -> {
+			byte[] bytes = randomByteArray(10);
+			String strBytes = Base64.getEncoder().encodeToString(bytes);
+			String json = "{\"mystr\":\"foo\",\"myint\":123,\"mylong\":1234,\"myfloat\":1.23,\"mydouble\":2.34,\"" +
+				"myboolean\":true,\"mybinary\":\"" + strBytes + "\",\"mynull\":null,\"myobj\":{\"foo\":\"bar\"},\"myarr\":[\"foo\",123]}";
+			JsonObject obj = new JsonObject(jsonParser.parse(json));
+			assertEquals("foo", obj.getString("mystr"));
+			assertEquals(Integer.valueOf(123), obj.getInteger("myint"));
+			assertEquals(Long.valueOf(1234), obj.getLong("mylong"));
+			assertEquals(Float.valueOf(1.23f), obj.getFloat("myfloat"));
+			assertEquals(Double.valueOf(2.34d), obj.getDouble("mydouble"));
+			assertTrue(obj.getBoolean("myboolean"));
+			assertArrayEquals(bytes, obj.getBinary("mybinary"));
+			assertTrue(obj.containsKey("mynull"));
+			JsonObject nestedObj = obj.getJsonObject("myobj");
+			assertEquals("bar", nestedObj.getString("foo"));
+			JsonArray nestedArr = obj.getJsonArray("myarr");
+			assertEquals("foo", nestedArr.getString(0));
+			assertEquals(Integer.valueOf(123), Integer.valueOf(nestedArr.getInteger(1)));
+		});
 	}
 
 	@Test
-	public void testToString() {
+	void testToString() {
 		JsonObject jsonObject = new JsonObject();
 
 		jsonObject.put("foo", "bar");
@@ -1119,7 +1157,7 @@ public class JsonObjectTest {
 	}
 
 	@Test
-	public void testClear() {
+	void testClear() {
 		JsonObject jsonObject = new JsonObject();
 
 		jsonObject.put("foo", "bar");
@@ -1132,7 +1170,7 @@ public class JsonObjectTest {
 	}
 
 	@Test
-	public void testIsEmpty() {
+	void testIsEmpty() {
 		JsonObject jsonObject = new JsonObject();
 
 		assertTrue(jsonObject.isEmpty());
@@ -1144,7 +1182,7 @@ public class JsonObjectTest {
 	}
 
 	@Test
-	public void testRemove() {
+	void testRemove() {
 		JsonObject jsonObject = new JsonObject();
 
 		jsonObject.put("mystr", "bar");
@@ -1157,7 +1195,7 @@ public class JsonObjectTest {
 	}
 
 	@Test
-	public void testIterator() {
+	void testIterator() {
 		JsonObject jsonObject = new JsonObject();
 
 		jsonObject.put("foo", "bar");
@@ -1184,7 +1222,7 @@ public class JsonObjectTest {
 	}
 
 	@Test
-	public void testIteratorDoesntChangeObject() {
+	void testIteratorDoesntChangeObject() {
 		Map<String, Object> map = new LinkedHashMap<>();
 		map.put("nestedMap", new HashMap<>());
 		map.put("nestedList", new ArrayList<>());
@@ -1203,7 +1241,7 @@ public class JsonObjectTest {
 	}
 
 	@Test
-	public void testStream() {
+	void testStream() {
 		JsonObject jsonObject = new JsonObject();
 
 		jsonObject.put("foo", "bar");
@@ -1231,7 +1269,7 @@ public class JsonObjectTest {
 	}
 
 	@Test
-	public void testGetMap() {
+	void testGetMap() {
 		JsonObject jsonObject = new JsonObject();
 
 		jsonObject.put("foo", "bar");
@@ -1251,7 +1289,7 @@ public class JsonObjectTest {
 	}
 
 	@Test
-	public void testCreateFromMap() {
+	void testCreateFromMap() {
 		Map<String, Object> map = new HashMap<>();
 		map.put("foo", "bar");
 		map.put("quux", 123);
@@ -1262,7 +1300,7 @@ public class JsonObjectTest {
 	}
 
 	@Test
-	public void testCreateFromMapCharSequence() {
+	void testCreateFromMapCharSequence() {
 		Map<String, Object> map = new HashMap<>();
 		map.put("foo", "bar");
 		map.put("quux", 123);
@@ -1275,7 +1313,7 @@ public class JsonObjectTest {
 	}
 
 	@Test
-	public void testCreateFromMapNestedJsonObject() {
+	void testCreateFromMapNestedJsonObject() {
 		Map<String, Object> map = new HashMap<>();
 		JsonObject nestedObj = new JsonObject().put("foo", "bar");
 		map.put("nested", nestedObj);
@@ -1285,7 +1323,7 @@ public class JsonObjectTest {
 	}
 
 	@Test
-	public void testCreateFromMapNestedMap() {
+	void testCreateFromMapNestedMap() {
 		Map<String, Object> map = new HashMap<>();
 		Map<String, Object> nestedMap = new HashMap<>();
 		nestedMap.put("foo", "bar");
@@ -1296,7 +1334,7 @@ public class JsonObjectTest {
 	}
 
 	@Test
-	public void testCreateFromMapNestedJsonArray() {
+	void testCreateFromMapNestedJsonArray() {
 		Map<String, Object> map = new HashMap<>();
 		JsonArray nestedArr = new JsonArray().add("foo");
 		map.put("nested", nestedArr);
@@ -1306,7 +1344,7 @@ public class JsonObjectTest {
 	}
 
 	@Test
-	public void testCreateFromMapNestedList() {
+	void testCreateFromMapNestedList() {
 		Map<String, Object> map = new HashMap<>();
 		List<String> nestedArr = Arrays.asList("foo");
 		map.put("nested", nestedArr);
@@ -1316,7 +1354,7 @@ public class JsonObjectTest {
 	}
 
 	@Test
-	public void testNumberEquality() {
+	void testNumberEquality() {
 		assertNumberEquals(4, 4);
 		assertNumberEquals(4, (long) 4);
 		assertNumberEquals(4, 4f);
@@ -1370,7 +1408,7 @@ public class JsonObjectTest {
 	}
 
 	@Test
-	public void testJsonObjectEquality() {
+	void testJsonObjectEquality() {
 		JsonObject obj = new JsonObject(Collections.singletonMap("abc", Collections.singletonMap("def", 3)));
 		assertEquals(obj, new JsonObject(Collections.singletonMap("abc", Collections.singletonMap("def", 3))));
 		assertEquals(obj, new JsonObject(Collections.singletonMap("abc", Collections.singletonMap("def", 3L))));
@@ -1388,7 +1426,7 @@ public class JsonObjectTest {
 	}
 
 	@Test
-	public void testJsonObjectEquality2() {
+	void testJsonObjectEquality2() {
 		JsonObject obj1 = new JsonObject().put("arr", new JsonArray().add("x"));
 		List<Object> list = new ArrayList<>();
 		list.add("x");
@@ -1405,7 +1443,7 @@ public class JsonObjectTest {
 	}
 
 	@Test
-	public void testRemoveMethodReturnedObject() {
+	void testRemoveMethodReturnedObject() {
 		JsonObject obj = new JsonObject();
 		obj.put("simple", "bar")
 			.put("object", new JsonObject().put("name", "vert.x").put("count", 2))

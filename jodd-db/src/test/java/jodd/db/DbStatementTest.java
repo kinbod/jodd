@@ -29,13 +29,13 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class DbStatementTest extends DbH2TestCase {
+class DbStatementTest extends DbH2TestCase {
 
 	@Test
-	public void testStatementVsPreparedStatement() throws Exception {
+	void testStatementVsPreparedStatement() {
 		DbSession dbSession = createDbSession();
 
-		DbQuery q = new DbQuery("select 1;");
+		DbQuery q = DbQuery.query("select 1;");
 
 		try {
 			q.setString(1, "value");

@@ -37,15 +37,17 @@ import java.lang.reflect.Type;
  */
 public class MethodDescriptor extends Descriptor implements Getter, Setter {
 
+	private static final MethodParamDescriptor[] NO_PARAMS = new MethodParamDescriptor[0];
+
 	protected final Method method;
 	protected final Type returnType;
 	protected final Class rawReturnType;
 	protected final Class rawReturnComponentType;
 	protected final Class rawReturnKeyComponentType;
-	protected final Class[] rawParameterTypes;
-	protected final Class[] rawParameterComponentTypes;
+	protected final MethodParamDescriptor[] parameters;
+	protected final MapperFunction mapperFunction;
 
-	public MethodDescriptor(ClassDescriptor classDescriptor, Method method) {
+	public MethodDescriptor(final ClassDescriptor classDescriptor, final Method method) {
 		super(classDescriptor, ClassUtil.isPublic(method));
 		this.method = method;
 		this.returnType = method.getGenericReturnType();
@@ -60,19 +62,41 @@ public class MethodDescriptor extends Descriptor implements Getter, Setter {
 			this.rawReturnKeyComponentType = null;
 		}
 
+		// force access
+
 		ClassUtil.forceAccess(method);
 
-		Type[] params = method.getGenericParameterTypes();
-		Type[] genericParams = method.getGenericParameterTypes();
+		// mapper
 
-		rawParameterTypes = new Class[params.length];
-		rawParameterComponentTypes = genericParams.length == 0 ? null : new Class[params.length];
+		final Mapper mapper = method.getAnnotation(Mapper.class);
 
-		for (int i = 0; i < params.length; i++) {
-			Type type = params[i];
-			rawParameterTypes[i] = ClassUtil.getRawType(type, classDescriptor.getType());
-			if (rawParameterComponentTypes != null) {
-				rawParameterComponentTypes[i] = ClassUtil.getComponentType(genericParams[i], classDescriptor.getType(), -1);
+		if (mapper != null) {
+			mapperFunction = MapperFunctionInstances.get().lookup(mapper.value());
+		} else {
+			mapperFunction = null;
+		}
+
+		// parameters
+
+		if (method.getParameterCount() == 0) {
+			parameters = NO_PARAMS;
+		}
+		else {
+			parameters = new MethodParamDescriptor[method.getParameterCount()];
+
+			Class[] params = method.getParameterTypes();
+			Type[] genericParams = method.getGenericParameterTypes();
+
+			for (int i = 0; i < params.length; i++) {
+				final Class parameterType = params[i];
+				final Class rawParameterType = genericParams.length == 0 ?
+					parameterType :
+					ClassUtil.getRawType(genericParams[i], classDescriptor.getType());
+				final Class rawParameterComponentType = genericParams.length == 0 ?
+					null :
+					ClassUtil.getComponentType(genericParams[i], classDescriptor.getType(), -1);
+
+				parameters[i] = new MethodParamDescriptor(parameterType, rawParameterType, rawParameterComponentType);
 			}
 		}
 	}
@@ -80,6 +104,7 @@ public class MethodDescriptor extends Descriptor implements Getter, Setter {
 	/**
 	 * Returns method name.
 	 */
+	@Override
 	public String getName() {
 		return method.getName();
 	}
@@ -125,52 +150,62 @@ public class MethodDescriptor extends Descriptor implements Getter, Setter {
 	}
 
 	/**
-	 * Returns raw parameter types.
+	 * Returns {@link MethodParamDescriptor method parameteres}.
 	 */
-	public Class[] getRawParameterTypes() {
-		return rawParameterTypes;
+	public MethodParamDescriptor[] getParameters() {
+		return parameters;
 	}
 
 	/**
-	 * Returns raw parameter component types. Returns <code>null</code>
-	 * if data does not exist.
+	 * Returns number of parameters.
 	 */
-	public Class[] getRawParameterComponentTypes() {
-		return rawParameterComponentTypes;
+	public int getParameterCount() {
+		return parameters.length;
 	}
 
 	// ---------------------------------------------------------------- getter/setter
 
-	public Object invokeGetter(Object target) throws InvocationTargetException, IllegalAccessException {
+	@Override
+	public Object invokeGetter(final Object target) throws InvocationTargetException, IllegalAccessException {
 		return method.invoke(target, null);
 	}
 
+	@Override
 	public Class getGetterRawType() {
 		return getRawReturnType();
 	}
 
+	@Override
 	public Class getGetterRawComponentType() {
 		return getRawReturnComponentType();
 	}
 
+	@Override
 	public Class getGetterRawKeyComponentType() {
 		return getRawReturnKeyComponentType();
 	}
 
-	public void invokeSetter(Object target, Object argument) throws IllegalAccessException, InvocationTargetException {
+	@Override
+	public void invokeSetter(final Object target, final Object argument) throws IllegalAccessException, InvocationTargetException {
 		method.invoke(target, argument);
 	}
 
+	@Override
 	public Class getSetterRawType() {
-		return getRawParameterTypes()[0];
+		return getParameters()[0].getRawType();
 	}
 
+	@Override
 	public Class getSetterRawComponentType() {
-		Class[] ts = getRawParameterComponentTypes();
-		if (ts == null) {
-			return null;
-		}
-		return ts[0];
+		return getParameters()[0].getRawComponentType();
+	}
+
+	/**
+	 * Returns {@link MapperFunction} if defined, or {@code null} otherwise.
+	 */
+	@Override
+	public MapperFunction getMapperFunction() {
+		return mapperFunction;
 	}
 
 	// ---------------------------------------------------------------- toString

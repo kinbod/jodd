@@ -34,10 +34,10 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.*;
 
-public class AssertValidConstraintTest extends ConstraintTestBase {
+class AssertValidConstraintTest extends ConstraintTestBase {
 
     @Test
-    public void testIsValid_withNullValue() {
+    void testIsValid_withNullValue() {
         //given
         ValidationContext targetValidationContext = mock(ValidationContext.class);
         AssertValidConstraint assertValidConstraint = new AssertValidConstraint(targetValidationContext);
@@ -52,7 +52,7 @@ public class AssertValidConstraintTest extends ConstraintTestBase {
     }
 
     @Test
-    public void testIsValid() {
+    void testIsValid() {
         //given
         ValidationContext targetValidationContext = mock(ValidationContext.class);
         AssertValidConstraint assertValidConstraint = new AssertValidConstraint(targetValidationContext);

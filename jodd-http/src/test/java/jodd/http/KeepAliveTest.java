@@ -40,7 +40,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class KeepAliveTest {
+class KeepAliveTest {
 
 	private static final String[] RESPONSES = new String[] {
 			"HTTP/1.1 200 OK\r\n" +
@@ -99,7 +99,7 @@ public class KeepAliveTest {
 	};
 
 	@Test
-	public void testKeepAlive() {
+	void testKeepAlive() {
 		currentResponse = 0;
 
 		// ->
@@ -158,7 +158,7 @@ public class KeepAliveTest {
 	}
 
 	@Test
-	public void testKeepAliveBrowser() {
+	void testKeepAliveBrowser() {
 		HttpBrowser browser = new HttpBrowser();
 		browser.setKeepAlive(true);
 		browser.setHttpConnectionProvider(httpConnectionProvider);

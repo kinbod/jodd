@@ -29,13 +29,15 @@ import jodd.mutable.MutableShort;
 import jodd.typeconverter.impl.MutableShortConverter;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
-public class MutableShortConverterTest {
+class MutableShortConverterTest {
 
 	@Test
-	public void testConversion() {
-		MutableShortConverter mutableShortConverter = (MutableShortConverter) TypeConverterManager.lookup(MutableShort.class);
+	void testConversion() {
+		MutableShortConverter mutableShortConverter = (MutableShortConverter) TypeConverterManager.get().lookup(MutableShort.class);
 
 		assertNull(mutableShortConverter.convert(null));
 

@@ -29,105 +29,118 @@ import jodd.core.JoddCore;
 import jodd.util.StringUtil;
 
 import javax.mail.Address;
+import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import java.io.UnsupportedEncodingException;
 
 /**
  * Storage for personal name and email address.
- * Serves as a email address adapter between various formats.
+ * Serves as an email address adapter between various formats.
  */
 public class EmailAddress {
 
 	public static final EmailAddress[] EMPTY_ARRAY = new EmailAddress[0];
 
+	/**
+	 * Email address.
+	 */
 	private final String email;
+
+	/**
+	 * Personal name.
+	 */
 	private final String personalName;
 
 	/**
 	 * Creates new address by specifying email and personal name.
+	 *
+	 * @param personalName personal name.
+	 * @param email        email address.
 	 */
-	public EmailAddress(String personalName, String email) {
+	public EmailAddress(final String personalName, final String email) {
 		this.email = email;
 		this.personalName = personalName;
 	}
 
 	/**
+	 * @see #EmailAddress(String, String)
+	 */
+	public static EmailAddress of(final String personalName, final String email) {
+		return new EmailAddress(personalName, email);
+	}
+
+	/**
 	 * Creates new address by specifying one of the following:
 	 * <ul>
-	 *     <li>"foo@bar.com" - only email address.</li>
-	 *     <li>"Jenny Doe &lt;foo@bar.com&gt;" - first part of the string is personal name,
-	 *     and the other part is email, surrounded with &lt; and &gt;.</li>
+	 * <li>{@code "foo@bar.com" - only email address.}</li>
+	 * <li>{@code "Jenny Doe &lt;foo@bar.com&gt;" - first part of the string is personal name,
+	 * and the other part is email, surrounded with < and >.}</li>
 	 * </ul>
+	 *
+	 * @param address {@link String} containing address to convert.
 	 */
-	public EmailAddress(String address) {
+	public static EmailAddress of(String address) {
 		address = address.trim();
 
 		if (!StringUtil.endsWithChar(address, '>')) {
-			this.email = address;
-			this.personalName = null;
-			return;
+			return new EmailAddress(null, address);
 		}
 
-		int ndx = address.lastIndexOf('<');
+		final int ndx = address.lastIndexOf('<');
 		if (ndx == -1) {
-			this.email = address;
-			this.personalName = null;
-			return;
+			return new EmailAddress(null, address);
 		}
 
-		this.email = address.substring(ndx + 1, address.length() - 1);
-		this.personalName = address.substring(0, ndx).trim();
+		String email = address.substring(ndx + 1, address.length() - 1);
+		String personalName = address.substring(0, ndx).trim();
+		return new EmailAddress(personalName, email);
 	}
 
 	/**
-	 * Creates new email address from <code>InternetAddress</code>.
+	 * Creates new email address from {@link InternetAddress}.
+	 *
+	 * @param internetAddress {@link InternetAddress} to convert
 	 */
-	public EmailAddress(InternetAddress internetAddress) {
-		this.personalName = internetAddress.getPersonal();
-		this.email = internetAddress.getAddress();
+	public static EmailAddress of(final InternetAddress internetAddress) {
+		return new EmailAddress(internetAddress.getPersonal(), internetAddress.getAddress());
 	}
 
 	/**
-	 * Creates new email address from <code>Address</code>.
+	 * Creates new email address from {@link InternetAddress}.
+	 *
+	 * @param address {@link Address} to convert.
 	 */
-	public EmailAddress(Address address) {
-		this(address.toString());
+	public static EmailAddress of(final Address address) {
+		return of(address.toString());
 	}
 
 	// ---------------------------------------------------------------- getters
 
 	/**
 	 * Returns email address.
+	 *
+	 * @return email address.
 	 */
 	public String getEmail() {
 		return email;
 	}
 
 	/**
-	 * Returns personal name, may be <code>null</code>.
+	 * Returns personal name.
+	 *
+	 * @return personal name. Value may be {@code null}.
 	 */
 	public String getPersonalName() {
 		return personalName;
 	}
 
-
-	// ---------------------------------------------------------------- convert
-
 	/**
-	 * Creates new <code>InternetAddress</code> from current data.
+	 * Returns string representation of this.
+	 *
+	 * @return String representation of this.
 	 */
-	public InternetAddress toInternetAddress() throws AddressException {
-		try {
-			return new InternetAddress(email, personalName, JoddCore.encoding);
-		} catch (UnsupportedEncodingException ueex) {
-			throw new AddressException(ueex.toString());
-		}
-	}
-
-	/**
-	 * Returns string representation of this email.
-	 */
+	@Override
 	public String toString() {
 		if (this.personalName == null) {
 			return this.email;
@@ -135,12 +148,30 @@ public class EmailAddress {
 		return this.personalName + " <" + this.email + '>';
 	}
 
+	// ---------------------------------------------------------------- convert
+
+	/**
+	 * Creates new {@link InternetAddress} from current data.
+	 *
+	 * @return {@link InternetAddress} from current data.
+	 */
+	public InternetAddress toInternetAddress() throws AddressException {
+		try {
+			return new InternetAddress(email, personalName, JoddCore.encoding);
+		} catch (final UnsupportedEncodingException ueex) {
+			throw new AddressException(ueex.toString());
+		}
+	}
+
 	// ---------------------------------------------------------------- arrays
 
 	/**
-	 * Converts array of <code>Address</code> to {@link EmailAddress}.
+	 * Converts array of {@link Address} to {@link EmailAddress}.
+	 *
+	 * @param addresses array of {@link Address}es to convert.
+	 * @return an array of {@link EmailAddress}.
 	 */
-	public static EmailAddress[] createFrom(Address... addresses) {
+	public static EmailAddress[] of(final Address... addresses) {
 		if (addresses == null) {
 			return EmailAddress.EMPTY_ARRAY;
 		}
@@ -148,19 +179,22 @@ public class EmailAddress {
 			return EmailAddress.EMPTY_ARRAY;
 		}
 
-		EmailAddress[] res = new EmailAddress[addresses.length];
+		final EmailAddress[] res = new EmailAddress[addresses.length];
 
 		for (int i = 0; i < addresses.length; i++) {
-			res[i] = new EmailAddress(addresses[i]);
+			res[i] = EmailAddress.of(addresses[i]);
 		}
 
 		return res;
 	}
 
 	/**
-	 * Converts array of <code>String</code> to {@link EmailAddress}.
+	 * Converts array of {@link String} to {@link EmailAddress}.
+	 *
+	 * @param addresses array of {@link String}s to convert.
+	 * @return an array of {@link EmailAddress}.
 	 */
-	public static EmailAddress[] createFrom(String... addresses) {
+	public static EmailAddress[] of(final String... addresses) {
 		if (addresses == null) {
 			return EmailAddress.EMPTY_ARRAY;
 		}
@@ -168,12 +202,33 @@ public class EmailAddress {
 			return EmailAddress.EMPTY_ARRAY;
 		}
 
-		EmailAddress[] res = new EmailAddress[addresses.length];
+		final EmailAddress[] res = new EmailAddress[addresses.length];
 
 		for (int i = 0; i < addresses.length; i++) {
-			res[i] = new EmailAddress(addresses[i]);
+			res[i] = EmailAddress.of(addresses[i]);
 		}
 
 		return res;
+	}
+
+	/**
+	 * Convert from array of {@link EmailAddress} to array of {@link InternetAddress}.
+	 *
+	 * @param addresses {@link EmailMessage}
+	 * @return array of {@link InternetAddress}. Returns empty array if addresses was {@code null}.
+	 * @throws MessagingException if there are failures
+	 */
+	public static InternetAddress[] convert(final EmailAddress[] addresses) throws MessagingException {
+		if (addresses == null) {
+			return new InternetAddress[0];
+		}
+
+		final int numRecipients = addresses.length;
+		final InternetAddress[] address = new InternetAddress[numRecipients];
+
+		for (int i = 0; i < numRecipients; i++) {
+			address[i] = addresses[i].toInternetAddress();
+		}
+		return address;
 	}
 }

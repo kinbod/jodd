@@ -39,7 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-public class SimpleLoggerTest extends LoggerTestBase {
+class SimpleLoggerTest extends LoggerTestBase {
 
 	private SimpleLoggerProvider slf;
 
@@ -48,25 +48,25 @@ public class SimpleLoggerTest extends LoggerTestBase {
 	private String output;
 
 	@BeforeEach
-	public void setUp() throws Exception {
+	void setUp() throws Exception {
 		initializeLogFactoryAndLogger(Logger.Level.DEBUG);
 	}
 
 	@Override
 	@Test
-	public void testIsEnabled() {
+	void testIsEnabled() {
 		assertTrue(logger.isEnabled(Level.DEBUG));
 	}
 
 	@Test
-	public void testBasicOperations() throws Exception {
+	void testBasicOperations() throws Exception {
 		assertTrue(slf.getElapsedTime() >= 0);
 		assertEquals(logger.getName(), LoggerConstants.SIMPLE_LOGGER);
 	}
 
 	@Override
 	@Test
-	public void testIsLevelEnabled() {
+	void testIsLevelEnabled() {
 		//when
 		initializeLogFactoryAndLogger(Logger.Level.DEBUG);
 
@@ -99,7 +99,7 @@ public class SimpleLoggerTest extends LoggerTestBase {
 	}
 
 	@Test
-	public void testLogLevel() {
+	void testLogLevel() {
 		//given
 		setUpOutputStream();
 
@@ -141,7 +141,7 @@ public class SimpleLoggerTest extends LoggerTestBase {
 	}
 
 	@Test
-	public void testLog() {
+	void testLog() {
 		//given
 		setUpOutputStream();
 
@@ -154,7 +154,7 @@ public class SimpleLoggerTest extends LoggerTestBase {
 	}
 
 	@Test
-	public void testThrowable() {
+	void testThrowable() {
 		//given
 		throwable = mock(Throwable.class);
 		setUpOutputStream();

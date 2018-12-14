@@ -35,18 +35,18 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class Slf4jLoggerTest extends LoggerTestBase {
+class Slf4jLoggerTest extends LoggerTestBase {
 
 	private org.slf4j.Logger log;
 
 	@BeforeEach
-	public void setUp() throws Exception {
+	void setUp() throws Exception {
 		log = mock(org.slf4j.Logger.class);
 		logger = new Slf4jLogger(log);
 	}
 
 	@Test
-	public void testGetName() {
+	void testGetName() {
 		//given
 		when(log.getName()).thenReturn(LoggerConstants.LOG);
 
@@ -55,7 +55,7 @@ public class Slf4jLoggerTest extends LoggerTestBase {
 	}
 
 	@Test
-	public void testLog() {
+	void testLog() {
 		//when
 		logger.log(Level.TRACE, LoggerConstants.SIMPLE_MESSAGE);
 
@@ -88,7 +88,7 @@ public class Slf4jLoggerTest extends LoggerTestBase {
 	}
 
 	@Test
-	public void testLevel() {
+	void testLevel() {
 		//when
 		logger.trace(LoggerConstants.TRACE_MESSAGE);
 
@@ -121,7 +121,7 @@ public class Slf4jLoggerTest extends LoggerTestBase {
 	}
 
 	@Test
-	public void testErrorWithThrowable() {
+	void testErrorWithThrowable() {
 		//given
 		throwable = mock(Throwable.class);
 
@@ -133,7 +133,7 @@ public class Slf4jLoggerTest extends LoggerTestBase {
 	}
 
 	@Test
-	public void testWarnWithThrowable() {
+	void testWarnWithThrowable() {
 		//given
 		throwable = mock(Throwable.class);
 
@@ -145,7 +145,7 @@ public class Slf4jLoggerTest extends LoggerTestBase {
 	}
 
 	@Test
-	public void testSl4jLoggerFactory() {
+	void testSl4jLoggerFactory() {
 		//given
 		loggerProvider = Slf4jLogger.PROVIDER;
 

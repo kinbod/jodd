@@ -29,10 +29,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class BeanUtilUtilTest {
+class BeanUtilUtilTest {
 
 	@Test
-	public void testIndexOfDot() {
+	void testIndexOfDot() {
 		BeanUtilUtil buu = new BeanUtilBean();
 
 		assertEquals(3, buu.indexOfDot("aaa.ccc"));

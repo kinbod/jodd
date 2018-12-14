@@ -24,17 +24,18 @@
 // POSSIBILITY OF SUCH DAMAGE.
 package jodd.db.oom;
 
+import jodd.db.DbOom;
 import jodd.db.DbQuery;
 import jodd.db.DbSession;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class PreparedTest extends DbBaseTest {
+class PreparedTest extends DbBaseTest {
 
-	public class PostgreSql extends PostgreSqlDbAccess {
+	class PostgreSql extends PostgreSqlDbAccess {
 		@Override
-		public String getCreateTableSql() {
+		public String createTableSql() {
 			return "create table TESTER (" +
 				"ID			SERIAL," +
 				"NAME		varchar(20)	NOT NULL," +
@@ -50,11 +51,9 @@ public class PreparedTest extends DbBaseTest {
 	}
 
 	@Test
-	public void testPreparedStatementDebugFalse() {
+	void testPreparedStatementDebugFalse() {
 		DbBaseTest.DbAccess db = new PreparedTest.PostgreSql();
-		init();
-		db.initDb();
-		connect();
+		init(db);
 
 		db.createTables();
 		try {
@@ -65,11 +64,9 @@ public class PreparedTest extends DbBaseTest {
 	}
 
 	@Test
-	public void testPrepredStatementDebugTrue() {
+	void testPrepredStatementDebugTrue() {
 		DbBaseTest.DbAccess db = new PreparedTest.PostgreSql();
-		init();
-		db.initDb();
-		connect();
+		init(db);
 
 		db.createTables();
 		try {
@@ -80,9 +77,9 @@ public class PreparedTest extends DbBaseTest {
 	}
 
 	private void test(final boolean debug) {
-		DbSession session = new DbSession();
+		DbSession session = new DbSession(connectionPool);
 
-		DbQuery dbQuery = new DbQuery(session, "select * from TESTER where id=:id and name=:name");
+		DbQuery dbQuery = new DbQuery(DbOom.get(), session, "select * from TESTER where id=:id and name=:name");
 		dbQuery.setDebug(debug);
 
 		dbQuery.setInteger("id", 3);

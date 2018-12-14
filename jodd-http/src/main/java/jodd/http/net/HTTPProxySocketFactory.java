@@ -31,7 +31,6 @@ import jodd.util.Base64;
 
 import javax.net.SocketFactory;
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.net.HttpURLConnection;
@@ -47,76 +46,79 @@ public class HTTPProxySocketFactory extends SocketFactory {
 
 	private final ProxyInfo proxy;
 
-	public HTTPProxySocketFactory(ProxyInfo proxy) {
+	public HTTPProxySocketFactory(final ProxyInfo proxy) {
 		this.proxy = proxy;
 	}
 
-	public Socket createSocket(String host, int port) throws IOException {
+	@Override
+	public Socket createSocket(final String host, final int port) {
 		return createHttpProxySocket(host, port);
 	}
 
-	public Socket createSocket(String host, int port, InetAddress localHost, int localPort) throws IOException {
+	@Override
+	public Socket createSocket(final String host, final int port, final InetAddress localHost, final int localPort) {
 		return createHttpProxySocket(host, port);
 	}
 
-	public Socket createSocket(InetAddress host, int port) throws IOException {
+	@Override
+	public Socket createSocket(final InetAddress host, final int port) {
 		return createHttpProxySocket(host.getHostAddress(), port);
 	}
 
-	public Socket createSocket(InetAddress address, int port, InetAddress localAddress, int localPort) throws IOException {
+	@Override
+	public Socket createSocket(final InetAddress address, final int port, final InetAddress localAddress, final int localPort) {
 		return createHttpProxySocket(address.getHostAddress(), port);
 	}
 
-	private Socket createHttpProxySocket(String host, int port) {
+	private Socket createHttpProxySocket(final String host, final int port) {
 		Socket socket = null;
 		String proxyAddress = proxy.getProxyAddress();
 		int proxyPort = proxy.getProxyPort();
 
 		try {
-
 			socket = new Socket(proxyAddress, proxyPort);
-			String hostport = "CONNECT " + host + ":" + port;
-			String proxyLine;
+			String hostport = host + ":" + port;
+			String proxyLine = "";
 			String username = proxy.getProxyUsername();
 
-			if (username == null) {
-				proxyLine = "";
-			} else {
+			if (username != null) {
 				String password = proxy.getProxyPassword();
 				proxyLine =
-						"\r\nProxy-Authorization: Basic "
-						+ Base64.encodeToString((username + ":" + password));
+						"Proxy-Authorization: Basic " +
+						Base64.encodeToString((username + ":" + password)) + "\r\n";
 			}
+
 			socket.getOutputStream().write(
-					(hostport + " HTTP/1.1\r\nHost: "
-					+ hostport + proxyLine + "\r\n\r\n").getBytes("UTF-8"));
+					("CONNECT " + hostport + " HTTP/1.1\r\n" +
+					 "Host: " + hostport + "\r\n" +
+                     proxyLine +
+                     "\r\n"
+                    ).getBytes("UTF-8")
+            );
 
 			InputStream in = socket.getInputStream();
 			StringBuilder recv = new StringBuilder(100);
 			int nlchars = 0;
 
-			while (true) {
-				int i =  in.read();
-				if (i == -1) {
-					throw new HttpException(ProxyInfo.ProxyType.HTTP, "Invalid response");
-				}
+            do {
+                int i = in.read();
+                if (i == -1) {
+                    throw new HttpException(ProxyInfo.ProxyType.HTTP, "Invalid response");
+                }
 
-				char c = (char) i;
-				recv.append(c);
-				if (recv.length() > 1024) {
-					throw new HttpException(ProxyInfo.ProxyType.HTTP, "Received header longer then 1024 chars");
-				}
-				if ((nlchars == 0 || nlchars == 2) && c == '\r') {
-					nlchars++;
-				} else if ((nlchars == 1 || nlchars == 3) && c == '\n') {
-					nlchars++;
-				} else {
-					nlchars = 0;
-				}
-				if (nlchars == 4) {
-					break;
-				}
-			}
+                char c = (char) i;
+                recv.append(c);
+                if (recv.length() > 1024) {
+                    throw new HttpException(ProxyInfo.ProxyType.HTTP, "Received header longer then 1024 chars");
+                }
+                if ((nlchars == 0 || nlchars == 2) && c == '\r') {
+                    nlchars++;
+                } else if ((nlchars == 1 || nlchars == 3) && c == '\n') {
+                    nlchars++;
+                } else {
+                    nlchars = 0;
+                }
+            } while (nlchars != 4);
 
 			String recvStr = recv.toString();
 
@@ -152,7 +154,7 @@ public class HTTPProxySocketFactory extends SocketFactory {
 	/**
 	 * Closes socket silently.
 	 */
-	private void closeSocket(Socket socket) {
+	private void closeSocket(final Socket socket) {
 		try {
 			if (socket != null) {
 				socket.close();

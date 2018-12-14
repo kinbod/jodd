@@ -32,10 +32,10 @@ import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class FloatConverterTest {
+class FloatConverterTest {
 
 	@Test
-	public void testConversion() {
+	void testConversion() {
 		FloatConverter floatConverter = new FloatConverter();
 
 		assertNull(floatConverter.convert(null));

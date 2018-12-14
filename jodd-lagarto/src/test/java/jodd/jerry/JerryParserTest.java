@@ -35,10 +35,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
-public class JerryParserTest {
+class JerryParserTest {
 
 	@Test
-	public void testJerryParserCreation() {
+	void testJerryParserCreation() {
 		Jerry.JerryParser jerryParser = Jerry.jerry();
 
 		((LagartoDOMBuilder) jerryParser.getDOMBuilder()).enableXmlMode();
@@ -53,7 +53,7 @@ public class JerryParserTest {
 	}
 
 	@Test
-	public void testAppendContent() {
+	void testAppendContent() {
 		Jerry.JerryParser jerryParser = Jerry.jerry();
 
 		((LagartoDOMBuilder) jerryParser.getDOMBuilder()).enableHtmlMode();
@@ -68,7 +68,7 @@ public class JerryParserTest {
 	}
 
 	@Test
-	public void testAppendContent2() {
+	void testAppendContent2() {
 		Jerry.JerryParser jerryParser = Jerry.jerry();
 
 		((LagartoDOMBuilder) jerryParser.getDOMBuilder()).enableXmlMode();
@@ -83,7 +83,7 @@ public class JerryParserTest {
 	}
 
 	@Test
-	public void testAppendContent3() {
+	void testAppendContent3() {
 		Jerry.JerryParser jerryParser = Jerry.jerry();
 
 		((LagartoDOMBuilder) jerryParser.getDOMBuilder()).enableXhtmlMode();
@@ -98,7 +98,7 @@ public class JerryParserTest {
 	}
 
 	@Test
-	public void testAttributeCaseSensitive() {
+	void testAttributeCaseSensitive() {
 		String str = "<dIV id='one' myAttr='aaa'>xxx</dIV>";
 
 		Jerry.JerryParser jerryParser = Jerry.jerry();

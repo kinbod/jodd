@@ -38,12 +38,12 @@ import java.net.URL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Disabled("test does not give consistent results - run each method individually")
-public class DirWatcherTest {
+class DirWatcherTest {
 
 	protected String dataRoot;
 
 	@BeforeEach
-	public void setUp() throws Exception {
+	void setUp() throws Exception {
 		if (dataRoot != null) {
 			return;
 		}
@@ -52,7 +52,7 @@ public class DirWatcherTest {
 	}
 
 	@Test
-	public void testDirWatcher() throws IOException {
+	void testDirWatcher() throws IOException {
 		DirWatcher dirWatcher = new DirWatcher(dataRoot, "*.md");
 
 		final StringBuilder sb = new StringBuilder();
@@ -82,7 +82,7 @@ public class DirWatcherTest {
 	}
 
 	@Test
-	public void testDirWatcherWithFile() throws IOException {
+	void testDirWatcherWithFile() throws IOException {
 		DirWatcher dirWatcher = new DirWatcher(dataRoot)
 				.monitor("*.md")
 				.useWatchFile("watch.txt");
@@ -118,7 +118,7 @@ public class DirWatcherTest {
 	}
 
 	@Test
-	public void testBlankStart() throws IOException {
+	void testBlankStart() throws IOException {
 		DirWatcher dirWatcher = new DirWatcher(dataRoot)
 				.monitor("*.txt")
 				.startBlank(true);

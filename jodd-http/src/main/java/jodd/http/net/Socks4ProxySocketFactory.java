@@ -29,7 +29,6 @@ import jodd.http.HttpException;
 import jodd.http.ProxyInfo;
 
 import javax.net.SocketFactory;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
@@ -44,30 +43,34 @@ public class Socks4ProxySocketFactory extends SocketFactory {
 
 	private final ProxyInfo proxy;
 
-	public Socks4ProxySocketFactory(ProxyInfo proxy) {
+	public Socks4ProxySocketFactory(final ProxyInfo proxy) {
 		this.proxy = proxy;
 	}
 
-	public Socket createSocket(String host, int port) throws IOException {
+	@Override
+	public Socket createSocket(final String host, final int port) {
 		return createSocks4ProxySocket(host, port);
 	}
 
-	public Socket createSocket(String host, int port, InetAddress localHost, int localPort) throws IOException {
+	@Override
+	public Socket createSocket(final String host, final int port, final InetAddress localHost, final int localPort) {
 		return createSocks4ProxySocket(host, port);
 	}
 
-	public Socket createSocket(InetAddress host, int port) throws IOException {
+	@Override
+	public Socket createSocket(final InetAddress host, final int port) {
 		return createSocks4ProxySocket(host.getHostAddress(), port);
 	}
 
-	public Socket createSocket(InetAddress address, int port, InetAddress localAddress, int localPort) throws IOException {
+	@Override
+	public Socket createSocket(final InetAddress address, final int port, final InetAddress localAddress, final int localPort) {
 		return createSocks4ProxySocket(address.getHostAddress(), port);
 	}
 
 	/**
 	 * Connects to the SOCKS4 proxy and returns proxified socket.
 	 */
-	private Socket createSocks4ProxySocket(String host, int port) {
+	private Socket createSocks4ProxySocket(final String host, final int port) {
 		Socket socket = null;
 		String proxyHost = proxy.getProxyAddress();
 		int proxyPort = proxy.getProxyPort();
@@ -141,7 +144,7 @@ public class Socks4ProxySocketFactory extends SocketFactory {
 	/**
 	 * Closes socket silently.
 	 */
-	private void closeSocket(Socket socket) {
+	private void closeSocket(final Socket socket) {
 		try {
 			if (socket != null) {
 				socket.close();

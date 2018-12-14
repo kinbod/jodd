@@ -32,21 +32,25 @@ import jodd.petite.scope.ProtoScope;
 import jodd.petite.scope.SingletonScope;
 import jodd.petite.scope.ThreadLocalScope;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
-public class MixScopeTest {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+class MixScopeTest {
 
 	@Test
-	public void testPrototypeInSingleton() {
+	void testPrototypeInSingleton() {
 		Small.instanceCounter = 0;
 
 		PetiteContainer pc = new PetiteContainer();
-		pc.getConfig().setWireScopedProxy(true);
-		pc.getConfig().setDetectMixedScopes(true);
+		pc.config().setWireScopedProxy(true);
+		pc.config().setDetectMixedScopes(true);
 
-		pc.registerPetiteBean(Big.class, "big", SingletonScope.class, null, false);
-		pc.registerPetiteBean(Big.class, "big2", SingletonScope.class, null, false);
-		pc.registerPetiteBean(Small.class, "small", ProtoScope.class, null, false);
+		pc.registerPetiteBean(Big.class, "big", SingletonScope.class, null, false, null);
+		pc.registerPetiteBean(Big.class, "big2", SingletonScope.class, null, false, null);
+		pc.registerPetiteBean(Small.class, "small", ProtoScope.class, null, false, null);
 
 		Big big = pc.getBean("big");
 
@@ -73,15 +77,15 @@ public class MixScopeTest {
 	}
 
 	@Test
-	public void testPrototypeInSingleton2() {
+	void testPrototypeInSingleton2() {
 		Small.instanceCounter = 0;
 
 		PetiteContainer pc = new PetiteContainer();
-		pc.getConfig().setWireScopedProxy(true);
-		pc.getConfig().setDetectMixedScopes(true);
+		pc.config().setWireScopedProxy(true);
+		pc.config().setDetectMixedScopes(true);
 
-		pc.registerPetiteBean(Big2.class, "big", SingletonScope.class, null, false);
-		pc.registerPetiteBean(Small.class, "small", ProtoScope.class, null, false);
+		pc.registerPetiteBean(Big2.class, "big", SingletonScope.class, null, false, null);
+		pc.registerPetiteBean(Small.class, "small", ProtoScope.class, null, false, null);
 
 		Big2 big = pc.getBean("big");
 
@@ -103,17 +107,17 @@ public class MixScopeTest {
 	}
 
 	@Test
-	public void testSingleFactoryInstance() {
+	void testSingleFactoryInstance() {
 
 		Small.instanceCounter = 0;
 
 		PetiteContainer pc = new PetiteContainer();
-		pc.getConfig().setWireScopedProxy(true);
-		pc.getConfig().setDetectMixedScopes(true);
+		pc.config().setWireScopedProxy(true);
+		pc.config().setDetectMixedScopes(true);
 
-		pc.registerPetiteBean(Big.class, "big", SingletonScope.class, null, false);
-		pc.registerPetiteBean(Big.class, "big2", SingletonScope.class, null, false);
-		pc.registerPetiteBean(Small.class, "small", ProtoScope.class, null, false);
+		pc.registerPetiteBean(Big.class, "big", SingletonScope.class, null, false, null);
+		pc.registerPetiteBean(Big.class, "big2", SingletonScope.class, null, false, null);
+		pc.registerPetiteBean(Small.class, "small", ProtoScope.class, null, false, null);
 
 		Big big = pc.getBean("big");
 
@@ -135,16 +139,16 @@ public class MixScopeTest {
 	}
 
 	@Test
-	public void testThreadLocalScopeInSingleton() {
+	void testThreadLocalScopeInSingleton() {
 
 		Small.instanceCounter = 0;
 
 		PetiteContainer pc = new PetiteContainer();
-		pc.getConfig().setWireScopedProxy(true);
-		pc.getConfig().setDetectMixedScopes(true);
+		pc.config().setWireScopedProxy(true);
+		pc.config().setDetectMixedScopes(true);
 
-		pc.registerPetiteBean(Big.class, "big", SingletonScope.class, null, false);
-		pc.registerPetiteBean(Small.class, "small", ThreadLocalScope.class, null, false);
+		pc.registerPetiteBean(Big.class, "big", SingletonScope.class, null, false, null);
+		pc.registerPetiteBean(Small.class, "small", ThreadLocalScope.class, null, false, null);
 
 		final Big big = pc.getBean("big");
 

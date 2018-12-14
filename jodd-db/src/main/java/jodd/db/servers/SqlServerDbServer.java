@@ -25,7 +25,7 @@
 
 package jodd.db.servers;
 
-import jodd.db.oom.DbOomManager;
+import jodd.db.oom.DbOomConfig;
 
 /**
  * SQL Server.
@@ -34,14 +34,17 @@ public class SqlServerDbServer implements DbServer {
 
 	private final String version;
 
-	public SqlServerDbServer(String version) {
+	public SqlServerDbServer(final String version) {
 		this.version = version;
 	}
 
 	@Override
-	public void accept(DbOomManager dbOomManager) {
-		dbOomManager.getSqlGenConfig().setUpdateAcceptsTableAlias(false);
-		dbOomManager.getSqlGenConfig().setUpdateablePrimaryKey(false);
+	public void accept(final DbOomConfig dbOomConfig) {
+		dbOomConfig.setUpdateAcceptsTableAlias(false);
+		dbOomConfig.setUpdateablePrimaryKey(false);
+
+		// quote character
+		dbOomConfig.getColumnNames().setQuoteChar('\"');
 	}
 
 	@Override

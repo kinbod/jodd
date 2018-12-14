@@ -29,10 +29,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class AssertTrueConstraintTest extends ConstraintTestBase {
+class AssertTrueConstraintTest extends ConstraintTestBase {
 
     @Test
-    public void testAssertTrue() {
+    void testAssertTrue() {
         AssertTrueConstraint assertTrueConstraint = new AssertTrueConstraint();
         //this is an empty method nothing can be verified
         assertTrueConstraint.configure(null);

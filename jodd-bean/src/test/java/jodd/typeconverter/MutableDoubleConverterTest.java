@@ -31,13 +31,15 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
-public class MutableDoubleConverterTest {
+class MutableDoubleConverterTest {
 
 	@Test
-	public void testConversion() {
-		MutableDoubleConverter mutableDoubleConverter = (MutableDoubleConverter) TypeConverterManager.lookup(MutableDouble.class);
+	void testConversion() {
+		MutableDoubleConverter mutableDoubleConverter = (MutableDoubleConverter) TypeConverterManager.get().lookup(MutableDouble.class);
 
 		assertNull(mutableDoubleConverter.convert(null));
 

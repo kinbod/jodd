@@ -35,23 +35,23 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-public class JCLLoggerTest extends LoggerTestBase {
+class JCLLoggerTest extends LoggerTestBase {
 
 	private Log log;
 
 	@BeforeEach
-	public void setUp() throws Exception {
+	void setUp() throws Exception {
 		log = mock(Log.class);
 		logger = new JCLLogger(log);
 	}
 
 	@Test
-	public void testGetName() {
+	void testGetName() {
 		assertEquals(log.toString(), logger.getName());
 	}
 
 	@Test
-	public void testLog() {
+	void testLog() {
 		//when
 		logger.log(Level.TRACE, LoggerConstants.SIMPLE_MESSAGE);
 
@@ -84,7 +84,7 @@ public class JCLLoggerTest extends LoggerTestBase {
 	}
 
 	@Test
-	public void testLevel() {
+	void testLevel() {
 		//when
 		logger.trace(LoggerConstants.TRACE_MESSAGE);
 
@@ -117,7 +117,7 @@ public class JCLLoggerTest extends LoggerTestBase {
 	}
 
 	@Test
-	public void testErrorWithThrowable() {
+	void testErrorWithThrowable() {
 		//given
 		throwable = mock(Throwable.class);
 
@@ -129,7 +129,7 @@ public class JCLLoggerTest extends LoggerTestBase {
 	}
 
 	@Test
-	public void testWarnWithThrowable() {
+	void testWarnWithThrowable() {
 		//given
 		throwable = mock(Throwable.class);
 
@@ -141,7 +141,7 @@ public class JCLLoggerTest extends LoggerTestBase {
 	}
 
 	@Test
-	public void testJCLLoggerFactory() {
+	void testJCLLoggerFactory() {
 		//given
 		loggerProvider = JCLLogger.PROVIDER;
 

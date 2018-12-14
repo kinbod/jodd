@@ -34,18 +34,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-public class JDKLoggerTest extends LoggerTestBase {
+class JDKLoggerTest extends LoggerTestBase {
 
 	private java.util.logging.Logger log;
 
 	@BeforeEach
-	public void setUp() throws Exception {
+	void setUp() throws Exception {
 		log = mock(java.util.logging.Logger.class);
 		logger = new JDKLogger(log);
 	}
 
 	@Test
-	public void testGetName() {
+	void testGetName() {
 		//when
 		logger.getName();
 
@@ -54,7 +54,7 @@ public class JDKLoggerTest extends LoggerTestBase {
 	}
 
 	@Test
-	public void testLog() {
+	void testLog() {
 		//when
 		logger.log(Level.TRACE, LoggerConstants.SIMPLE_MESSAGE);
 
@@ -87,7 +87,7 @@ public class JDKLoggerTest extends LoggerTestBase {
 	}
 
 	@Test
-	public void testLevel() {
+	void testLevel() {
 		//when
 		logger.trace(LoggerConstants.TRACE_MESSAGE);
 
@@ -120,7 +120,7 @@ public class JDKLoggerTest extends LoggerTestBase {
 	}
 
 	@Test
-	public void testErrorWithThrowable() {
+	void testErrorWithThrowable() {
 		//given
 		throwable = mock(Throwable.class);
 
@@ -132,7 +132,7 @@ public class JDKLoggerTest extends LoggerTestBase {
 	}
 
 	@Test
-	public void testWarnWithThrowable() {
+	void testWarnWithThrowable() {
 		//given
 		throwable = mock(Throwable.class);
 
@@ -144,7 +144,7 @@ public class JDKLoggerTest extends LoggerTestBase {
 	}
 
 	@Test
-	public void testJDKLoggerFactory() {
+	void testJDKLoggerFactory() {
 		//given
 		loggerProvider = JDKLogger.PROVIDER;
 

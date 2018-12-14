@@ -25,7 +25,7 @@
 
 package jodd.db.servers;
 
-import jodd.db.oom.DbOomManager;
+import jodd.db.oom.DbOomConfig;
 
 /**
  * Sybase.
@@ -34,12 +34,14 @@ public class SybaseDbServer implements DbServer {
 
 	private final String version;
 
-	public SybaseDbServer(String version) {
+	public SybaseDbServer(final String version) {
 		this.version = version;
 	}
 
 	@Override
-	public void accept(DbOomManager dbOomManager) {
+	public void accept(final DbOomConfig dbOomConfig) {
+		// quote character
+		dbOomConfig.getColumnNames().setQuoteChar('\"');
 	}
 
 	@Override

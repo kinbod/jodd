@@ -30,15 +30,15 @@ import jodd.log.Logger;
 import jodd.log.LoggerFactory;
 
 import java.sql.CallableStatement;
-import java.sql.Statement;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.HashSet;
 
 import static jodd.db.DbQueryBase.State.CLOSED;
 import static jodd.db.DbQueryBase.State.CREATED;
@@ -47,23 +47,30 @@ import static jodd.db.DbQueryBase.State.INITIALIZED;
 /**
  * Support for {@link DbQuery} holds all configuration, initialization and the execution code.
  */
-abstract class DbQueryBase implements AutoCloseable {
+abstract class DbQueryBase<Q extends DbQueryBase> implements AutoCloseable {
 
 	private static final Logger log = LoggerFactory.getLogger(DbQueryBase.class);
 
+	protected final DbOom dbOom;
+
 	// ---------------------------------------------------------------- ctor
 
-	protected final DbManager dbManager = DbManager.getInstance();
-
-	protected DbQueryBase() {
-		this.forcePreparedStatement = dbManager.forcePreparedStatement;
-		this.type = dbManager.type;
-		this.concurrencyType = dbManager.concurrencyType;
-		this.holdability = dbManager.holdability;
-		this.debug = dbManager.debug;
-		this.fetchSize = dbManager.fetchSize;
-		this.maxRows = dbManager.maxRows;
+	protected DbQueryBase(final DbOom dbOom) {
+		this.dbOom = dbOom;
+		this.forcePreparedStatement = dbOom.queryConfig().isForcePreparedStatement();
+		this.type = dbOom.queryConfig().getType();
+		this.concurrencyType = dbOom.queryConfig().getConcurrencyType();
+		this.holdability = dbOom.queryConfig().getHoldability();
+		this.debug = dbOom.queryConfig().isDebug();
+		this.fetchSize = dbOom.queryConfig().getFetchSize();
+		this.maxRows = dbOom.queryConfig().getMaxRows();
 	}
+
+	@SuppressWarnings("unchecked")
+	protected Q _this() {
+		return (Q) this;
+	}
+
 
 	// ---------------------------------------------------------------- query states
 
@@ -96,7 +103,7 @@ abstract class DbQueryBase implements AutoCloseable {
 	 */
 	protected void checkCreated() {
 		if (queryState != CREATED) {
-			String message = (queryState == INITIALIZED ?
+			final String message = (queryState == INITIALIZED ?
 									"Query is already initialized." : "Query is closed.");
 			throw new DbSqlException(this, message + " Operation may be performed only on created queries.");
 		}
@@ -107,7 +114,7 @@ abstract class DbQueryBase implements AutoCloseable {
 	 */
 	protected void checkInitialized() {
 		if (queryState != INITIALIZED) {
-			String message = (queryState == CREATED ?
+			final String message = (queryState == CREATED ?
 									"Query is created but not yet initialized." : "Query is closed.");
 			throw new DbSqlException(this, message + " Operation may be performed only on initialized queries.");
 		}
@@ -162,7 +169,7 @@ abstract class DbQueryBase implements AutoCloseable {
 	/**
 	 * Stores result set.
 	 */
-	protected void saveResultSet(ResultSet rs) {
+	protected void saveResultSet(final ResultSet rs) {
 		if (resultSets == null) {
 			resultSets = new HashSet<>();
 		}
@@ -179,9 +186,10 @@ abstract class DbQueryBase implements AutoCloseable {
 	/**
 	 * Forces creation of prepared statements.
 	 */
-	public void forcePreparedStatement() {
+	public Q forcePreparedStatement() {
 		checkCreated();
 		forcePreparedStatement = true;
+		return _this();
 	}
 
 	// ---------------------------------------------------------------- initialization
@@ -206,17 +214,13 @@ abstract class DbQueryBase implements AutoCloseable {
 	 * Initializes session. When not specified (i.e. is <code>null</code>),
 	 * session is fetched from session provider.
 	 */
-	protected void initSession(DbSession session) {
+	protected void initSession(final DbSession session) {
 		if (session != null) {
 			this.session = session;
 			return;
 		}
 
-		DbSessionProvider dbSessionProvider = dbManager.sessionProvider;
-
-		if (dbSessionProvider == null) {
-			throw new DbSqlException("Session provider not available.");
-		}
+		final DbSessionProvider dbSessionProvider = dbOom.sessionProvider();
 
 		this.session = dbSessionProvider.getDbSession();
 	}
@@ -225,6 +229,7 @@ abstract class DbQueryBase implements AutoCloseable {
 	 * Performs JDBC initialization of the query. Obtains connection, parses the SQL query string
 	 * and creates statements. Initialization is performed only once, when switching to initialized state.
 	 */
+	@SuppressWarnings("MagicConstant")
 	protected void initializeJdbc() {
 		// connection
 		if (connection == null) {
@@ -240,17 +245,21 @@ abstract class DbQueryBase implements AutoCloseable {
 		if (query.callable) {
 			try {
 				if (debug) {
-					if (holdability != DEFAULT_HOLDABILITY) {
-						callableStatement = LogabbleStatementFactory.callable().prepareCall(connection, query.sql, type, concurrencyType, holdability);
+					if (holdability != QueryHoldability.DEFAULT) {
+						callableStatement = LogabbleStatementFactory.callable().prepareCall(
+							connection, query.sql, type.value(), concurrencyType.value(), holdability.value());
 					} else {
-						callableStatement = LogabbleStatementFactory.callable().prepareCall(connection, query.sql, type, concurrencyType);
+						callableStatement = LogabbleStatementFactory.callable().prepareCall(
+							connection, query.sql, type.value(), concurrencyType.value());
 					}
 				}
 				else {
-					if (holdability != DEFAULT_HOLDABILITY) {
-						callableStatement = connection.prepareCall(query.sql, type, concurrencyType, holdability);
+					if (holdability != QueryHoldability.DEFAULT) {
+						callableStatement = connection.prepareCall(
+							query.sql, type.value(), concurrencyType.value(), holdability.value());
 					} else {
-						callableStatement = connection.prepareCall(query.sql, type, concurrencyType);
+						callableStatement = connection.prepareCall(
+							query.sql, type.value(), concurrencyType.value());
 					}
 				}
 			}
@@ -276,10 +285,12 @@ abstract class DbQueryBase implements AutoCloseable {
 							preparedStatement = LogabbleStatementFactory.prepared().create(connection, query.sql, generatedColumns);
 						}
 					} else {
-						if (holdability != DEFAULT_HOLDABILITY) {
-							preparedStatement = LogabbleStatementFactory.prepared().create(connection, query.sql, type, concurrencyType, holdability);
+						if (holdability != QueryHoldability.DEFAULT) {
+							preparedStatement = LogabbleStatementFactory.prepared().create(
+								connection, query.sql, type.value(), concurrencyType.value(), holdability.value());
 						} else {
-							preparedStatement = LogabbleStatementFactory.prepared().create(connection, query.sql, type, concurrencyType);
+							preparedStatement = LogabbleStatementFactory.prepared().create(
+								connection, query.sql, type.value(), concurrencyType.value());
 						}
 					}
 				} else {
@@ -290,10 +301,12 @@ abstract class DbQueryBase implements AutoCloseable {
 							preparedStatement = connection.prepareStatement(query.sql, generatedColumns);
 						}
 					} else {
-						if (holdability != DEFAULT_HOLDABILITY) {
-							preparedStatement = connection.prepareStatement(query.sql, type, concurrencyType, holdability);
+						if (holdability != QueryHoldability.DEFAULT) {
+							preparedStatement = connection.prepareStatement(
+								query.sql, type.value(), concurrencyType.value(), holdability.value());
 						} else {
-							preparedStatement = connection.prepareStatement(query.sql, type, concurrencyType);
+							preparedStatement = connection.prepareStatement(
+								query.sql, type.value(), concurrencyType.value());
 						}
 					}
 				}
@@ -310,10 +323,10 @@ abstract class DbQueryBase implements AutoCloseable {
 		// statement
 
 		try {
-			if (holdability != DEFAULT_HOLDABILITY) {
-				statement = connection.createStatement(type, concurrencyType, holdability);
+			if (holdability != QueryHoldability.DEFAULT) {
+				statement = connection.createStatement(type.value(), concurrencyType.value(), holdability.value());
 			} else {
-				statement = connection.createStatement(type, concurrencyType);
+				statement = connection.createStatement(type.value(), concurrencyType.value());
 			}
 		} catch (SQLException sex) {
 			throw new DbSqlException(this, "Error creating statement", sex);
@@ -342,9 +355,9 @@ abstract class DbQueryBase implements AutoCloseable {
 	 * Defines that query should be automatically closed immediately after using.
 	 * Should be called before actual statement execution.
 	 */
-	public <Q extends DbQueryBase> Q autoClose() {
+	public Q autoClose() {
 		autoClose = true;
-		return (Q) this;
+		return _this();
 	}
 
 	/**
@@ -356,7 +369,7 @@ abstract class DbQueryBase implements AutoCloseable {
 		SQLException sqlException = null;
 
 		if (resultSets != null) {
-			for (ResultSet rs : resultSets) {
+			for (final ResultSet rs : resultSets) {
 				try {
 					rs.close();
 				} catch (SQLException sex) {
@@ -378,11 +391,12 @@ abstract class DbQueryBase implements AutoCloseable {
 	/**
 	 * Closes all result sets created by this query. Query remains active.
 	 */
-	public void closeAllResultSets() {
-		SQLException sex = closeQueryResultSets();
+	public Q closeAllResultSets() {
+		final SQLException sex = closeQueryResultSets();
 		if (sex != null) {
 			throw new DbSqlException("Close associated ResultSets error", sex);
 		}
+		return _this();
 	}
 
 	/**
@@ -410,9 +424,10 @@ abstract class DbQueryBase implements AutoCloseable {
 	/**
 	 * Closes the query and all created results sets and detaches itself from the session.
 	 */
+	@Override
 	@SuppressWarnings({"ClassReferencesSubclass"})
 	public void close() {
-		SQLException sqlException = closeQuery();
+		final SQLException sqlException = closeQuery();
 		connection = null;
 		if (this.session != null) {
 			this.session.detachQuery(this);
@@ -427,7 +442,7 @@ abstract class DbQueryBase implements AutoCloseable {
 	 * explicitly, since {@link DbQueryBase#close()} method closes all created result sets.
 	 * Query remains active.
 	 */
-	public void closeResultSet(ResultSet rs) {
+	public void closeResultSet(final ResultSet rs) {
 		if (rs == null) {
 			return;
 		}
@@ -445,101 +460,74 @@ abstract class DbQueryBase implements AutoCloseable {
 
 	// ---------------------------------------------------------------- result set type
 
-	/**
-	 * @see ResultSet#TYPE_FORWARD_ONLY
-	 */
-	public static final int TYPE_FORWARD_ONLY = ResultSet.TYPE_FORWARD_ONLY;
-	/**
-	 * @see ResultSet#TYPE_SCROLL_SENSITIVE
-	 */
-	public static final int TYPE_SCROLL_SENSITIVE = ResultSet.TYPE_SCROLL_SENSITIVE;
-	/**
-	 * @see ResultSet#TYPE_SCROLL_INSENSITIVE
-	 */
-	public static final int TYPE_SCROLL_INSENSITIVE = ResultSet.TYPE_SCROLL_INSENSITIVE;
+	protected QueryScrollType type;
 
-	protected int type;
-
-	public int getType() {
+	public QueryScrollType getType() {
 		return type;
 	}
 
-	public void setType(int type) {
+	public Q setType(final QueryScrollType type) {
 		checkCreated();
 		this.type = type;
+		return _this();
 	}
-	public void typeForwardOnly() {
-		setType(TYPE_FORWARD_ONLY);
+	public Q typeForwardOnly() {
+		setType(QueryScrollType.FORWARD_ONLY);
+		return _this();
 	}
-	public void typeScrollSensitive() {
-		setType(TYPE_SCROLL_SENSITIVE);
+	public Q typeScrollSensitive() {
+		setType(QueryScrollType.SCROLL_SENSITIVE);
+		return _this();
 	}
-	public void typeScrollInsensitive() {
-		setType(TYPE_SCROLL_SENSITIVE);
+	public Q typeScrollInsensitive() {
+		setType(QueryScrollType.SCROLL_INSENSITIVE);
+		return _this();
 	}
 
 	// ---------------------------------------------------------------- concurrency
 
-	/**
-	 * @see ResultSet#CONCUR_READ_ONLY
-	 */
-	public static final int CONCUR_READ_ONLY = ResultSet.CONCUR_READ_ONLY;
-	/**
-	 * @see ResultSet#CONCUR_UPDATABLE
-	 */
-	public static final int CONCUR_UPDATABLE = ResultSet.CONCUR_UPDATABLE;
+	protected QueryConcurrencyType concurrencyType;
 
-	protected int concurrencyType;
-
-	public int getConcurrencyType() {
+	public QueryConcurrencyType getConcurrencyType() {
 		return concurrencyType;
 	}
 
-	public void setConcurrencyType(int concurrencyType) {
+	public Q setConcurrencyType(final QueryConcurrencyType concurrencyType) {
 		checkCreated();
 		this.concurrencyType = concurrencyType;
+		return _this();
 	}
-	public void concurReadOnly() {
-		setConcurrencyType(CONCUR_READ_ONLY);
+	public Q concurrentReadOnly() {
+		setConcurrencyType(QueryConcurrencyType.READ_ONLY);
+		return _this();
 	}
-	public void concurUpdatable() {
-		setConcurrencyType(CONCUR_UPDATABLE);
+	public Q concurrentUpdatable() {
+		setConcurrencyType(QueryConcurrencyType.UPDATABLE);
+		return _this();
 	}
 
 	// ---------------------------------------------------------------- holdability
 
-	/**
-	 * Default holdability. JDBC specification does not specifies default value for holdability.
-	 */
-	public static final int DEFAULT_HOLDABILITY = -1;
+	protected QueryHoldability holdability;
 
-	/**
-	 * @see ResultSet#CLOSE_CURSORS_AT_COMMIT
-	 */
-	public static final int CLOSE_CURSORS_AT_COMMIT = ResultSet.CLOSE_CURSORS_AT_COMMIT;
-
-	/**
-	 * @see ResultSet#HOLD_CURSORS_OVER_COMMIT
-	 */
-	public static final int HOLD_CURSORS_OVER_COMMIT = ResultSet.HOLD_CURSORS_OVER_COMMIT;
-
-	protected int holdability;
-
-	public int getHoldability() {
+	public QueryHoldability getHoldability() {
 		return holdability;
 	}
 
-	public void setHoldability(int holdability) {
+	public Q setHoldability(final QueryHoldability holdability) {
 		checkCreated();
 		this.holdability = holdability;
+		return _this();
 	}
 
-	public void holdCursorsOverCommit() {
-		setHoldability(HOLD_CURSORS_OVER_COMMIT);
+	public Q holdCursorsOverCommit() {
+		setHoldability(QueryHoldability.HOLD_CURSORS_OVER_COMMIT);
+		return _this();
 	}
 
-	public void closeCursorsAtCommit() {
-		setHoldability(CLOSE_CURSORS_AT_COMMIT);
+	public Q closeCursorsAtCommit() {
+		setHoldability(QueryHoldability.CLOSE_CURSORS_AT_COMMIT);
+		return _this();
 	}
 
 	// ---------------------------------------------------------------- debug mode
@@ -550,12 +538,14 @@ abstract class DbQueryBase implements AutoCloseable {
 		return debug;
 	}
 
-	public void setDebug(boolean debug) {
+	public Q setDebug(final boolean debug) {
 		checkCreated();
 		this.debug = debug;
+		return _this();
 	}
-	public void setDebugMode() {
+	public Q setDebugMode() {
 		setDebug(true);
+		return _this();
 	}
 
 
@@ -573,28 +563,29 @@ abstract class DbQueryBase implements AutoCloseable {
 	/**
 	 * Specifies columns which values will be generated by database.
 	 */
-	public void setGeneratedColumns(String... columns) {
+	public Q setGeneratedColumns(final String... columns) {
 		checkCreated();
 		generatedColumns = columns;
+		return _this();
 	}
 
 	/**
 	 * Specifies that database will generate some columns values,
 	 * usually the single id.
 	 */
-	public void setGeneratedKey() {
+	public Q setGeneratedKey() {
 		setGeneratedColumns();
+		return _this();
 	}
 
 	/**
 	 * Resets creating generated columns.
 	 */
-	public void resetGeneratedColumns() {
+	public Q resetGeneratedColumns() {
 		checkCreated();
 		generatedColumns = null;
+		return _this();
 	}
-
-
 
 
 	// ---------------------------------------------------------------- performance hints
@@ -615,7 +606,7 @@ abstract class DbQueryBase implements AutoCloseable {
 	 * If the value specified is zero, then the hint is ignored. The default value is zero.
 	 * @see Statement#setFetchSize(int)
 	 */
-	public void setFetchSize(int rows) {
+	public Q setFetchSize(final int rows) {
 		checkNotClosed();
 		this.fetchSize = rows;
 		if (statement != null) {
@@ -625,6 +616,7 @@ abstract class DbQueryBase implements AutoCloseable {
 				throw new DbSqlException(this, "Unable to set fetch size: " + fetchSize, sex);
 			}
 		}
+		return _this();
 	}
 
 	protected int maxRows;
@@ -642,7 +634,7 @@ abstract class DbQueryBase implements AutoCloseable {
 	 * If the limit is exceeded, the excess rows are silently dropped. Zero means there is no limit.
 	 * @see Statement#setMaxRows(int)
 	 */
-	public void setMaxRows(int maxRows) {
+	public Q setMaxRows(final int maxRows) {
 		checkNotClosed();
 		this.maxRows = maxRows;
 		if (statement != null) {
@@ -652,6 +644,7 @@ abstract class DbQueryBase implements AutoCloseable {
 				throw new DbSqlException(this, "Unable to set max rows: " + maxRows, sex);
 			}
 		}
+		return _this();
 	}
 
 	// ---------------------------------------------------------------- execute
@@ -736,11 +729,11 @@ abstract class DbQueryBase implements AutoCloseable {
 	 * Executes UPDATE, INSERT or DELETE queries and optionally closes the query.
 	 * @see Statement#executeUpdate(String)
 	 */
-	protected int executeUpdate(boolean closeQuery) {
+	protected int executeUpdate(final boolean closeQuery) {
 		start = System.currentTimeMillis();
 
 		init();
-		int result;
+		final int result;
 		if (log.isDebugEnabled()) {
 			log.debug("Executing update: " + getQueryString());
 		}
@@ -786,7 +779,7 @@ abstract class DbQueryBase implements AutoCloseable {
 	/**
 	 * Executes count queries and optionally closes query afterwards.
 	 */
-	protected long executeCount(boolean close) {
+	protected long executeCount(final boolean close) {
 		start = System.currentTimeMillis();
 
 		init();
@@ -801,7 +794,7 @@ abstract class DbQueryBase implements AutoCloseable {
 				rs = preparedStatement.executeQuery();
 			}
 
-			long firstLong = DbUtil.getFirstLong(rs);
+			final long firstLong = DbUtil.getFirstLong(rs);
 
 			elapsed = System.currentTimeMillis() - start;
 			if (log.isDebugEnabled()) {
@@ -823,16 +816,16 @@ abstract class DbQueryBase implements AutoCloseable {
 
 	/**
 	 * {@link #execute() Executes} the query, iterates result set and
-	 * {@link QueryMapper map} each row.
+	 * {@link QueryMapper maps} each row.
 	 */
-	public <T> List<T> list(QueryMapper<T> queryMapper) {
-		ResultSet resultSet = execute();
+	public <T> List<T> list(final QueryMapper<T> queryMapper) {
+		final ResultSet resultSet = execute();
 
-		List<T> list = new ArrayList<>();
+		final List<T> list = new ArrayList<>();
 
 		try {
 			while (resultSet.next()) {
-				T t = queryMapper.process(resultSet);
+				final T t = queryMapper.process(resultSet);
 				if (t == null) {
 					break;
 				}
@@ -848,10 +841,10 @@ abstract class DbQueryBase implements AutoCloseable {
 	}
 
 	/**
-	 * {@link #execute() Executes} the query and maps single result row.
+	 * {@link #execute() Executes} the query and {@link QueryMapper maps} single result row.
 	 */
-	public <T> T find(QueryMapper<T> queryMapper) {
-		ResultSet resultSet = execute();
+	public <T> T find(final QueryMapper<T> queryMapper) {
+		final ResultSet resultSet = execute();
 
 		try {
 			if (resultSet.next()) {
@@ -867,16 +860,16 @@ abstract class DbQueryBase implements AutoCloseable {
 
 	/**
 	 * {@link #execute() Executes} the query, iterates all rows and
-	 * maps them.
+	 * {@link QueryMapper maps} them.
 	 */
-	public <T> Set<T> listSet(QueryMapper<T> queryMapper) {
-		ResultSet resultSet = execute();
+	public <T> Set<T> listSet(final QueryMapper<T> queryMapper) {
+		final ResultSet resultSet = execute();
 
-		Set<T> set = new HashSet<>();
+		final Set<T> set = new HashSet<>();
 
 		try {
 			while (resultSet.next()) {
-				T t = queryMapper.process(resultSet);
+				final T t = queryMapper.process(resultSet);
 				if (t == null) {
 					break;
 				}
@@ -900,7 +893,7 @@ abstract class DbQueryBase implements AutoCloseable {
 		if (generatedColumns == null) {
 			throw new DbSqlException(this, "No column is specified as auto-generated");
 		}
-		ResultSet rs;
+		final ResultSet rs;
 		try {
 			rs = statement.getGeneratedKeys();
 		} catch (SQLException sex) {
@@ -916,9 +909,23 @@ abstract class DbQueryBase implements AutoCloseable {
 	 */
 	public long getGeneratedKey() {
 		checkInitialized();
-		ResultSet rs = getGeneratedColumns();
+		final ResultSet rs = getGeneratedColumns();
 		try {
 			return DbUtil.getFirstLong(rs);
+		} catch (SQLException sex) {
+			throw new DbSqlException(this, "No generated key as long", sex);
+		} finally {
+			DbUtil.close(rs);
+			resultSets.remove(rs);
+			totalOpenResultSetCount--;
+		}
+	}
+
+	public Object getGeneratedKeyObject() {
+		checkInitialized();
+		final ResultSet rs = getGeneratedColumns();
+		try {
+			return DbUtil.getFirstObject(rs);
 		} catch (SQLException sex) {
 			throw new DbSqlException(this, "No generated key as long", sex);
 		} finally {

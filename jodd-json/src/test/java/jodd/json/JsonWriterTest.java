@@ -29,10 +29,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class JsonWriterTest {
+class JsonWriterTest {
 
 	@Test
-	public void testJsonWriter() {
+	void testJsonWriter() {
 		StringBuilder sb = new StringBuilder();
 		JsonWriter jsonWriter = new JsonWriter(sb, false);
 

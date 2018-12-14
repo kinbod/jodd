@@ -32,14 +32,17 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.net.URL;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class FindFile2Test {
+class FindFile2Test {
 
 	protected String dataRoot;
 
 	@BeforeEach
-	public void setUp() throws Exception {
+	void setUp() throws Exception {
 		if (dataRoot != null) {
 			return;
 		}
@@ -48,7 +51,7 @@ public class FindFile2Test {
 	}
 
 	@Test
-	public void testAcceptAndWalk() {
+	void testAcceptAndWalk() {
 		final StringBuilder s1 = new StringBuilder();
 		final StringBuilder s2 = new StringBuilder();
 
@@ -98,7 +101,7 @@ public class FindFile2Test {
 	}
 
 	@Test
-	public void testTwoRoots() {
+	void testTwoRoots() {
 
 		FindFile ff =
 			new WildcardFindFile()
@@ -130,7 +133,7 @@ public class FindFile2Test {
 	}
 
 	@Test
-	public void testTwoRootsAndWildcardMatchTypes() {
+	void testTwoRootsAndWildcardMatchTypes() {
 
 		WildcardFindFile wff = new WildcardFindFile();
 		wff.includeDirs(true);
@@ -188,7 +191,7 @@ public class FindFile2Test {
 	}
 
 	@Test
-	public void testNonExisting() {
+	void testNonExisting() {
 		FindFile wff = new FindFile();
 
 		wff.includeDirs(true);
@@ -206,7 +209,7 @@ public class FindFile2Test {
 	}
 
 	@Test
-	public void testNotFound() {
+	void testNotFound() {
 		WildcardFindFile wff = new WildcardFindFile();
 		wff.includeDirs(true);
 		wff.includeFiles(true);
@@ -227,7 +230,7 @@ public class FindFile2Test {
 
 
 	@Test
-	public void testSort() {
+	void testSort() {
 		final StringBuilder str = new StringBuilder();
 
 		FindFile ff = new FindFile();
@@ -295,7 +298,7 @@ public class FindFile2Test {
 	}
 
 	@Test
-	public void testJustFoldersAndFiles() {
+	void testJustFoldersAndFiles() {
 		FindFile ff = new FindFile();
 		ff.includeDirs(false);
 		ff.includeFiles(true);

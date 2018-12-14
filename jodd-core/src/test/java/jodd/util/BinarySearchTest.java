@@ -34,13 +34,13 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class BinarySearchTest {
+class BinarySearchTest {
 
 	protected List<String> list;
 	protected BinarySearch<String> listBinarySearch;
 
 	@BeforeEach
-	public void setUp() throws Exception {
+	void setUp() throws Exception {
 		list = new ArrayList<>();
 		list.add("aaa");    // 0
 		list.add("bbb");
@@ -57,7 +57,7 @@ public class BinarySearchTest {
 	}
 
 	@Test
-	public void testFind() {
+	void testFind() {
 		assertEquals(0, listBinarySearch.find("aaa"));
 		assertEquals(1, listBinarySearch.find("bbb"));
 		assertEquals(2, listBinarySearch.find("ccc"));
@@ -77,7 +77,7 @@ public class BinarySearchTest {
 	}
 
 	@Test
-	public void testFindFirst() {
+	void testFindFirst() {
 		assertEquals(0, listBinarySearch.findFirst("aaa"));
 		assertEquals(1, listBinarySearch.findFirst("bbb"));
 		assertEquals(2, listBinarySearch.findFirst("ccc"));
@@ -95,7 +95,7 @@ public class BinarySearchTest {
 	}
 
 	@Test
-	public void testFindLast() {
+	void testFindLast() {
 		assertEquals(0, listBinarySearch.findLast("aaa"));
 		assertEquals(6, listBinarySearch.findLast("eee"));
 		assertEquals(9, listBinarySearch.findLast("sss"));
@@ -110,7 +110,7 @@ public class BinarySearchTest {
 	}
 
 	@Test
-	public void testFindRange() {
+	void testFindRange() {
 		assertEquals(3, listBinarySearch.findFirst("ddd"));
 		assertEquals(5, listBinarySearch.findLast("ddd", 3, 9));
 

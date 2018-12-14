@@ -29,10 +29,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class Props146Test {
+class Props146Test {
 
 	@Test
-	public void testIssue146ActiveProfile() {
+	void testIssue146ActiveProfile() {
 		String data =
 			"root=/app\n" +
 			"root<foo>=/foo\n" +
@@ -60,7 +60,7 @@ public class Props146Test {
 	}
 
 	@Test
-	public void testIssue146DeclaredProfile() {
+	void testIssue146DeclaredProfile() {
 		String data =
 			"root=/app\n" +
 			"root<foo>=/foo\n" +
@@ -81,7 +81,7 @@ public class Props146Test {
 	}
 
 	@Test
-	public void testIssue146Directly() {
+	void testIssue146Directly() {
 		String data =
 			"root=/app\n" +
 			"root<foo>=/foo\n" +
@@ -98,7 +98,7 @@ public class Props146Test {
 	}
 
 	@Test
-	public void testAddonFor146() {
+	void testAddonFor146() {
 		String data =
 				"key1=DEFAULT\n" +
 				"key1<foo>=FOO\n" +

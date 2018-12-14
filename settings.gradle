@@ -1,3 +1,5 @@
+enableFeaturePreview('STABLE_PUBLISHING')
+
 include 'distribution'
 
 include 'jodd-all'
@@ -18,7 +20,6 @@ include 'jodd-petite'
 include 'jodd-props'
 include 'jodd-proxetta'
 include 'jodd-servlet'
-include 'jodd-upload'
 include 'jodd-vtor'
 
 include 'jodd-bom'

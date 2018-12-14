@@ -25,6 +25,8 @@
 
 package jodd.util;
 
+import jodd.util.concurrent.ThreadFactoryBuilder;
+
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
@@ -42,15 +44,16 @@ public class Futures {
 	private static final ScheduledExecutorService SCHEDULER =
 		Executors.newScheduledThreadPool(
 			1,
-			new ThreadFactoryBuilder()
+			ThreadFactoryBuilder
+				.create()
 				.setDaemon(true)
 				.setNameFormat("failAfter-%d")
-				.build());
+				.get());
 
 	/**
 	 * Returns {@code CompletableFuture} that fails after certain number of milliseconds.
 	 */
-	public static <T> CompletableFuture<T> failAfter(long duration) {
+	public static <T> CompletableFuture<T> failAfter(final long duration) {
 		final CompletableFuture<T> promise = new CompletableFuture<>();
 		SCHEDULER.schedule(() -> {
 			final TimeoutException ex = new TimeoutException("Timeout after " + duration);
@@ -62,16 +65,16 @@ public class Futures {
 	/**
 	 * Returns {@code CompletableFuture} that fails after certain amount of time.
 	 */
-	public static <T> CompletableFuture<T> failAfter(Duration duration) {
+	public static <T> CompletableFuture<T> failAfter(final Duration duration) {
 		return failAfter(duration.toMillis());
 	}
 
-	public static <T> CompletableFuture<T> within(CompletableFuture<T> future, Duration duration) {
+	public static <T> CompletableFuture<T> within(final CompletableFuture<T> future, final Duration duration) {
 		final CompletableFuture<T> timeout = failAfter(duration);
 		return future.applyToEither(timeout, Function.identity());
 	}
 
-	public static <T> CompletableFuture<T> within(CompletableFuture<T> future, long duration) {
+	public static <T> CompletableFuture<T> within(final CompletableFuture<T> future, final long duration) {
 		final CompletableFuture<T> timeout = failAfter(duration);
 		return future.applyToEither(timeout, Function.identity());
 	}

@@ -35,10 +35,10 @@ import java.net.URL;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class RawTest {
+class RawTest {
 
 	@Test
-	public void testRawResponse1() throws IOException {
+	void testRawResponse1() throws IOException {
 		URL data = RawTest.class.getResource("1-response.txt");
 
 		String fileContent = FileUtil.readString(data.getFile());
@@ -86,7 +86,7 @@ public class RawTest {
 	}
 
 	@Test
-	public void testRawResponse4() throws IOException {
+	void testRawResponse4() throws IOException {
 		URL data = RawTest.class.getResource("4-response.txt");
 
 		String fileContent = FileUtil.readString(data.getFile());
@@ -106,7 +106,7 @@ public class RawTest {
 
 
 	@Test
-	public void testRawResponse5() throws IOException {
+	void testRawResponse5() throws IOException {
 		URL data = RawTest.class.getResource("5-response.txt");
 
 		String fileContent = FileUtil.readString(data.getFile());
@@ -127,7 +127,7 @@ public class RawTest {
 	}
 
 	@Test
-	public void testRawResponse6() throws IOException {
+	void testRawResponse6() throws IOException {
 		URL data = RawTest.class.getResource("6-response.txt");
 
 		String fileContent = FileUtil.readString(data.getFile());

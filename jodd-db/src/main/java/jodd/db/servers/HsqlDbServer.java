@@ -25,7 +25,7 @@
 
 package jodd.db.servers;
 
-import jodd.db.oom.DbOomManager;
+import jodd.db.oom.DbOomConfig;
 
 /**
  * HSQLDB.
@@ -34,14 +34,22 @@ public class HsqlDbServer implements DbServer {
 
 	private final String version;
 
-	public HsqlDbServer(String version) {
+	public HsqlDbServer(final String version) {
 		this.version = version;
 	}
 
 	@Override
-	public void accept(DbOomManager dbOomManager) {
-		dbOomManager.getTableNames().setLowercase(true);
-		dbOomManager.getColumnNames().setLowercase(true);
+	public void accept(final DbOomConfig dbOomConfig) {
+
+		// When a database object is created with one of the CREATE statements or renamed with the ALTER statement,
+		// if the name is enclosed in double quotes, the exact name is used as the case-normal form. But if it is
+		// not enclosed in double quotes, the name is converted to uppercase and this uppercase version is stored
+		// in the database as the case-normal form.
+		dbOomConfig.getTableNames().setUppercase(true);
+		dbOomConfig.getColumnNames().setUppercase(true);
+
+		// quote character
+		dbOomConfig.getColumnNames().setQuoteChar('\"');
 	}
 
 	@Override

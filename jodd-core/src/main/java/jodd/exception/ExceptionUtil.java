@@ -63,7 +63,7 @@ public class ExceptionUtil {
 	/**
 	 * Returns stack trace filtered by class names.
 	 */
-	public static StackTraceElement[] getStackTrace(Throwable t, String[] allow, String[] deny) {
+	public static StackTraceElement[] getStackTrace(final Throwable t, final String[] allow, final String[] deny) {
 		StackTraceElement[] st = t.getStackTrace();
 		ArrayList<StackTraceElement> result = new ArrayList<>(st.length);
 
@@ -98,7 +98,7 @@ public class ExceptionUtil {
 	/**
 	 * Returns stack trace chain filtered by class names.
 	 */
-	public static StackTraceElement[][] getStackTraceChain(Throwable t, String[] allow, String[] deny) {
+	public static StackTraceElement[][] getStackTraceChain(Throwable t, final String[] allow, final String[] deny) {
 		ArrayList<StackTraceElement[]> result = new ArrayList<>();
 		while (t != null) {
 			StackTraceElement[] stack = getStackTrace(t, allow, deny);
@@ -133,7 +133,7 @@ public class ExceptionUtil {
 	/**
 	 * Prints stack trace into a String.
 	 */
-	public static String exceptionStackTraceToString(Throwable t) {
+	public static String exceptionStackTraceToString(final Throwable t) {
 		StringWriter sw = new StringWriter();
 		PrintWriter pw = new PrintWriter(sw, true);
 
@@ -165,7 +165,7 @@ public class ExceptionUtil {
 	/**
 	 * Build a message for the given base message and its cause.
 	 */
-	public static String buildMessage(String message, Throwable cause) {
+	public static String buildMessage(final String message, Throwable cause) {
 		if (cause != null) {
 			cause = getRootCause(cause);
 			StringBuilder buf = new StringBuilder();
@@ -188,7 +188,7 @@ public class ExceptionUtil {
 	 * "root" of the tree, and returns that exception. If no root cause found
 	 * returns provided throwable.
 	 */
-	public static Throwable getRootCause(Throwable throwable) {
+	public static Throwable getRootCause(final Throwable throwable) {
 		Throwable cause = throwable.getCause();
 		if (cause == null) {
 			return throwable;
@@ -213,7 +213,7 @@ public class ExceptionUtil {
 	 * Otherwise, returns <code>null</code>.
 	 */
 	@SuppressWarnings({"unchecked"})
-	public static <T extends Throwable> T findCause(Throwable throwable, Class<T> cause) {
+	public static <T extends Throwable> T findCause(Throwable throwable, final Class<T> cause) {
 		while (throwable != null) {
 			if (throwable.getClass().equals(cause)) {
 				return (T) throwable;
@@ -231,7 +231,7 @@ public class ExceptionUtil {
      * and making it a child of the previous using the <code>setNextException</code>
      * method of SQLException.
      */
-	public static SQLException rollupSqlExceptions(Collection<SQLException> exceptions) {
+	public static SQLException rollupSqlExceptions(final Collection<SQLException> exceptions) {
 		SQLException parent = null;
 		for (SQLException exception : exceptions) {
 			if (parent != null) {
@@ -245,59 +245,16 @@ public class ExceptionUtil {
 	// ---------------------------------------------------------------- misc
 
 	/**
-	 * Throws target of <code>InvocationTargetException</code> if it is exception.
-	 */
-	public static void throwTargetException(InvocationTargetException itex) throws Exception {
-		throw extractTargetException(itex);
-	}
-	public static Exception extractTargetException(InvocationTargetException itex) {
-		Throwable target = itex.getTargetException();
-		return target instanceof Exception ? (Exception) target : itex;
-	}
-
-
-	/**
 	 * Throws checked exceptions in un-checked manner.
-	 * Uses deprecated method.
-	 * @see #throwException(Throwable)
 	 */
-	@SuppressWarnings({"deprecation"})
-	public static void throwExceptionAlt(Throwable throwable) {
-		if (throwable instanceof RuntimeException) {
-			throw (RuntimeException) throwable;
-		}
-		Thread.currentThread().stop(throwable);
-	}
-
-	/**
-	 * Throws checked exceptions in un-checked manner.
-	 * @see #throwException(Throwable) 
-	 */
-	public static void throwException(Throwable throwable) {
-		if (throwable instanceof RuntimeException) {
-			throw (RuntimeException) throwable;
-		}
-		// can't handle these types
-		if ((throwable instanceof IllegalAccessException) || (throwable instanceof InstantiationException)) {
-			throw new IllegalArgumentException(throwable);
-		}
-
-		try {
-			synchronized (ThrowableThrower.class) {
-				ThrowableThrower.throwable = throwable;
-				ThrowableThrower.class.newInstance();
-			}
-		} catch (InstantiationException | IllegalAccessException iex) {
-			throw new RuntimeException(iex);
-		} finally {
-			ThrowableThrower.throwable = null;
-		}
+	public static void throwRuntimeException(final Throwable throwable) {
+		throw wrapToRuntimeException(throwable);
 	}
 
 	/**
 	 * Returns <code>non-null</code> message for a throwable.
 	 */
-	public static String message(Throwable throwable) {
+	public static String message(final Throwable throwable) {
 		String message = throwable.getMessage();
 
 		if (StringUtil.isBlank(message)) {
@@ -310,19 +267,24 @@ public class ExceptionUtil {
 	/**
 	 * Wraps exception to {@code RuntimeException}.
 	 */
-	public static RuntimeException wrapRuntime(Throwable throwable) {
+	public static RuntimeException wrapToRuntimeException(final Throwable throwable) {
 		if (throwable instanceof RuntimeException) {
 			return (RuntimeException) throwable;
-		} else {
-			return new RuntimeException(throwable);
 		}
+		return new RuntimeException(throwable);
+	}
+	public static Exception wrapToException(final Throwable throwable) {
+		if (throwable instanceof Exception) {
+			return (Exception) throwable;
+		}
+		return new RuntimeException(throwable);
 	}
 
 	/**
 	 * Unwraps invocation and undeclared exceptions to real cause.
 	 */
-	public static Throwable unwrap(Throwable wrapped) {
-		Throwable unwrapped = wrapped;
+	public static Throwable unwrapThrowable(final Throwable wrappedThrowable) {
+		Throwable unwrapped = wrappedThrowable;
 		while (true) {
 			if (unwrapped instanceof InvocationTargetException) {
 				unwrapped = ((InvocationTargetException) unwrapped).getTargetException();
@@ -336,10 +298,4 @@ public class ExceptionUtil {
 		}
 	}
 
-	private static class ThrowableThrower {
-		private static Throwable throwable;
-		ThrowableThrower() throws Throwable {
-			throw throwable;
-		}
-	}
 }

@@ -38,19 +38,19 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class PageRegionExtractorTest {
+class PageRegionExtractorTest {
 
 	private PageRegionExtractor pageRegionExtractor;
 	private LinkedList<RegionMarker> regionMarkers;
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		pageRegionExtractor = new PageRegionExtractor(new DecoraTag[] {});
 		regionMarkers = new LinkedList<>();
 	}
 
 	@Test
-	public final void testEndRegionMarkersNotEmpty() {
+	void testEndRegionMarkersNotEmpty() {
 		// setup
 		regionMarkers.add(new RegionMarker("TEST"));
 		pageRegionExtractor.regionMarkers = regionMarkers;
@@ -61,7 +61,7 @@ public class PageRegionExtractorTest {
 		});
 	}
 
-	public final void testEndRegionMarkersEmpty() {
+	void testEndRegionMarkersEmpty() {
 		// setup
 		pageRegionExtractor.regionMarkers = regionMarkers;
 
@@ -73,7 +73,7 @@ public class PageRegionExtractorTest {
 	}
 
 	@Test
-	public final void testTag() {
+	void testTag() {
 		// setup
 		Tag tag = mock(Tag.class);
 		when(tag.getType()).thenReturn(TagType.END);

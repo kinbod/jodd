@@ -29,20 +29,21 @@ import jodd.typeconverter.impl.BooleanConverter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class BooleanConverterTest {
+class BooleanConverterTest {
 
 	private static BooleanConverter booleanConverter;
 
 	@BeforeEach
-	public void setUp(){
+	void setUp(){
 		booleanConverter = new BooleanConverter();
 	}
 
-
 	@Test
-	public void testConversion() {
+	void testConversion() {
 		assertNull(booleanConverter.convert(null));
 
 		assertEquals(Boolean.TRUE, booleanConverter.convert(Boolean.TRUE));
@@ -68,12 +69,12 @@ public class BooleanConverterTest {
 	}
 
 	@Test
-	public void testConversionWithBlankInput() {
+	void testConversionWithBlankInput() {
 		assertThrows(TypeConversionException.class, () -> booleanConverter.convert("    "));
 	}
 
 	@Test
-	public void testConversionWithUnrecognizedInput() {
+	void testConversionWithUnrecognizedInput() {
 		assertThrows(TypeConversionException.class, () -> booleanConverter.convert("asd#%^&(412"));
 	}
 

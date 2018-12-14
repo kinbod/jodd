@@ -30,17 +30,17 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class TagTypeTest {
+class TagTypeTest {
 
 	@Test
-	public void testOpen() {
+	void testOpen() {
 		assertTrue(TagType.START.isStartingTag());
 		assertTrue(TagType.SELF_CLOSING.isStartingTag());
 		assertFalse(TagType.END.isStartingTag());
 	}
 
 	@Test
-	public void testClose() {
+	void testClose() {
 		assertTrue(TagType.END.isEndingTag());
 		assertTrue(TagType.SELF_CLOSING.isEndingTag());
 		assertFalse(TagType.START.isEndingTag());

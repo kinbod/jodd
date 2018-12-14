@@ -28,7 +28,6 @@ package jodd.introspector;
 import jodd.util.ClassUtil;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 
 /**
@@ -42,12 +41,13 @@ public class FieldDescriptor extends Descriptor implements Getter, Setter {
 	protected final Class rawType;
 	protected final Class rawComponentType;
 	protected final Class rawKeyComponentType;
+	protected final MapperFunction mapperFunction;
 
 	/**
 	 * Creates new field descriptor and resolve all additional field data.
 	 * Also, forces access to a field.
 	 */
-	public FieldDescriptor(ClassDescriptor classDescriptor, Field field) {
+	public FieldDescriptor(final ClassDescriptor classDescriptor, final Field field) {
 		super(classDescriptor, ClassUtil.isPublic(field));
 		this.field = field;
 		this.type = field.getGenericType();
@@ -62,7 +62,19 @@ public class FieldDescriptor extends Descriptor implements Getter, Setter {
 			this.rawKeyComponentType = null;
 		}
 
+		// force access
+
 		ClassUtil.forceAccess(field);
+
+		// mapper
+
+		final Mapper mapper = field.getAnnotation(Mapper.class);
+
+		if (mapper != null) {
+			mapperFunction = MapperFunctionInstances.get().lookup(mapper.value());
+		} else {
+			mapperFunction = null;
+		}
 	}
 
 	/**
@@ -112,32 +124,44 @@ public class FieldDescriptor extends Descriptor implements Getter, Setter {
 
 	// ---------------------------------------------------------------- getter/setter
 
-	public Object invokeGetter(Object target) throws InvocationTargetException, IllegalAccessException {
+	@Override
+	public Object invokeGetter(final Object target) throws IllegalAccessException {
 		return field.get(target);
 	}
 
+	@Override
 	public Class getGetterRawType() {
 		return getRawType();
 	}
 
+	@Override
 	public Class getGetterRawComponentType() {
 		return getRawComponentType();
 	}
 
+	@Override
 	public Class getGetterRawKeyComponentType() {
 		return getRawKeyComponentType();
 	}
 
-	public void invokeSetter(Object target, Object argument) throws IllegalAccessException {
+	@Override
+	public void invokeSetter(final Object target, final Object argument) throws IllegalAccessException {
 		field.set(target, argument);
 	}
 
+	@Override
 	public Class getSetterRawType() {
 		return getRawType();
 	}
 
+	@Override
 	public Class getSetterRawComponentType() {
 		return getRawComponentType();
+	}
+
+	@Override
+	public MapperFunction getMapperFunction() {
+		return mapperFunction;
 	}
 
 	// ---------------------------------------------------------------- toString

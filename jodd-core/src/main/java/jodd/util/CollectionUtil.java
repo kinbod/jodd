@@ -45,10 +45,12 @@ public class CollectionUtil {
 	 */
 	public static <E> Enumeration<E> asEnumeration(final Iterator<E> iter) {
 		return new Enumeration<E>() {
+			@Override
 			public boolean hasMoreElements() {
 				return iter.hasNext();
 			}
 
+			@Override
 			public E nextElement() {
 				return iter.next();
 			}
@@ -60,10 +62,12 @@ public class CollectionUtil {
 	 */
 	public static <E> Iterator<E> asIterator(final Enumeration<E> e) {
 		return new Iterator<E>() {
+			@Override
 			public boolean hasNext() {
 				return e.hasMoreElements();
 			}
 
+			@Override
 			public E next() {
 				if (!hasNext()) {
 					throw new NoSuchElementException();
@@ -71,6 +75,7 @@ public class CollectionUtil {
 				return e.nextElement();
 			}
 
+			@Override
 			public void remove() {
 				throw new UnsupportedOperationException();
 			}
@@ -80,8 +85,8 @@ public class CollectionUtil {
 	/**
 	 * Returns a collection containing all elements of the iterator.
 	 */
-	public static <T> Collection<T> asCollection(final Iterator<? extends T> iterator) {
-		List<T> list = new ArrayList<>();
+	public static <T> Collection<T> collectionOf(final Iterator<? extends T> iterator) {
+		final List<T> list = new ArrayList<>();
 		while (iterator.hasNext()) {
 			list.add(iterator.next());
 		}
@@ -89,18 +94,32 @@ public class CollectionUtil {
 	}
 
 	/**
-	 * Wraps iterator as a stream.
+	 * Converts iterator to a stream.
 	 */
-	public static <T> Stream<T> asStream(Iterator<T> sourceIterator) {
-		return asStream(sourceIterator, false);
+	public static <T> Stream<T> streamOf(final Iterator<T> iterator) {
+		return StreamSupport.stream(((Iterable<T>) () -> iterator).spliterator(), false);
+	}
+
+	/**
+	 * Converts interable to a non-parallel stream.
+	 */
+	public static <T> Stream<T> streamOf(final Iterable<T> iterable) {
+		return StreamSupport.stream(iterable.spliterator(), false);
 	}
 
 	/**
 	 * Wraps an iterator as a stream.
 	 */
-	public static <T> Stream<T> asStream(Iterator<T> sourceIterator, boolean parallel) {
-		Iterable<T> iterable = () -> sourceIterator;
-		return StreamSupport.stream(iterable.spliterator(), parallel);
+	public static <T> Stream<T> parallelStreamOf(final Iterator<T> iterator) {
+		return StreamSupport.stream(((Iterable<T>) () -> iterator).spliterator(), true);
 	}
+
+	/**
+	 * Wraps an iterator as a stream.
+	 */
+	public static <T> Stream<T> parallelStreamOf(final Iterable<T> iterable) {
+		return StreamSupport.stream(iterable.spliterator(), true);
+	}
+
 
 }

@@ -31,12 +31,12 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class UrlRewriterTest {
+class UrlRewriterTest {
 
 	@Test
-	public void testUrlRewriter() {
+	void testUrlRewriter() {
 		LagartoParser lagartoParser = new LagartoParser(
-				"<a href=\"http://jodd.org\">1</a><a href=\"page.html\">2</a>", false);
+				"<a href=\"http://jodd.org\">1</a><a href=\"page.html\">2</a>");
 
 		StringBuilder out = new StringBuilder();
 		UrlRewriterTagAdapter urlRewriterTagAdapter = new UrlRewriterTagAdapter(new TagWriter(out)) {

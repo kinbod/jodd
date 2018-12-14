@@ -25,12 +25,13 @@
 
 package jodd.db;
 
-import jodd.util.collection.IntArrayList;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class DbQueryTest {
+class DbQueryTest {
 
 	static class DbQueryEx extends DbQueryParser {
 		public DbQueryEx() {
@@ -45,22 +46,22 @@ public class DbQueryTest {
 
 
 	private void doTestSingleNamedParam(DbQueryEx dbp, String paramName, int position) {
-		IntArrayList list = dbp.lookupNamedParameterIndices(paramName);
-		assertEquals(1, list.size());
-		assertEquals(position, list.get(0));
+		DbQueryNamedParameter p = dbp.lookupNamedParameter(paramName);
+		assertEquals(1, p.indices.length);
+		assertEquals(position, p.indices[0]);
 		assertTrue(dbp.prepared);
 	}
 
 	private void doTestDoubleNamedParam(DbQueryEx dbp, String paramName, int position1, int position2) {
-		IntArrayList list = dbp.lookupNamedParameterIndices(paramName);
-		assertEquals(2, list.size());
-		assertEquals(position1, list.get(0));
-		assertEquals(position2, list.get(1));
+		DbQueryNamedParameter p = dbp.lookupNamedParameter(paramName);
+		assertEquals(2, p.indices.length);
+		assertEquals(position1, p.indices[0]);
+		assertEquals(position2, p.indices[1]);
 		assertTrue(dbp.prepared);
 	}
 
 	@Test
-	public void testPrepareSql() {
+	void testPrepareSql() {
 		DbQueryEx dbp = new DbQueryEx();
 		assertEquals("aaa", dbp.prepare("aaa"));
 		assertFalse(dbp.prepared);

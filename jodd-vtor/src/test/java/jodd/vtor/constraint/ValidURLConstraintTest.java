@@ -31,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 // see: https://mathiasbynens.be/demo/url-regex
-public class ValidURLConstraintTest {
+class ValidURLConstraintTest {
 
 	public static boolean check(String url) {
 		return ValidURLConstraint.validate(url);
@@ -118,14 +118,14 @@ public class ValidURLConstraintTest {
 	};
 
 	@Test
-	public void testValidUrls() {
+	void testValidUrls() {
 		for (String url : SHOULD_MATCH) {
 			assertTrue(check(url));
 		}
 	}
 
 	@Test
-	public void testInvalidUrls() {
+	void testInvalidUrls() {
 		for (String url : SHOULD_NOT_MATCH) {
 			assertFalse(check(url));
 		}

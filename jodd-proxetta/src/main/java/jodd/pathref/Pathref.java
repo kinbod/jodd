@@ -25,6 +25,7 @@
 
 package jodd.pathref;
 
+import jodd.cache.TypeCache;
 import jodd.proxetta.ProxettaUtil;
 import jodd.util.ClassUtil;
 import jodd.util.StringPool;
@@ -34,8 +35,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.WeakHashMap;
 
 /**
  * Super tool for getting calling path reference in compile-time.
@@ -45,8 +44,9 @@ public class Pathref<C> {
 
 	public static final int ALL = -1;
 
+	public static TypeCache<Class> cache = TypeCache.createDefault();
+
 	private static final PathrefProxetta proxetta = new PathrefProxetta();
-	private static final Map<Class, Class> cache = new WeakHashMap<>();
 
 	private final C instance;
 
@@ -56,7 +56,7 @@ public class Pathref<C> {
 	 * proxified, it's real target will be used.
 	 */
 	@SuppressWarnings({"unchecked"})
-	public Pathref(Class<C> target) {
+	public Pathref(final Class<C> target) {
 		C proxy = createProxyObject(target);
 
 		this.instance = proxy;
@@ -66,7 +66,7 @@ public class Pathref<C> {
 		this.path = StringPool.EMPTY;
 	}
 
-	private Pathref(Class<C> target, Pathref root) {
+	private Pathref(final Class<C> target, final Pathref root) {
 		C proxy = createProxyObject(target);
 
         this.instance = proxy;
@@ -80,7 +80,7 @@ public class Pathref<C> {
 	 * Creates proxy object.
 	 */
 	protected C createProxyObject(Class<C> target) {
-		target = ProxettaUtil.getTargetClass(target);
+		target = ProxettaUtil.resolveTargetClass(target);
 
 		Class proxyClass = cache.get(target);
 
@@ -93,7 +93,7 @@ public class Pathref<C> {
 		C proxy;
 
 		try {
-			proxy = (C) proxyClass.newInstance();
+			proxy = (C) ClassUtil.newInstance(proxyClass);
 		} catch (Exception ex) {
 			throw new PathrefException(ex);
 		}
@@ -108,7 +108,7 @@ public class Pathref<C> {
 	/**
 	 * Appends method name to existing path.
 	 */
-	protected void append(String methodName) {
+	protected void append(final String methodName) {
 		if (path.length() != 0) {
 			path += StringPool.DOT;
 		}
@@ -121,7 +121,7 @@ public class Pathref<C> {
 	/**
 	 * Static factory, for convenient use.
 	 */
-	public static <T> Pathref<T> on(Class<T> target) {
+	public static <T> Pathref<T> on(final Class<T> target) {
 		return new Pathref<>(target);
 	}
 
@@ -131,7 +131,7 @@ public class Pathref<C> {
 	 * it returns <code>null</code>.
 	 */
 	@SuppressWarnings("unchecked")
-	public <T> T continueWith(Object currentInstance, String methodName, final Class<T> target) {
+	public <T> T continueWith(final Object currentInstance, final String methodName, final Class<T> target) {
 		Class currentClass = currentInstance.getClass();
 
 		Method method;
@@ -161,7 +161,7 @@ public class Pathref<C> {
 
 			return (T) new ArrayList() {
 				@Override
-				public Object get(int index) {
+				public Object get(final int index) {
 					if (index >= 0) {
 						append("[" + index + "]");
 					}
@@ -189,35 +189,35 @@ public class Pathref<C> {
 
 	// ---------------------------------------------------------------- ref
 
-	public String path(int dummy) {
+	public String path(final int dummy) {
 		return path(null);
 	}
-	public String path(short dummy) {
+	public String path(final short dummy) {
 		return path(null);
 	}
-	public String path(byte dummy) {
+	public String path(final byte dummy) {
 		return path(null);
 	}
-	public String path(char dummy) {
+	public String path(final char dummy) {
 		return path(null);
 	}
-	public String path(long dummy) {
+	public String path(final long dummy) {
 		return path(null);
 	}
-	public String path(float dummy) {
+	public String path(final float dummy) {
 		return path(null);
 	}
-	public String path(double dummy) {
+	public String path(final double dummy) {
 		return path(null);
 	}
-	public String path(boolean dummy) {
+	public String path(final boolean dummy) {
 		return path(null);
 	}
 
 	/**
 	 * Returns the path.
 	 */
-	public String path(Object object) {
+	public String path(final Object object) {
 		return path;
 	}
 
@@ -228,7 +228,7 @@ public class Pathref<C> {
 		return path;
 	}
 
-	protected void injectPathRef(Pathref pathref, Object instance) {
+	protected void injectPathRef(final Pathref pathref, final Object instance) {
 		try {
 			Field f = instance.getClass().getDeclaredField("$__pathref$0");
 			f.setAccessible(true);

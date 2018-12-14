@@ -25,6 +25,8 @@
 
 package jodd.http;
 
+import jodd.net.HttpMethod;
+import jodd.net.MimeTypes;
 import jodd.util.Base64;
 import jodd.util.StringBand;
 import jodd.util.StringPool;
@@ -37,6 +39,9 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 import static jodd.util.StringPool.CRLF;
 import static jodd.util.StringPool.SPACE;
@@ -46,20 +51,9 @@ import static jodd.util.StringPool.SPACE;
  */
 public class HttpRequest extends HttpBase<HttpRequest> {
 
-	private static final int DEFAULT_PORT = -1;
-	private static final String METHOD_CONNECT = "CONNECT";
-	private static final String METHOD_GET = "GET";
-	private static final String METHOD_POST = "POST";
-	private static final String METHOD_PUT = "PUT";
-	private static final String METHOD_PATCH = "PATCH";
-	private static final String METHOD_DELETE = "DELETE";
-	private static final String METHOD_HEAD = "HEAD";
-	private static final String METHOD_TRACE = "TRACE";
-	private static final String METHOD_OPTIONS = "OPTIONS";
-
 	protected String protocol = "http";
 	protected String host = "localhost";
-	protected int port = DEFAULT_PORT;
+	protected int port = Defaults.DEFAULT_PORT;
 	protected String method = "GET";
 	protected String path = StringPool.SLASH;
 	protected HttpMultiMap<String> query;
@@ -90,7 +84,7 @@ public class HttpRequest extends HttpBase<HttpRequest> {
 	/**
 	 * Sets request host name.
 	 */
-	public HttpRequest host(String host) {
+	public HttpRequest host(final String host) {
 		this.host = host;
 		return this;
 	}
@@ -105,7 +99,7 @@ public class HttpRequest extends HttpBase<HttpRequest> {
 	/**
 	 * Defines protocol.
 	 */
-	public HttpRequest protocol(String protocol) {
+	public HttpRequest protocol(final String protocol) {
 		this.protocol = protocol;
 		return this;
 	}
@@ -116,7 +110,7 @@ public class HttpRequest extends HttpBase<HttpRequest> {
 	 * current protocol.
 	 */
 	public int port() {
-		if (port == DEFAULT_PORT) {
+		if (port == Defaults.DEFAULT_PORT) {
 			if (protocol == null) {
 				return 80;
 			}
@@ -131,7 +125,7 @@ public class HttpRequest extends HttpBase<HttpRequest> {
 	/**
 	 * Sets request port number.
 	 */
-	public HttpRequest port(int port) {
+	public HttpRequest port(final int port) {
 		this.port = port;
 		return this;
 	}
@@ -151,20 +145,13 @@ public class HttpRequest extends HttpBase<HttpRequest> {
 		if (ndx != -1) {
 			String method = destination.substring(0, ndx).toUpperCase();
 
-			switch (method) {
-				case METHOD_CONNECT:
-				case METHOD_DELETE:
-				case METHOD_GET:
-				case METHOD_HEAD:
-				case METHOD_OPTIONS:
-				case METHOD_PATCH:
-				case METHOD_POST:
-				case METHOD_PUT:
-				case METHOD_TRACE:
-					this.method = method;
-					destination = destination.substring(ndx + 1);
-					break;
-				default:
+			try {
+				HttpMethod httpMethod = HttpMethod.valueOf(method);
+				this.method = httpMethod.name();
+				destination = destination.substring(ndx + 1);
+			}
+			catch (IllegalArgumentException ignore) {
+				// unknown http method
 			}
 		}
 
@@ -195,7 +182,7 @@ public class HttpRequest extends HttpBase<HttpRequest> {
 			ndx = host.indexOf(':');
 
 			if (ndx == -1) {
-				port = DEFAULT_PORT;
+				port = Defaults.DEFAULT_PORT;
 			} else {
 				port = Integer.parseInt(host.substring(ndx + 1));
 				host = host.substring(0, ndx);
@@ -215,7 +202,7 @@ public class HttpRequest extends HttpBase<HttpRequest> {
 	 * Generic request builder, usually used when method is a variable.
 	 * Otherwise, use one of the other static request builder methods.
 	 */
-	public static HttpRequest create(String method, String destination) {
+	public static HttpRequest create(final String method, final String destination) {
 		return new HttpRequest()
 				.method(method.toUpperCase())
 				.set(destination);
@@ -224,73 +211,73 @@ public class HttpRequest extends HttpBase<HttpRequest> {
 	/**
 	 * Builds a CONNECT request.
 	 */
-	public static HttpRequest connect(String destination) {
+	public static HttpRequest connect(final String destination) {
 		return new HttpRequest()
-				.method(METHOD_CONNECT)
+				.method(HttpMethod.CONNECT)
 				.set(destination);
 	}
 	/**
 	 * Builds a GET request.
 	 */
-	public static HttpRequest get(String destination) {
+	public static HttpRequest get(final String destination) {
 		return new HttpRequest()
-				.method(METHOD_GET)
+				.method(HttpMethod.GET)
 				.set(destination);
 	}
 	/**
 	 * Builds a POST request.
 	 */
-	public static HttpRequest post(String destination) {
+	public static HttpRequest post(final String destination) {
 		return new HttpRequest()
-				.method(METHOD_POST)
+				.method(HttpMethod.POST)
 				.set(destination);
 	}
 	/**
 	 * Builds a PUT request.
 	 */
-	public static HttpRequest put(String destination) {
+	public static HttpRequest put(final String destination) {
 		return new HttpRequest()
-				.method(METHOD_PUT)
+				.method(HttpMethod.PUT)
 				.set(destination);
 	}
 	/**
 	 * Builds a PATCH request.
 	 */
-	public static HttpRequest patch(String destination) {
+	public static HttpRequest patch(final String destination) {
 		return new HttpRequest()
-				.method(METHOD_PATCH)
+				.method(HttpMethod.PATCH)
 				.set(destination);
 	}
 	/**
 	 * Builds a DELETE request.
 	 */
-	public static HttpRequest delete(String destination) {
+	public static HttpRequest delete(final String destination) {
 		return new HttpRequest()
-				.method(METHOD_DELETE)
+				.method(HttpMethod.DELETE)
 				.set(destination);
 	}
 	/**
 	 * Builds a HEAD request.
 	 */
-	public static HttpRequest head(String destination) {
+	public static HttpRequest head(final String destination) {
 		return new HttpRequest()
-				.method(METHOD_HEAD)
+				.method(HttpMethod.HEAD)
 				.set(destination);
 	}
 	/**
 	 * Builds a TRACE request.
 	 */
-	public static HttpRequest trace(String destination) {
+	public static HttpRequest trace(final String destination) {
 		return new HttpRequest()
-				.method(METHOD_TRACE)
+				.method(HttpMethod.TRACE)
 				.set(destination);
 	}
 	/**
 	 * Builds an OPTIONS request.
 	 */
-	public static HttpRequest options(String destination) {
+	public static HttpRequest options(final String destination) {
 		return new HttpRequest()
-				.method(METHOD_OPTIONS)
+				.method(HttpMethod.OPTIONS)
 				.set(destination);
 	}
 
@@ -307,8 +294,12 @@ public class HttpRequest extends HttpBase<HttpRequest> {
 	 * Specifies request method. It will be converted into uppercase.
 	 * Does not validate if method is one of the HTTP methods.
 	 */
-	public HttpRequest method(String method) {
+	public HttpRequest method(final String method) {
 		this.method = method.toUpperCase();
+		return this;
+	}
+	public HttpRequest method(final HttpMethod httpMethod) {
+		this.method = httpMethod.name();
 		return this;
 	}
 
@@ -356,7 +347,7 @@ public class HttpRequest extends HttpBase<HttpRequest> {
 	 * should be multipart. By setting this to <code>true</code>
 	 * we are forcing usage of multipart request.
 	 */
-	public HttpRequest multipart(boolean multipart) {
+	public HttpRequest multipart(final boolean multipart) {
 		this.multipart = multipart;
 		return this;
 	}
@@ -367,7 +358,7 @@ public class HttpRequest extends HttpBase<HttpRequest> {
 	/**
 	 * Sets cookies to the request.
 	 */
-	public HttpRequest cookies(Cookie... cookies) {
+	public HttpRequest cookies(final Cookie... cookies) {
 		if (cookies.length == 0) {
 			return this;
 		}
@@ -392,7 +383,7 @@ public class HttpRequest extends HttpBase<HttpRequest> {
 			cookieString.append(cookie.getValue());
 		}
 
-		header("cookie", cookieString.toString(), true);
+		headerOverwrite("cookie", cookieString.toString());
 
 		return this;
 	}
@@ -403,7 +394,7 @@ public class HttpRequest extends HttpBase<HttpRequest> {
 	/**
 	 * Adds query parameter.
 	 */
-	public HttpRequest query(String name, String value) {
+	public HttpRequest query(final String name, final String value) {
 		query.add(name, value);
 		return this;
 	}
@@ -412,7 +403,7 @@ public class HttpRequest extends HttpBase<HttpRequest> {
 	 * Adds many query parameters at once. Although it accepts objects,
 	 * each value will be converted to string.
 	 */
-	public HttpRequest query(String name1, Object value1, Object... parameters) {
+	public HttpRequest query(final String name1, final Object value1, final Object... parameters) {
 		query(name1, value1 == null ? null : value1.toString());
 
 		for (int i = 0; i < parameters.length; i += 2) {
@@ -427,7 +418,7 @@ public class HttpRequest extends HttpBase<HttpRequest> {
 	/**
 	 * Adds all parameters from the provided map.
 	 */
-	public HttpRequest query(Map<String, String> queryMap) {
+	public HttpRequest query(final Map<String, String> queryMap) {
 		for (Map.Entry<String, String> entry : queryMap.entrySet()) {
 			query.add(entry.getKey(), entry.getValue());
 		}
@@ -452,7 +443,7 @@ public class HttpRequest extends HttpBase<HttpRequest> {
 	/**
 	 * Removes query parameters for given name.
 	 */
-	public HttpRequest removeQuery(String name) {
+	public HttpRequest queryRemove(final String name) {
 		query.remove(name);
 		return this;
 	}
@@ -462,7 +453,7 @@ public class HttpRequest extends HttpBase<HttpRequest> {
 	/**
 	 * @see #queryString(String, boolean)
 	 */
-	public HttpRequest queryString(String queryString) {
+	public HttpRequest queryString(final String queryString) {
 		return queryString(queryString, true);
 	}
 
@@ -470,7 +461,7 @@ public class HttpRequest extends HttpBase<HttpRequest> {
 	 * Sets query from provided query string. Previous query values
 	 * are discarded.
 	 */
-	public HttpRequest queryString(String queryString, boolean decode) {
+	public HttpRequest queryString(final String queryString, final boolean decode) {
 		this.query = HttpUtil.parseQuery(queryString, decode);
 		return this;
 	}
@@ -487,13 +478,12 @@ public class HttpRequest extends HttpBase<HttpRequest> {
 
 	// ---------------------------------------------------------------- query encoding
 
-	protected String queryEncoding = JoddHttp.defaultQueryEncoding;
+	protected String queryEncoding = Defaults.queryEncoding;
 
 	/**
-	 * Defines encoding for query parameters. Default value is
-	 * copied from {@link JoddHttp#defaultQueryEncoding}.
+	 * Defines encoding for query parameters.
 	 */
-	public HttpRequest queryEncoding(String encoding) {
+	public HttpRequest queryEncoding(final String encoding) {
 		this.queryEncoding = encoding;
 		return this;
 	}
@@ -539,7 +529,7 @@ public class HttpRequest extends HttpBase<HttpRequest> {
 			url.append(host);
 		}
 
-		if (port != DEFAULT_PORT) {
+		if (port != Defaults.DEFAULT_PORT) {
 			url.append(':');
 			url.append(port);
 		}
@@ -552,18 +542,28 @@ public class HttpRequest extends HttpBase<HttpRequest> {
 	/**
 	 * Enables basic authentication by adding required header.
 	 */
-	public HttpRequest basicAuthentication(String username, String password) {
-
+	public HttpRequest basicAuthentication(final String username, final String password) {
 		if (username != null && password != null) {
 			String data = username.concat(StringPool.COLON).concat(password);
 
 			String base64 = Base64.encodeToString(data);
 
-			header("Authorization", "Basic " + base64, true);
+			headerOverwrite(HEADER_AUTHORIZATION, "Basic " + base64);
 		}
 
 		return this;
 	}
+
+	/**
+	 * Enables token-based authentication.
+	 */
+	public HttpRequest tokenAuthentication(final String token) {
+		if (token != null) {
+			headerOverwrite(HEADER_AUTHORIZATION, "Bearer " + token);
+		}
+		return this;
+	}
+
 
 	// ---------------------------------------------------------------- https
 
@@ -573,7 +573,7 @@ public class HttpRequest extends HttpBase<HttpRequest> {
 	/**
 	 * Trusts all certificates, use with caution.
 	 */
-	public HttpRequest trustAllCerts(boolean trust) {
+	public HttpRequest trustAllCerts(final boolean trust) {
 		trustAllCertificates = trust;
 		return this;
 	}
@@ -588,7 +588,7 @@ public class HttpRequest extends HttpBase<HttpRequest> {
 	/**
 	 * Verifies HTTPS hosts.
 	 */
-	public HttpRequest verifyHttpsHost(boolean verifyHttpsHost) {
+	public HttpRequest verifyHttpsHost(final boolean verifyHttpsHost) {
 		this.verifyHttpsHost = verifyHttpsHost;
 		return this;
 	}
@@ -608,11 +608,11 @@ public class HttpRequest extends HttpBase<HttpRequest> {
 	public HttpRequest setHostHeader() {
 		String hostPort = this.host;
 
-		if (port != DEFAULT_PORT) {
+		if (port != Defaults.DEFAULT_PORT) {
 			hostPort += StringPool.COLON + port;
 		}
 
-		header(HEADER_HOST, hostPort, true);
+		headerOverwrite(HEADER_HOST, hostPort);
 		return this;
 	}
 
@@ -623,7 +623,7 @@ public class HttpRequest extends HttpBase<HttpRequest> {
 	 * monitor upload progress. Be aware that the whole size of the
 	 * request is being monitored, not only the files content.
 	 */
-	public HttpRequest monitor(HttpProgressListener httpProgressListener) {
+	public HttpRequest monitor(final HttpProgressListener httpProgressListener) {
 		this.httpProgressListener = httpProgressListener;
 		return this;
 	}
@@ -632,6 +632,7 @@ public class HttpRequest extends HttpBase<HttpRequest> {
 
 	protected int timeout = -1;
 	protected int connectTimeout = -1;
+	protected boolean followRedirects = false;
 
 	/**
 	 * Defines the socket timeout (SO_TIMEOUT) in milliseconds, which is the timeout for waiting for data or,
@@ -644,7 +645,7 @@ public class HttpRequest extends HttpBase<HttpRequest> {
 	 * A timeout value of zero is interpreted as an infinite timeout.
 	 * @see jodd.http.HttpConnection#setTimeout(int)
 	 */
-	public HttpRequest timeout(int milliseconds) {
+	public HttpRequest timeout(final int milliseconds) {
 		this.timeout = milliseconds;
 		return this;
 	}
@@ -664,7 +665,7 @@ public class HttpRequest extends HttpBase<HttpRequest> {
 	 * two consecutive data packets). A timeout value of zero is interpreted as
 	 * an infinite timeout.
 	 */
-	public HttpRequest connectionTimeout(int milliseconds) {
+	public HttpRequest connectionTimeout(final int milliseconds) {
 		this.connectTimeout = milliseconds;
 		return this;
 	}
@@ -678,6 +679,21 @@ public class HttpRequest extends HttpBase<HttpRequest> {
 		return connectTimeout;
 	}
 
+	/**
+	 * Defines if redirects responses should be followed. NOTE: when redirection is enabled,
+	 * the original URL will NOT be preserved in the request!
+	 */
+	public HttpRequest followRedirects(final boolean followRedirects) {
+		this.followRedirects = followRedirects;
+		return this;
+	}
+
+	/**
+	 * Returns {@code true} if redirects are followed.
+	 */
+	public boolean isFollowRedirects() {
+		return this.followRedirects;
+	}
 
 	// ---------------------------------------------------------------- send
 
@@ -688,7 +704,7 @@ public class HttpRequest extends HttpBase<HttpRequest> {
 	 * Uses custom connection provider when {@link #open() opening} the
 	 * connection.
 	 */
-	public HttpRequest withConnectionProvider(HttpConnectionProvider httpConnectionProvider) {
+	public HttpRequest withConnectionProvider(final HttpConnectionProvider httpConnectionProvider) {
 		this.httpConnectionProvider = httpConnectionProvider;
 		return this;
 	}
@@ -713,12 +729,12 @@ public class HttpRequest extends HttpBase<HttpRequest> {
 
 	/**
 	 * Opens a new {@link HttpConnection connection} using either
-	 * provided or {@link JoddHttp#httpConnectionProvider default} connection
+	 * provided or {@link HttpConnectionProvider default} connection
 	 * provider.
 	 */
 	public HttpRequest open() {
 		if (httpConnectionProvider == null) {
-			return open(JoddHttp.httpConnectionProvider);
+			return open(HttpConnectionProvider.get());
 		}
 
 		return open(httpConnectionProvider);
@@ -728,7 +744,7 @@ public class HttpRequest extends HttpBase<HttpRequest> {
 	 * Opens a new {@link jodd.http.HttpConnection connection}
 	 * using given {@link jodd.http.HttpConnectionProvider}.
 	 */
-	public HttpRequest open(HttpConnectionProvider httpConnectionProvider) {
+	public HttpRequest open(final HttpConnectionProvider httpConnectionProvider) {
 		if (this.httpConnection != null) {
 			throw new HttpException("Connection already opened");
 		}
@@ -746,7 +762,7 @@ public class HttpRequest extends HttpBase<HttpRequest> {
 	 * Assignees provided {@link jodd.http.HttpConnection} for communication.
 	 * It does not actually opens it until the {@link #send() sending}.
 	 */
-	public HttpRequest open(HttpConnection httpConnection) {
+	public HttpRequest open(final HttpConnection httpConnection) {
 		if (this.httpConnection != null) {
 			throw new HttpException("Connection already opened");
 		}
@@ -771,7 +787,7 @@ public class HttpRequest extends HttpBase<HttpRequest> {
 	 *
 	 * @param doContinue set it to <code>false</code> to indicate the last connection
 	 */
-	public HttpRequest keepAlive(HttpResponse httpResponse, boolean doContinue) {
+	public HttpRequest keepAlive(final HttpResponse httpResponse, final boolean doContinue) {
 		boolean keepAlive = httpResponse.isConnectionPersistent();
 		if (keepAlive) {
 			HttpConnection previousConnection = httpResponse.getHttpRequest().httpConnection;
@@ -811,7 +827,31 @@ public class HttpRequest extends HttpBase<HttpRequest> {
 	 * connection will not be closed.
 	 */
 	public HttpResponse send() {
-		return _send();
+		if (!followRedirects) {
+			return _send();
+		}
+
+		while (true) {
+			HttpResponse httpResponse = _send();
+
+			int statusCode = httpResponse.statusCode();
+
+			if (HttpStatus.isRedirect(statusCode)) {
+				_reset();
+				set(httpResponse.location());
+				continue;
+			}
+
+			return httpResponse;
+		}
+	}
+
+	/**
+	 * Resets the request by resetting all additional values
+	 * added during the sending.
+	 */
+	private void _reset() {
+		headers.remove(HEADER_HOST);
 	}
 
 	private HttpResponse _send() {
@@ -852,7 +892,7 @@ public class HttpRequest extends HttpBase<HttpRequest> {
 	 * Prepares the request buffer.
 	 */
 	@Override
-	protected Buffer buffer(boolean fullRequest) {
+	protected Buffer buffer(final boolean fullRequest) {
 		// INITIALIZATION
 
 		// host port
@@ -872,7 +912,7 @@ public class HttpRequest extends HttpBase<HttpRequest> {
 		// user-agent
 
 		if (header("User-Agent") == null) {
-			header("User-Agent", JoddHttp.defaultUserAgent);
+			header("User-Agent", Defaults.userAgent);
 		}
 
 		// POST method requires Content-Type to be set
@@ -910,11 +950,11 @@ public class HttpRequest extends HttpBase<HttpRequest> {
 	 * Parses input stream and creates new <code>HttpRequest</code> object.
 	 * Assumes input stream is in ISO_8859_1 encoding.
 	 */
-	public static HttpRequest readFrom(InputStream in) {
+	public static HttpRequest readFrom(final InputStream in) {
 		return readFrom(in, StringPool.ISO_8859_1);
 	}
 
-	public static HttpRequest readFrom(InputStream in, String encoding) {
+	public static HttpRequest readFrom(final InputStream in, final String encoding) {
 		BufferedReader reader;
 		try {
 			reader = new BufferedReader(new InputStreamReader(in, encoding));
@@ -922,9 +962,10 @@ public class HttpRequest extends HttpBase<HttpRequest> {
 			return null;
 		}
 
-		HttpRequest httpRequest = new HttpRequest();
+		final HttpRequest httpRequest = new HttpRequest();
+		httpRequest.headers.clear();
 
-		String line;
+		final String line;
 		try {
 			line = reader.readLine();
 		} catch (IOException ioex) {
@@ -943,6 +984,49 @@ public class HttpRequest extends HttpBase<HttpRequest> {
 		}
 
 		return httpRequest;
+	}
+
+
+	// ---------------------------------------------------------------- shortcuts
+
+	/**
+	 * Specifies JSON content type.
+	 */
+	public HttpRequest contentTypeJson() {
+		return contentType(MimeTypes.MIME_APPLICATION_JSON);
+	}
+
+	/**
+	 * Accepts JSON content type.
+	 */
+	public HttpRequest acceptJson() {
+		return accept(MimeTypes.MIME_APPLICATION_JSON);
+	}
+
+
+	// ---------------------------------------------------------------- functional/async
+
+	/**
+	 * Sends http request asynchronously using common fork-join pool.
+	 * Note that this is not the right non-blocking call (not a NIO), it is just
+	 * a regular call that is operated in a separate thread.
+	 */
+	public CompletableFuture<HttpResponse> sendAsync() {
+		return CompletableFuture.supplyAsync(this::send);
+	}
+
+	/**
+	 * Syntax sugar.
+	 */
+	public <R> R sendAndReceive(final Function<HttpResponse, R> responseHandler) {
+		return responseHandler.apply(send());
+	}
+
+	/**
+	 * Syntax sugar.
+	 */
+	public void sendAndReceive(final Consumer<HttpResponse> responseHandler) {
+		responseHandler.accept(send());
 	}
 
 }

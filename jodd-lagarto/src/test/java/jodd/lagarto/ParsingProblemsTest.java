@@ -26,10 +26,10 @@
 package jodd.lagarto;
 
 import jodd.io.FileUtil;
-import jodd.lagarto.dom.Element;
-import jodd.lagarto.dom.LagartoDOMBuilder;
 import jodd.jerry.Jerry;
 import jodd.lagarto.dom.Document;
+import jodd.lagarto.dom.Element;
+import jodd.lagarto.dom.LagartoDOMBuilder;
 import jodd.util.StringUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,14 +38,16 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
-public class ParsingProblemsTest {
+class ParsingProblemsTest {
 
 	protected String testDataRoot;
 
 	@BeforeEach
-	public void setUp() throws Exception {
+	void setUp() throws Exception {
 		if (testDataRoot != null) {
 			return;
 		}
@@ -54,10 +56,10 @@ public class ParsingProblemsTest {
 	}
 
 	@Test
-	public void testInvalidTag() {
+	void testInvalidTag() {
 		String html = "<html>text1<=>text2</html>";
 
-		LagartoParser lagartoParser = new LagartoParser(html, false);
+		LagartoParser lagartoParser = new LagartoParser(html);
 
 		final StringBuilder sb = new StringBuilder();
 
@@ -87,7 +89,7 @@ public class ParsingProblemsTest {
 	}
 
 	@Test
-	public void testNonQuotedAttributeValue() {
+	void testNonQuotedAttributeValue() {
 		String html = "<a href=123>xxx</a>";
 
 		LagartoDOMBuilder lagartoDOMBuilder = new LagartoDOMBuilder();
@@ -108,7 +110,7 @@ public class ParsingProblemsTest {
 	}
 
 	@Test
-	public void testIssue23_0() throws IOException {
+	void testIssue23_0() throws IOException {
 		File file = new File(testDataRoot, "index-4-v0.html");
 
 		LagartoDOMBuilder lagartoDOMBuilder = new LagartoDOMBuilder();
@@ -121,7 +123,7 @@ public class ParsingProblemsTest {
 	}
 
 	@Test
-	public void testIssue23_1() throws IOException {
+	void testIssue23_1() throws IOException {
 		File file = new File(testDataRoot, "index-4-v1.html");
 
 		LagartoDOMBuilder lagartoDOMBuilder = new LagartoDOMBuilder();
@@ -134,7 +136,7 @@ public class ParsingProblemsTest {
 	}
 
 	@Test
-	public void testIssue23() throws IOException {
+	void testIssue23() throws IOException {
 		File file = new File(testDataRoot, "index-4.html");
 
 		LagartoDOMBuilder lagartoDOMBuilder = new LagartoDOMBuilder();
@@ -225,7 +227,7 @@ public class ParsingProblemsTest {
 	}
 
 	@Test
-	public void testNamespaces() throws IOException {
+	void testNamespaces() throws IOException {
 		File file = new File(testDataRoot, "namespace.xml");
 
 		LagartoDOMBuilder lagartoDOMBuilder = new LagartoDOMBuilder();
@@ -262,7 +264,7 @@ public class ParsingProblemsTest {
 	}
 
 	@Test
-	public void testPreserveCC() throws IOException {
+	void testPreserveCC() throws IOException {
 		File file = new File(testDataRoot, "preserve-cc.html");
 
 		String expectedResult = FileUtil.readString(file);
@@ -278,7 +280,7 @@ public class ParsingProblemsTest {
 	}
 
 	@Test
-	public void testKelkoo() throws Exception {
+	void testKelkoo() throws Exception {
 		File file = new File(testDataRoot, "kelkoo.html");
 		Jerry jerry;
 		try {
@@ -302,7 +304,7 @@ public class ParsingProblemsTest {
 	}
 
 	@Test
-	public void testEntity() throws Exception {
+	void testEntity() throws Exception {
 		assertEquals(
 			"<head><title>Peanut Butter &amp; Jelly</title>" +
 				"it's yummy &amp; delicious</head>",

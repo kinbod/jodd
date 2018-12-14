@@ -60,7 +60,7 @@ public class HttpResponse extends HttpBase<HttpResponse> {
 	/**
 	 * Sets response status code.
 	 */
-	public HttpResponse statusCode(int statusCode) {
+	public HttpResponse statusCode(final int statusCode) {
 		this.statusCode = statusCode;
 		return this;
 	}
@@ -75,9 +75,30 @@ public class HttpResponse extends HttpBase<HttpResponse> {
 	/**
 	 * Sets response status phrase.
 	 */
-	public HttpResponse statusPhrase(String statusPhrase) {
+	public HttpResponse statusPhrase(final String statusPhrase) {
 		this.statusPhrase = statusPhrase;
 		return this;
+	}
+
+	/**
+	 * Parses 'location' header to return the next location or returns {@code null} if location not specified.
+	 * Specification (<a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.30">rfc2616</a>)
+	 * says that only absolute path must be provided, however, this does not
+	 * happens in the real world. There a <a href="https://tools.ietf.org/html/rfc7231#section-7.1.2">proposal</a>
+	 * that allows server name etc to be omitted.
+	 */
+	public String location() {
+		String location = header("location");
+
+		if (location == null) {
+			return null;
+		}
+
+		if (location.startsWith(StringPool.SLASH)) {
+			location = getHttpRequest().hostUrl() + location;
+		}
+
+		return location;
 	}
 
 	// ---------------------------------------------------------------- cookie
@@ -106,7 +127,7 @@ public class HttpResponse extends HttpBase<HttpResponse> {
 			}
 		}
 
-		return cookieList.toArray(new Cookie[cookieList.size()]);
+		return cookieList.toArray(new Cookie[0]);
 	}
 
 	// ---------------------------------------------------------------- body
@@ -120,7 +141,7 @@ public class HttpResponse extends HttpBase<HttpResponse> {
 
 		if (contentEncoding != null && contentEncoding().equals("gzip")) {
 			if (body != null) {
-				removeHeader(HEADER_CONTENT_ENCODING);
+				headerRemove(HEADER_CONTENT_ENCODING);
 				try {
 					ByteArrayInputStream in = new ByteArrayInputStream(body.getBytes(StringPool.ISO_8859_1));
 					GZIPInputStream gzipInputStream = new GZIPInputStream(in);
@@ -145,7 +166,7 @@ public class HttpResponse extends HttpBase<HttpResponse> {
 	 * Creates response {@link jodd.http.Buffer buffer}.
 	 */
 	@Override
-	protected Buffer buffer(boolean fullResponse) {
+	protected Buffer buffer(final boolean fullResponse) {
 		// form
 
 		Buffer formBuffer = formBuffer();
@@ -172,7 +193,7 @@ public class HttpResponse extends HttpBase<HttpResponse> {
 	 * Reads response input stream and returns {@link HttpResponse response}.
 	 * Supports both streamed and chunked response.
 	 */
-	public static HttpResponse readFrom(InputStream in) {
+	public static HttpResponse readFrom(final InputStream in) {
 		InputStreamReader inputStreamReader;
 		try {
 			inputStreamReader = new InputStreamReader(in, StringPool.ISO_8859_1);
@@ -236,7 +257,7 @@ public class HttpResponse extends HttpBase<HttpResponse> {
 	/**
 	 * Binds {@link jodd.http.HttpRequest} to this response.
 	 */
-	void assignHttpRequest(HttpRequest httpRequest) {
+	void assignHttpRequest(final HttpRequest httpRequest) {
 		this.httpRequest = httpRequest;
 	}
 

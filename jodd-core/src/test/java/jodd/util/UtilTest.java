@@ -40,10 +40,10 @@ import jodd.util.collection.ArrayEnumeration;
 
 import org.junit.jupiter.api.Test;
 
-public class UtilTest {
+class UtilTest {
 
 	@Test
-	public void testEquals() {
+	void testEquals() {
 		Object a = new Integer(173);
 		Object b = new Integer(1);
 		Object c = new Integer(173);
@@ -61,7 +61,7 @@ public class UtilTest {
 	}
 
 	@Test
-	public void testToString() {
+	void testToString() {
 		assertNull(Util.toString(null));
 		assertEquals("abcd", Util.toString("abcd"));
 		assertEquals("1234", Util.toString(1234));
@@ -69,7 +69,7 @@ public class UtilTest {
 	}
 	
 	@Test
-	public void testLength() {
+	void testLength() {
 		assertEquals(0, Util.length(null));
 		assertEquals(-1, Util.length(1234));
 
@@ -98,7 +98,7 @@ public class UtilTest {
 	}
 	
 	@Test
-	public void testContainsElement() {
+	void testContainsElement() {
 		assertFalse(Util.containsElement(null, "abcd"));
 		assertFalse(Util.containsElement(1234, "abcd"));
 

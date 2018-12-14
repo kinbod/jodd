@@ -39,10 +39,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class LoggerFactoryTest {
+class LoggerFactoryTest {
 
 	@Test
-	public void testNopLogger() {
+	void testNopLogger() {
 		LoggerFactory.setLoggerProvider(NOPLogger.PROVIDER);
 		Logger log = LoggerFactory.getLogger("foo");
 
@@ -61,7 +61,7 @@ public class LoggerFactoryTest {
 	}
 
 	@Test
-	public void testSimpleFactory() {
+	void testSimpleFactory() {
 		LoggerFactory.setLoggerProvider(SimpleLogger.PROVIDER);
 		Logger log = LoggerFactory.getLogger("foo");
 		log.setLevel(Logger.Level.TRACE);

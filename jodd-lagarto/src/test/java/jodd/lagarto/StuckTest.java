@@ -41,12 +41,12 @@ import java.util.zip.GZIPInputStream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class StuckTest {
+class StuckTest {
 
 	protected String testDataRoot;
 
 	@BeforeEach
-	public void setUp() throws Exception {
+	void setUp() throws Exception {
 		if (testDataRoot != null) {
 			return;
 		}
@@ -55,7 +55,7 @@ public class StuckTest {
 	}
 
 	@Test
-	public void testStuck() throws IOException {
+	void testStuck() throws IOException {
 		File file = new File(testDataRoot, "stuck.html.gz");
 		InputStream in = new GZIPInputStream(new FileInputStream(file));
 		ByteArrayOutputStream out = new ByteArrayOutputStream();

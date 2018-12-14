@@ -30,23 +30,26 @@ import org.junit.jupiter.api.Test;
 
 import java.io.Writer;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-public class DecoraParserTestDecoratedPageTest {
+class DecoraParserTestDecoratedPageTest {
 
 	private DecoraParser decoraParser;
 	private Writer writerMock;
 	private DecoraTag decoraTagMock;
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		decoraParser = new DecoraParser();
 		writerMock = mock(Writer.class);
 		decoraTagMock = mock(DecoraTag.class);
 	}
 
 	@Test
-	public void testWriteDecoratedPageDecoraTagLengthNegative() throws Exception {
+	void testWriteDecoratedPageDecoraTagLengthNegative() throws Exception {
 		// setup
 		when(decoraTagMock.getStartIndex()).thenReturn(-1);
 		DecoraTag[] decoraTags = { decoraTagMock };
@@ -61,7 +64,7 @@ public class DecoraParserTestDecoratedPageTest {
 	}
 
 	@Test
-	public void testWriteDecoratedPageDecoraTagRegionUndefined() throws Exception {
+	void testWriteDecoratedPageDecoraTagRegionUndefined() throws Exception {
 		// setup
 		DecoraTag decoraTagMock2 = mock(DecoraTag.class);
 		when(decoraTagMock.isRegionUndefined()).thenReturn(true);

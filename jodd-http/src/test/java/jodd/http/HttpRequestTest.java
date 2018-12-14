@@ -25,22 +25,33 @@
 
 package jodd.http;
 
+import jodd.io.FastCharArrayWriter;
 import jodd.io.FileUtil;
-import jodd.upload.FileUpload;
+import jodd.io.StreamUtil;
+import jodd.io.upload.FileUpload;
+import jodd.net.MimeTypes;
+import jodd.util.ClassLoaderUtil;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
-public class HttpRequestTest {
+class HttpRequestTest {
 
 	@Test
-	public void testQueryParameters() {
+	void testQueryParameters() {
 		HttpRequest httpRequest = new HttpRequest();
 
 		httpRequest.path("");
@@ -106,7 +117,7 @@ public class HttpRequestTest {
 	}
 
 	@Test
-	public void testFormParamsObjects() {
+	void testFormParamsObjects() {
 		Map<String, Object> params = new HashMap<>();
 		params.put("state", 1);
 
@@ -117,7 +128,7 @@ public class HttpRequestTest {
 	}
 
 	@Test
-	public void testSet() {
+	void testSet() {
 		HttpRequest httpRequest = new HttpRequest();
 		httpRequest.set("GET http://jodd.org:173/index.html?light=true");
 
@@ -185,7 +196,7 @@ public class HttpRequestTest {
 
 
 	@Test
-	public void testInOutForm() {
+	void testInOutForm() {
 		HttpRequest request = HttpRequest.get("http://jodd.org/?id=173");
 		request.header("User-Agent", "Scaly");
 		request.form("one", "funny");
@@ -210,7 +221,7 @@ public class HttpRequestTest {
 	}
 
 	@Test
-	public void testNegativeContentLength() {
+	void testNegativeContentLength() {
 		HttpRequest request = HttpRequest.get("http://jodd.org/?id=173");
 		request.contentLength(-123);
 
@@ -236,7 +247,7 @@ public class HttpRequestTest {
 	}
 
 	@Test
-	public void testFileUpload() throws IOException {
+	void testFileUpload() throws IOException {
 		HttpRequest request = HttpRequest.get("http://jodd.org/?id=173");
 
 		request.header("User-Agent", "Scaly").form("one", "funny");
@@ -276,7 +287,7 @@ public class HttpRequestTest {
 	}
 
 	@Test
-	public void testUrl() {
+	void testUrl() {
 		HttpRequest httpRequest = new HttpRequest();
 		httpRequest.set("GET http://jodd.org:173/index.html?light=true");
 
@@ -289,7 +300,7 @@ public class HttpRequestTest {
 	}
 
 	@Test
-	public void testBasicAuthorizationCanBeSetToNullAndIsIgnoredSilently() {
+	void testBasicAuthorizationCanBeSetToNullAndIsIgnoredSilently() {
 		HttpRequest httpRequest = new HttpRequest();
 		String[][] input = new String[][]{
 				{"non-null", null},
@@ -310,7 +321,7 @@ public class HttpRequestTest {
 	}
 
 	@Test
-	public void test394() {
+	void test394() {
 		HttpRequest request = HttpRequest.get("https://jodd.org/random link");
 		assertEquals("GET", request.method());
 		assertEquals("https://jodd.org/random link", request.url());
@@ -330,7 +341,7 @@ public class HttpRequestTest {
 	}
 	
 	@Test
-	public void testCapitalizeHeaders() {
+	void testCapitalizeHeaders() {
 
 		// true
 
@@ -346,7 +357,7 @@ public class HttpRequestTest {
 		assertEquals(2, request.headers("KEY-TEST2").size());
 		assertEquals(2 + 2, request.headerNames().size());		// 2 default and 2 added
 
-		request.removeHeader("key-test2");
+		request.headerRemove("key-test2");
 		assertFalse(request.headers.contains("key-test2"));
 		assertFalse(request.headers.contains("key-tEST2"));
 
@@ -366,8 +377,55 @@ public class HttpRequestTest {
 		assertEquals(2, request.headers("KEY-TEST1").size());
 		assertEquals(2 + 2, request.headerNames().size());		// 2 default and 2 added
 
-		request.removeHeader("key-test1");
+		request.headerRemove("key-test1");
 		assertFalse(request.headers.contains("key-test1"));
 		assertFalse(request.headers.contains("KEY-TEST1"));
+	}
+
+	@Test
+	void testBigRequest() throws IOException {
+		InputStream inputStream = ClassLoaderUtil.getResourceAsStream("/jodd/http/answer.json");
+
+		FastCharArrayWriter writter = StreamUtil.copy(inputStream);
+		String body = writter.toString();
+
+		HttpRequest httpRequest = HttpRequest.get("").body(body);
+
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		httpRequest.sendTo(outputStream);
+
+		String receivedBody = outputStream.toString();
+
+		int ndx = receivedBody.indexOf("{");
+		receivedBody = receivedBody.substring(ndx);
+
+		assertEquals(body, receivedBody);
+	}
+
+	@Test
+	void testHttpRequestSlash() {
+		HttpRequest request = HttpRequest.post("/");
+		request.contentType("application/x-www-form-urlencoded");
+		HttpRequest request1 = HttpRequest.readFrom(new ByteArrayInputStream(request.toByteArray()));
+
+		assertEquals(request.toString(), request1.toString());
+	}
+
+	@Test
+	void testHttpRequestReRead() {
+		HttpRequest request = HttpRequest.post("http://127.0.0.1:8086/test");
+		request.form("a", null);
+		request.form("b", "aaa");
+		HttpRequest request1 = HttpRequest.readFrom(new ByteArrayInputStream(request.toByteArray()));
+		assertEquals(request.toString(), request1.toString());
+	}
+
+	@Test
+	void testHttpRequestContentSetOrder() {
+		final HttpRequest request = HttpRequest.get("http://127.0.0.1:8086/test");
+
+		request.contentTypeJson().bodyText("{}");
+
+		assertEquals(MimeTypes.MIME_APPLICATION_JSON, request.mediaType());
 	}
 }

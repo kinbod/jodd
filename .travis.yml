@@ -6,6 +6,15 @@ services:
 
 jdk:
   - oraclejdk8
+  - oraclejdk9
+#  - oraclejdk10
+  - openjdk8
+  - openjdk9
+
+matrix:
+  allow_failures:
+    - jdk: oraclejdk9
+    - jdk: openjdk9
 
 before_install:
   # Disable services enabled by default
@@ -22,7 +31,7 @@ install:
 #  - sleep 15
 
 script:
-  - TERM=dumb ./gradlew testAll codeCoverageReport
+  - TERM=dumb ./gradlew testAll codeCoverageReport --stacktrace
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)

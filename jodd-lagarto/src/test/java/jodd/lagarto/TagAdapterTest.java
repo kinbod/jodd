@@ -36,12 +36,12 @@ import java.net.URL;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class TagAdapterTest {
+class TagAdapterTest {
 
 	protected String testAdapterRoot;
 
 	@BeforeEach
-	public void setUp() throws Exception {
+	void setUp() throws Exception {
 		if (testAdapterRoot != null) {
 			return;
 		}
@@ -51,10 +51,10 @@ public class TagAdapterTest {
 	}
 
 	@Test
-	public void testCleanHtml() throws IOException {
+	void testCleanHtml() throws IOException {
 		File ff = new File(testAdapterRoot, "clean.html");
 
-		LagartoParser lagartoParser = new LagartoParser(FileUtil.readString(ff), false);
+		LagartoParser lagartoParser = new LagartoParser(FileUtil.readString(ff));
 
 		StringBuilder out = new StringBuilder();
 		TagWriter tagWriter = new TagWriter(out);
@@ -67,10 +67,10 @@ public class TagAdapterTest {
 	}
 
 	@Test
-	public void testTwoAdapters() throws IOException {
+	void testTwoAdapters() throws IOException {
 		File ff = new File(testAdapterRoot, "two.html");
 
-		LagartoParser lagartoParser = new LagartoParser(FileUtil.readString(ff), false);
+		LagartoParser lagartoParser = new LagartoParser(FileUtil.readString(ff));
 		StringBuilder out = new StringBuilder();
 		TagWriter tagWriter = new TagWriter(out);
 

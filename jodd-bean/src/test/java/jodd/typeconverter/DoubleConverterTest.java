@@ -32,10 +32,10 @@ import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class DoubleConverterTest {
+class DoubleConverterTest {
 
 	@Test
-	public void testConversion() {
+	void testConversion() {
 		DoubleConverter doubleConverter = new DoubleConverter();
 
 		assertNull(doubleConverter.convert(null));

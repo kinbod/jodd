@@ -55,6 +55,7 @@ public interface ConnectionProvider extends AutoCloseable {
 	/**
 	 * Closes a provider and releases all its resources.
 	 */
+	@Override
 	void close();
 
 }

@@ -29,10 +29,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class VtorExceptionTest {
+class VtorExceptionTest {
 
     @Test
-    public void testConstructor1() {
+    void testConstructor1() {
         //given
         RuntimeException cause = new RuntimeException("test");
         //when
@@ -42,7 +42,7 @@ public class VtorExceptionTest {
     }
 
     @Test
-    public void testConstructor2() {
+    void testConstructor2() {
         //given
         String message = "test";
         //when
@@ -52,7 +52,7 @@ public class VtorExceptionTest {
     }
 
     @Test
-    public void testConstructor3() {
+    void testConstructor3() {
         //given
         String message = "test";
         RuntimeException cause = new RuntimeException();

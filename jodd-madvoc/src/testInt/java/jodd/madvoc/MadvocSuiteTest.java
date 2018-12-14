@@ -26,17 +26,19 @@
 package jodd.madvoc;
 
 import jodd.exception.UncheckedException;
+import jodd.test.DisabledOnJava;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
 
-public class MadvocSuiteTest {
+@DisabledOnJava(value = 9, description = "The complete suite can not be tested on Java9 as Multi-Release JARS do not work in exploded mode.")
+class MadvocSuiteTest {
 
 	/**
 	 * Starts Tomcat after the suite.
 	 */
 	@BeforeAll
-	public static void beforeClass() {
+	static void beforeClass() {
 		isSuite = true;
 		startTomcat();
 	}
@@ -45,7 +47,7 @@ public class MadvocSuiteTest {
 	 * Stop Tomcat after the suite.
 	 */
 	@AfterAll
-	public static void afterSuite() {
+	static void afterSuite() {
 		isSuite = false;
 		stopTomcat();
 	}
@@ -101,6 +103,8 @@ public class MadvocSuiteTest {
 	@Nested
 	class HelloActionTest extends HelloActionTestBase {}
 	@Nested
+	class BodyTest extends BodyTestBase {}
+	@Nested
 	class SimpleTest extends SimpleTestBase {}
 	@Nested
 	class RawActionTest extends RawActionTestBase {}
@@ -129,8 +133,6 @@ public class MadvocSuiteTest {
 	@Nested
 	class AsyncTest extends AsyncTestBase {}
 	@Nested
-	class MoveTest extends MoveTestBase {}
-	@Nested
 	class BookActionTest extends BookActionTestBase {}
 	@Nested
 	class ResultsTest extends ResultsTestBase {}
@@ -138,4 +140,10 @@ public class MadvocSuiteTest {
 	class TagActionTest extends TagActionTestBase {}
 	@Nested
 	class MissingActionTest extends MissingActionTestBase {}
+	@Nested
+	class ComponentTest extends ComponentTestBase {}
+	@Nested
+	class CookieTest extends CookieTestBase {}
+	@Nested
+	class DefaultViewActionTest extends DefaultViewActionTestBase {}
 }

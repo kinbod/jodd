@@ -37,17 +37,17 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class AdviceWithMethodTest {
+class AdviceWithMethodTest {
 
 	@Test
-	public void testCollector() throws NoSuchFieldException, IllegalAccessException {
-		ProxyProxetta proxetta = ProxyProxetta.withAspects(
+	void testCollector() throws NoSuchFieldException, IllegalAccessException {
+		ProxyProxetta proxetta = Proxetta.proxyProxetta().withAspects(
 				new ProxyAspect(CollectorAdvice.class, new AllTopMethodsPointcut())
 		);
 
 //		proxetta.setDebugFolder("d:\\");
 
-		Foo foo = (Foo) proxetta.builder(Foo.class).newInstance();
+		Foo foo = (Foo) proxetta.proxy().setTarget(Foo.class).newInstance();
 
 		Field field = foo.getClass().getDeclaredField("$__methods$0");
 

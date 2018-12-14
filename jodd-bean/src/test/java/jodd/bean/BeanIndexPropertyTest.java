@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class BeanIndexPropertyTest {
+class BeanIndexPropertyTest {
 
 	// simple
 
@@ -96,7 +96,7 @@ public class BeanIndexPropertyTest {
 	// ---------------------------------------------------------------- tests
 
 	@Test
-	public void testGetSetArray1() {
+	void testGetSetArray1() {
 		for (int i = 0; i < 2; i++) {
 			String suffix = "";
 			if (i == 1) {
@@ -140,7 +140,7 @@ public class BeanIndexPropertyTest {
 	}
 
 	@Test
-	public void testGetSetArray2() {
+	void testGetSetArray2() {
 		for (int i = 0; i < 2; i++) {
 			String suffix = "";
 			if (i == 1) {
@@ -178,7 +178,7 @@ public class BeanIndexPropertyTest {
 	// ---------------------------------------------------------------- list
 
 	@Test
-	public void testGetSetList() {
+	void testGetSetList() {
 		for (int i = 0; i < 2; i++) {
 			String suffix = "";
 			if (i == 1) {
@@ -207,7 +207,7 @@ public class BeanIndexPropertyTest {
 	}
 
 	@Test
-	public void testGetSetList2() {
+	void testGetSetList2() {
 		for (int i = 0; i < 2; i++) {
 			String suffix = "";
 			if (i == 1) {
@@ -245,7 +245,7 @@ public class BeanIndexPropertyTest {
 	// ---------------------------------------------------------------- map
 
 	@Test
-	public void testGetSetMap() {
+	void testGetSetMap() {
 		for (int i = 0; i < 2; i++) {
 			String suffix = "";
 			if (i == 1) {
@@ -269,7 +269,7 @@ public class BeanIndexPropertyTest {
 	}
 
 	@Test
-	public void testGetSetMapWithIntegerKey() {
+	void testGetSetMapWithIntegerKey() {
 		for (int i = 0; i < 2; i++) {
 			String suffix = "";
 			if (i == 1) {
@@ -293,7 +293,7 @@ public class BeanIndexPropertyTest {
 	}
 
 	@Test
-	public void testGetSetMap2() {
+	void testGetSetMap2() {
 		for (int i = 0; i < 2; i++) {
 			String suffix = "";
 			if (i == 1) {
@@ -329,7 +329,7 @@ public class BeanIndexPropertyTest {
 	}
 
 	@Test
-	public void testGetSetMap2withIntegerKey() {
+	void testGetSetMap2withIntegerKey() {
 		for (int i = 0; i < 2; i++) {
 			String suffix = "";
 			if (i == 1) {

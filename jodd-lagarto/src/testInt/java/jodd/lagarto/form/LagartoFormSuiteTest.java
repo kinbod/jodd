@@ -30,13 +30,13 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
 
-public class LagartoFormSuiteTest {
+class LagartoFormSuiteTest {
 
 	/**
 	 * Starts Tomcat after the suite.
 	 */
 	@BeforeAll
-	public static void beforeClass() {
+	static void beforeClass() {
 		isSuite = true;
 		startTomcat();
 	}
@@ -45,7 +45,7 @@ public class LagartoFormSuiteTest {
 	 * Stop Tomcat after the suite.
 	 */
 	@AfterAll
-	public static void afterSuite() {
+	static void afterSuite() {
 		isSuite = false;
 		stopTomcat();
 	}
@@ -96,6 +96,6 @@ public class LagartoFormSuiteTest {
 	}
 
 	@Nested
-	public class FormTextTest extends FormTextTestBase {}
+	class FormTextTest extends FormTextTestBase {}
 
 }

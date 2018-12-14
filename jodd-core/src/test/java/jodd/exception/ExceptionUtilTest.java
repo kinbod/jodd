@@ -27,8 +27,6 @@ package jodd.exception;
 
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
-
 import static jodd.exception.ExceptionUtil.getExceptionChain;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -36,10 +34,10 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
-public class ExceptionUtilTest {
+class ExceptionUtilTest {
 
 	@Test
-	public void testCurrentStackTrace() {
+	void testCurrentStackTrace() {
 		StackTraceElement[] sts =ExceptionUtil.getCurrentStackTrace();
 
 		StackTraceElement st = sts[0];
@@ -49,7 +47,7 @@ public class ExceptionUtilTest {
 	}
 
 	@Test
-	public void testExceptionChain() {
+	void testExceptionChain() {
 		try {
 			throwTwoExceptions();
 			fail("error");
@@ -68,22 +66,8 @@ public class ExceptionUtilTest {
 		}
 	}
 
-	@Test
-	public void testThrowChecked() {
-		try {
-			throwMe();
-			fail("error");
-		} catch (Exception ex) {
-			assertEquals(IOException.class, ex.getClass());
-		}
-	}
-
 	public void throwTwoExceptions() {
 		throw new IllegalArgumentException(new NullPointerException());
-	}
-
-	public void throwMe() {
-		ExceptionUtil.throwException(new IOException());
 	}
 
 }

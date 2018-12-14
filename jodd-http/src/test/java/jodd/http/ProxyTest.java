@@ -43,26 +43,26 @@ import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 import static org.mockserver.verify.VerificationTimes.exactly;
 
-public class ProxyTest {
+class ProxyTest {
 
 	private ClientAndProxy proxy;
 	private ClientAndServer mockServer;
 
 	@BeforeEach
-	public void startProxy() {
+	void startProxy() {
 		mockServer = startClientAndServer(1080);
 		proxy = startClientAndProxy(1090);
 		setupMockServer();
 	}
 
 	@AfterEach
-	public void stopProxy() {
+	void stopProxy() {
 		proxy.stop();
 		mockServer.stop();
 	}
 
 	@Test
-	public void testDirect() {
+	void testDirect() {
 		HttpResponse response = HttpRequest.get("http://localhost:1080/get_books").send();
 		assertEquals(200, response.statusCode());
 		assertTrue(response.body().contains("Tatum"));
@@ -70,7 +70,7 @@ public class ProxyTest {
 	}
 
 	@Test
-	public void testDirectHttps() {
+	void testDirectHttps() {
 		HttpResponse response = HttpRequest.get("https://localhost:1080/get_books").trustAllCerts(true).send();
 		assertEquals(200, response.statusCode());
 		assertTrue(response.body().contains("Tatum"));
@@ -79,7 +79,7 @@ public class ProxyTest {
 
 	@Test
 	@Disabled
-	public void testHttpProxy() {
+	void testHttpProxy() {
 		SocketHttpConnectionProvider s = new SocketHttpConnectionProvider();
 		s.useProxy(ProxyInfo.httpProxy("localhost", 1090, null, null));
 
@@ -91,7 +91,7 @@ public class ProxyTest {
 	}
 
 	@Test
-	public void testSocks5Proxy() {
+	void testSocks5Proxy() {
 		SocketHttpConnectionProvider s = new SocketHttpConnectionProvider();
 		s.useProxy(ProxyInfo.socks5Proxy("localhost", 1090, null, null));
 
@@ -104,7 +104,7 @@ public class ProxyTest {
 	}
 
 	@Test
-	public void testSocks5ProxyWithHttps() {
+	void testSocks5ProxyWithHttps() {
 		SocketHttpConnectionProvider s = new SocketHttpConnectionProvider();
 		s.useProxy(ProxyInfo.socks5Proxy("localhost", 1090, null, null));
 

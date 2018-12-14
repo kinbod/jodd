@@ -29,10 +29,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class CsvUtilTest {
+class CsvUtilTest {
 
 	@Test
-	public void testToCsv() {
+	void testToCsv() {
 		assertEquals("a", CsvUtil.toCsvString("a"));
 		assertEquals("a,b", CsvUtil.toCsvString("a", "b"));
 		assertEquals("a,b,", CsvUtil.toCsvString("a", "b", ""));
@@ -46,7 +46,7 @@ public class CsvUtilTest {
 	}
 
 	@Test
-	public void testFromCsv() {
+	void testFromCsv() {
 		assertStringArray(CsvUtil.toStringArray("a"), "a");
 		assertStringArray(CsvUtil.toStringArray("a,b"), "a", "b");
 		assertStringArray(CsvUtil.toStringArray("a, b "), "a", " b ");

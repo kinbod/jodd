@@ -25,7 +25,7 @@
 
 package jodd.db.servers;
 
-import jodd.db.oom.DbOomManager;
+import jodd.db.oom.DbOomConfig;
 
 /**
  * Postgres.
@@ -34,14 +34,20 @@ public class PostgreSqlDbServer implements DbServer {
 
 	private final String version;
 
-	public PostgreSqlDbServer(String version) {
+	public PostgreSqlDbServer(final String version) {
 		this.version = version;
 	}
 
 	@Override
-	public void accept(DbOomManager dbOomManager) {
-		dbOomManager.getTableNames().setLowercase(true);
-		dbOomManager.getColumnNames().setLowercase(true);
+	public void accept(final DbOomConfig dbOomConfig) {
+		// However, the standard says that unquoted identifiers should be
+		// folded to uppercase but PostgreSQL folds them to lower case
+		// (probably for historic reasons)
+		dbOomConfig.getTableNames().setLowercase(true);
+		dbOomConfig.getColumnNames().setLowercase(true);
+
+		// quote character
+		dbOomConfig.getColumnNames().setQuoteChar('\"');
 	}
 
 	@Override

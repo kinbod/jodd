@@ -29,13 +29,15 @@ import jodd.mutable.MutableInteger;
 import jodd.typeconverter.impl.MutableIntegerConverter;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
-public class MutableIntegerConverterTest {
+class MutableIntegerConverterTest {
 
 	@Test
-	public void testConversion() {
-		MutableIntegerConverter mutableIntegerConverter = (MutableIntegerConverter) TypeConverterManager.lookup(MutableInteger.class);
+	void testConversion() {
+		MutableIntegerConverter mutableIntegerConverter = (MutableIntegerConverter) TypeConverterManager.get().lookup(MutableInteger.class);
 
 		assertNull(mutableIntegerConverter.convert(null));
 

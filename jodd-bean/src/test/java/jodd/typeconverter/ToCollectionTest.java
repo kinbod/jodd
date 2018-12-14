@@ -35,16 +35,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class ToCollectionTest {
+class ToCollectionTest {
 
 	@Test
-	public void testConvertToList() {
+	void testConvertToList() {
 		Set<String> set = new HashSet<>();
 		set.add("123");
 		set.add("456");
 
-		List<Integer> list =
-			TypeConverterManager.convertToCollection(set, List.class, Integer.class);
+		List<Integer> list = TypeConverterManager.get().convertToCollection(set, List.class, Integer.class);
 
 		assertNotNull(list);
 		assertEquals(2, list.size());

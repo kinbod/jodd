@@ -35,10 +35,10 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class AnnotationTest {
+class AnnotationTest {
 
 	@Test
-	public void testAnn() {
+	void testAnn() {
 		Vtor vtor = new Vtor();
 		vtor.validate(new Woo());
 		List<Violation> v = vtor.getViolations();
@@ -58,7 +58,7 @@ public class AnnotationTest {
 	}
 
 	@Test
-	public void testTime() {
+	void testTime() {
 		Vtor vtor = new Vtor();
 		vtor.validate(new Tad());
 

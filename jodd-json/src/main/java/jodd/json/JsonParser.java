@@ -29,32 +29,76 @@ import jodd.introspector.ClassDescriptor;
 import jodd.introspector.ClassIntrospector;
 import jodd.introspector.PropertyDescriptor;
 import jodd.json.meta.JsonAnnotationManager;
+import jodd.json.meta.TypeData;
+import jodd.util.CharArraySequence;
 import jodd.util.CharUtil;
 import jodd.util.StringPool;
 import jodd.util.UnsafeUtil;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static jodd.json.JoddJson.DEFAULT_CLASS_METADATA_NAME;
+import java.util.function.Supplier;
 
 /**
  * Simple, developer-friendly JSON parser. It focuses on easy usage
  * and type mappings. Uses Jodd's type converters, so it is natural
  * companion for Jodd projects.
  * <p>
+ * This JSON parser also works in {@link #lazy(boolean)} mode. This
+ * mode is for top performance usage: parsing is done very, very lazy.
+ * While you can use all the mappings and other tools, for best performance
+ * the lazy mode should be used only with maps and lists (no special mappings).
+ * Also, the performance has it's price: more memory consumption, because the
+ * original input is hold until the result is in use.
+ * <p>
  * See: http://www.ietf.org/rfc/rfc4627.txt
  */
 public class JsonParser extends JsonParserBase {
+
+	public static class Defaults {
+
+		public static final String DEFAULT_CLASS_METADATA_NAME = "__class";
+
+		/**
+		 * Flag for enabling the lazy mode.
+		 */
+		public static boolean lazy = false;
+		/**
+		 * Defines if parser will use extended paths information
+		 * and path matching.
+		 */
+		public static boolean useAltPathsByParser = false;
+		/**
+		 * Default value for loose mode.
+		 */
+		public static boolean loose = false;
+
+		/**
+		 * Specifies if 'class' metadata is used and its value. When set, class metadata
+		 * is used by {@link jodd.json.JsonSerializer} and all objects
+		 * will have additional field with the class type in the resulting JSON.
+		 * {@link jodd.json.JsonParser} will also consider this flag to build
+		 * correct object type. If <code>null</code>, class information is not used.
+		 */
+		public static String classMetadataName = null;
+	}
 
 	/**
 	 * Static ctor.
 	 */
 	public static JsonParser create() {
 		return new JsonParser();
+	}
+
+	/**
+	 * Creates a lazy implementation of the JSON parser.
+	 */
+	public static JsonParser createLazyOne() {
+		return new JsonParser().lazy(true);
 	}
 
 	private static final char[] T_RUE = new char[] {'r', 'u', 'e'};
@@ -74,13 +118,18 @@ public class JsonParser extends JsonParserBase {
 	protected char[] input;
 	protected int total;
 	protected Path path;
-	protected boolean useAltPaths = JoddJson.useAltPathsByParser;
+	protected boolean useAltPaths = Defaults.useAltPathsByParser;
+	protected boolean lazy = Defaults.lazy;
+	protected boolean looseMode = Defaults.loose;
 	protected Class rootType;
 	protected MapToBean mapToBean;
-	protected boolean looseMode;
+	private boolean notFirstObject = false;
+
+	private final JsonAnnotationManager jsonAnnotationManager;
 
 	public JsonParser() {
-		text = new char[512];
+		this.text = new char[512];
+		this.jsonAnnotationManager = JsonAnnotationManager.get();
 	}
 
 	/**
@@ -116,8 +165,22 @@ public class JsonParser extends JsonParserBase {
 	 *     <li>strings can be unquoted, but may not contain escapes</li>
 	 * </ul>
 	 */
-	public JsonParser looseMode(boolean looseMode) {
+	public JsonParser looseMode(final boolean looseMode) {
 		this.looseMode = looseMode;
+		return this;
+	}
+
+	/**
+	 * Defines how JSON parser works. In non-lazy mode, the whole JSON is parsed as it is.
+	 * In the lazy mode, not everything is parsed, but some things are left lazy.
+	 * This way we gain performance, especially on partial usage of the whole JSON.
+	 * However, be aware that parser holds the input memory until the returned
+	 * objects are disposed.
+	 */
+	public JsonParser lazy(final boolean lazy) {
+		this.lazy = lazy;
+		this.mapSupplier = lazy ? LAZYMAP_SUPPLIER : HASMAP_SUPPLIER;
+		this.listSupplier = lazy ? LAZYLIST_SUPPLIER : ARRAYLIST_SUPPLIER;
 		return this;
 	}
 
@@ -128,7 +191,7 @@ public class JsonParser extends JsonParserBase {
 	/**
 	 * Maps a class to JSONs root.
 	 */
-	public JsonParser map(Class target) {
+	public JsonParser map(final Class target) {
 		rootType = target;
 		return this;
 	}
@@ -138,7 +201,7 @@ public class JsonParser extends JsonParserBase {
 	 * to the path to specify component type (if not specified by
 	 * generics).
 	 */
-	public JsonParser map(String path, Class target) {
+	public JsonParser map(final String path, final Class target) {
 		if (path == null) {
 			rootType = target;
 			return this;
@@ -153,7 +216,7 @@ public class JsonParser extends JsonParserBase {
 	/**
 	 * Replaces type with mapped type for current path.
 	 */
-	protected Class replaceWithMappedTypeForPath(Class target) {
+	protected Class replaceWithMappedTypeForPath(final Class target) {
 		if (mappings == null) {
 			return target;
 		}
@@ -192,7 +255,7 @@ public class JsonParser extends JsonParserBase {
 	/**
 	 * Defines {@link jodd.json.ValueConverter} to use on given path.
 	 */
-	public JsonParser withValueConverter(String path, ValueConverter valueConverter) {
+	public JsonParser withValueConverter(final String path, final ValueConverter valueConverter) {
 		if (convs == null) {
 			convs = new HashMap<>();
 		}
@@ -212,19 +275,32 @@ public class JsonParser extends JsonParserBase {
 
 	// ---------------------------------------------------------------- class meta data name
 
-	protected String classMetadataName = JoddJson.classMetadataName;
+	protected String classMetadataName = Defaults.classMetadataName;
 
 	/**
 	 * Sets local class meta-data name.
+	 * <p>
+	 * Note that by using the class meta-data name you may expose a security hole in case untrusted source
+	 * manages to specify a class that is accessible through class loader and exposes set of methods and/or fields,
+	 * access of which opens an actual security hole. Such classes are known as “deserialization gadget”s.
+	 *
+	 * Because of this, use of "default typing" is not encouraged in general, and in particular is recommended against
+	 * if the source of content is not trusted. Conversely, default typing may be used for processing content in
+	 * cases where both ends (sender and receiver) are controlled by same entity.
 	 */
-	public JsonParser setClassMetadataName(String name) {
+	public JsonParser setClassMetadataName(final String name) {
 		classMetadataName = name;
 		return this;
 	}
 
-	public JsonParser withClassMetadata(boolean useMetadata) {
+	/**
+	 * Sets usage of default class meta-data name.
+	 * Using it may introduce a security hole, see {@link #setClassMetadataName(String)} for more details.
+	 * @see #setClassMetadataName(String)
+	 */
+	public JsonParser withClassMetadata(final boolean useMetadata) {
 		if (useMetadata) {
-			classMetadataName = DEFAULT_CLASS_METADATA_NAME;
+			classMetadataName = Defaults.DEFAULT_CLASS_METADATA_NAME;
 		}
 		else {
 			classMetadataName = null;
@@ -232,6 +308,26 @@ public class JsonParser extends JsonParserBase {
 		return this;
 	}
 
+	/**
+	 * Adds a {@link jodd.util.Wildcard wildcard} pattern for white-listing classes.
+	 * @see #setClassMetadataName(String)
+	 */
+	public JsonParser allowClass(final String classPattern) {
+		if (super.classnameWhitelist == null) {
+			super.classnameWhitelist = new ArrayList<>();
+		}
+		classnameWhitelist.add(classPattern);
+		return this;
+	}
+
+	/**
+	 * Removes the whitelist of allowed classes.
+	 * @see #setClassMetadataName(String)
+	 */
+	public JsonParser allowAllClasses() {
+		classnameWhitelist = null;
+		return this;
+	}
 
 	// ---------------------------------------------------------------- parse
 
@@ -239,30 +335,29 @@ public class JsonParser extends JsonParserBase {
 	 * Parses input JSON as given type.
 	 */
 	@SuppressWarnings("unchecked")
-	public <T> T parse(String input, Class<T> targetType) {
-		char[] chars = UnsafeUtil.getChars(input);
+	public <T> T parse(final String input, final Class<T> targetType) {
 		rootType = targetType;
-		return _parse(chars);
+		return _parse(UnsafeUtil.getChars(input));
 	}
 
 	/**
 	 * Parses input JSON to {@link JsonObject}, special case of {@link #parse(String, Class)}.
 	 */
-	public JsonObject parseAsJsonObject(String input) {
+	public JsonObject parseAsJsonObject(final String input) {
 		return new JsonObject(parse(input));
 	}
 
 	/**
 	 * Parses input JSON to {@link JsonArray}, special case of parsing.
 	 */
-	public JsonArray parseAsJsonArray(String input) {
+	public JsonArray parseAsJsonArray(final String input) {
 		return new JsonArray(parse(input));
 	}
 
 	/**
 	 * Parses input JSON to a list with specified component type.
 	 */
-	public <T> List<T> parseAsList(String string, Class<T> componentType) {
+	public <T> List<T> parseAsList(final String string, final Class<T> componentType) {
 		return new JsonParser()
 			.map(JsonParser.VALUES, componentType)
 			.parse(string);
@@ -272,7 +367,7 @@ public class JsonParser extends JsonParserBase {
 	 * Parses input JSON to a list with specified key and value types.
 	 */
 	public <K, V> Map<K, V> parseAsMap(
-		String string, Class<K> keyType, Class<V> valueType) {
+		final String string, final Class<K> keyType, final Class<V> valueType) {
 
 		return new JsonParser()
 			.map(JsonParser.KEYS, keyType)
@@ -283,16 +378,15 @@ public class JsonParser extends JsonParserBase {
 	/**
 	 * Parses input JSON string.
 	 */
-	public <T> T parse(String input) {
-		char[] chars = UnsafeUtil.getChars(input);
-		return _parse(chars);
+	public <T> T parse(final String input) {
+		return _parse(UnsafeUtil.getChars(input));
 	}
 
 	/**
 	 * Parses input JSON as given type.
 	 */
 	@SuppressWarnings("unchecked")
-	public <T> T parse(char[] input, Class<T> targetType) {
+	public <T> T parse(final char[] input, final Class<T> targetType) {
 		rootType = targetType;
 		return _parse(input);
 	}
@@ -300,12 +394,12 @@ public class JsonParser extends JsonParserBase {
 	/**
 	 * Parses input JSON char array.
 	 */
-	public <T> T parse(char[] input) {
+	public <T> T parse(final char[] input) {
 		return _parse(input);
 	}
 
 
-	private <T> T _parse(char[] input) {
+	private <T> T _parse(final char[] input) {
 		this.input = input;
 		this.total = input.length;
 
@@ -330,6 +424,11 @@ public class JsonParser extends JsonParserBase {
 			return null;
 		}
 
+		if (lazy) {
+			// lets resolve root lazy values
+			value = resolveLazyValue(value);
+		}
+
 		// convert map to target type
 
 		if (classMetadataName != null && rootType == null) {
@@ -350,10 +449,10 @@ public class JsonParser extends JsonParserBase {
 	 * @param targetType target type to convert, may be <code>null</code>
 	 * @param componentType component type for maps and arrays, may be <code>null</code>
 	 */
-	protected Object parseValue(Class targetType, Class keyType, Class componentType) {
-		ValueConverter valueConverter;
+	protected Object parseValue(final Class targetType, final Class keyType, final Class componentType) {
+		final ValueConverter valueConverter;
 
-		char c = input[ndx];
+		final char c = input[ndx];
 
 		switch (c) {
 			case '\'':
@@ -376,6 +475,19 @@ public class JsonParser extends JsonParserBase {
 
 			case '{':
 				ndx++;
+				if (lazy) {
+					if (notFirstObject) {
+						final Object value = new ObjectParser(this, targetType, keyType, componentType);
+
+						skipObject();
+
+						return value;
+					}
+					else {
+						notFirstObject = true;
+					}
+				}
+
 				return parseObjectContent(targetType, keyType, componentType);
 
 			case '[':
@@ -470,6 +582,53 @@ public class JsonParser extends JsonParserBase {
 		return null;
 	}
 
+
+	// ---------------------------------------------------------------- lazy
+
+	/**
+	 * Resolves lazy value during the parsing runtime.
+	 */
+	private Object resolveLazyValue(Object value) {
+		if (value instanceof Supplier) {
+			value = ((Supplier)value).get();
+		}
+		return value;
+	}
+
+	/**
+	 * Skips over complete object. It is not parsed, just skipped. It will be
+	 * parsed later, but oonly if required.
+	 */
+	private void skipObject() {
+		int bracketCount = 1;
+		boolean insideString = false;
+
+		while (ndx < total) {
+			final char c = input[ndx];
+
+			if (insideString) {
+				if (c == '\"' && (ndx == 0 || input[ndx - 1] != '\\')) {
+					insideString = false;
+				}
+			}
+			else {
+				if (c == '\"') {
+					insideString = true;
+				}
+				if (c == '{') {
+					bracketCount++;
+				} else if (c == '}') {
+					bracketCount--;
+					if (bracketCount == 0) {
+						ndx++;
+						return;
+					}
+				}
+			}
+			ndx++;
+		}
+	}
+
 	// ---------------------------------------------------------------- string
 
 	protected char[] text;
@@ -493,19 +652,19 @@ public class JsonParser extends JsonParserBase {
 	}
 
 	/**
-	 * Parses string content, once when starting quote has been consumer.
+	 * Parses string content, once when starting quote has been consumed.
 	 */
 	protected String parseStringContent(final char quote) {
-		int startNdx = ndx;
+		final int startNdx = ndx;
 
 		// roll-out until the end of the string or the escape char
 		while (true) {
-			char c = input[ndx];
+			final char c = input[ndx];
 
 			if (c == quote) {
 				// no escapes found, just use existing string
 				ndx++;
-				return new String(input, startNdx, ndx - startNdx - 1);
+				return new String(input, startNdx, ndx - 1 - startNdx);
 			}
 
 			if (c == '\\') {
@@ -521,6 +680,9 @@ public class JsonParser extends JsonParserBase {
 
 		growEmpty();
 
+//		for (int i = startNdx, j = 0; j < textLen; i++, j++) {
+//			text[j] = input[i];
+//		}
 		System.arraycopy(input, startNdx, text, 0, textLen);
 
 		// escape char, process everything until the end
@@ -530,7 +692,7 @@ public class JsonParser extends JsonParserBase {
 			if (c == quote) {
 				// done
 				ndx++;
-				String str = new String(text, 0, textLen);
+				final String str = new String(text, 0, textLen);
 				textLen = 0;
 				return str;
 			}
@@ -625,18 +787,18 @@ public class JsonParser extends JsonParserBase {
 	 * Parses un-quoted string content.
 	 */
 	protected String parseUnquotedStringContent() {
-		int startNdx = ndx;
+		final int startNdx = ndx;
 
 		while (true) {
-			char c = input[ndx];
+			final char c = input[ndx];
 
 			if (c <= ' ' || CharUtil.equalsOne(c, UNQOUTED_DELIMETERS)) {
-				// done
-				int len = ndx - startNdx;
+				final int currentNdx = ndx;
 
+				// done
 				skipWhiteSpaces();
 
-				return new String(input, startNdx, len);
+				return new String(input, startNdx, currentNdx - startNdx);
 			}
 
 			ndx++;
@@ -650,7 +812,7 @@ public class JsonParser extends JsonParserBase {
 	 * Parses JSON numbers.
 	 */
 	protected Number parseNumber() {
-		int startIndex = ndx;
+		final int startIndex = ndx;
 
 		char c = input[ndx];
 
@@ -688,7 +850,8 @@ public class JsonParser extends JsonParserBase {
 			ndx++;
 		}
 
-		String value = String.valueOf(input, startIndex, ndx - startIndex);
+
+		final String value = new String(input, startIndex, ndx - startIndex);
 
 		if (isDouble) {
 			return Double.valueOf(value);
@@ -704,7 +867,7 @@ public class JsonParser extends JsonParserBase {
 				// if string is 19 chars and longer, it can be over the limit
 				BigInteger bigInteger = new BigInteger(value);
 
-				if (isGreaterThenLong(bigInteger)) {
+				if (isGreaterThanLong(bigInteger)) {
 					return bigInteger;
 				}
 				longNumber = bigInteger.longValue();
@@ -720,11 +883,11 @@ public class JsonParser extends JsonParserBase {
 		return Long.valueOf(longNumber);
 	}
 
-	private static boolean isGreaterThenLong(BigInteger bigInteger) {
-		if (bigInteger.compareTo(MAX_LONG) == 1) {
+	private static boolean isGreaterThanLong(final BigInteger bigInteger) {
+		if (bigInteger.compareTo(MAX_LONG) > 0) {
 			return true;
 		}
-		if (bigInteger.compareTo(MIN_LONG) == -1) {
+		if (bigInteger.compareTo(MIN_LONG) < 0) {
 			return true;
 		}
 		return false;
@@ -822,10 +985,10 @@ public class JsonParser extends JsonParserBase {
 		boolean isTargetTypeMap = true;
 		boolean isTargetRealTypeMap = true;
 		ClassDescriptor targetTypeClassDescriptor = null;
-		JsonAnnotationManager.TypeData typeData = null;
+		TypeData typeData = null;
 
 		if (targetType != null) {
-			targetTypeClassDescriptor = ClassIntrospector.lookup(targetType);
+			targetTypeClassDescriptor = ClassIntrospector.get().lookup(targetType);
 
 			// find if the target is really a map
 			// because when classMetadataName != null we are forcing
@@ -833,7 +996,7 @@ public class JsonParser extends JsonParserBase {
 
 			isTargetRealTypeMap = targetTypeClassDescriptor.isMap();
 
-			typeData = JoddJson.annotationManager.lookupTypeData(targetType);
+			typeData = jsonAnnotationManager.lookupTypeData(targetType);
 		}
 
 		if (isTargetRealTypeMap) {
@@ -850,7 +1013,7 @@ public class JsonParser extends JsonParserBase {
 			isTargetTypeMap = isTargetRealTypeMap;
 		} else {
 			// all beans will be created first as a map
-			target = new HashMap();
+			target = mapSupplier.get();
 		}
 
 		boolean koma = false;
@@ -892,7 +1055,7 @@ public class JsonParser extends JsonParserBase {
 
 			if (!isTargetRealTypeMap) {
 				// replace key with real property value
-				key = JoddJson.annotationManager.resolveRealName(targetType, key);
+				key = jsonAnnotationManager.resolveRealName(targetType, key);
 			}
 
 			if (!isTargetTypeMap) {
@@ -918,6 +1081,11 @@ public class JsonParser extends JsonParserBase {
 				if (typeData.rules.match(keyOriginal, !typeData.strict)) {
 
 					if (pd != null) {
+						if (lazy) {
+							// need to resolve lazy value before injecting objects into it
+							value = resolveLazyValue(value);
+						}
+
 						// only inject values if target property exist
 						injectValueIntoObject(target, pd, value);
 					}
@@ -973,7 +1141,7 @@ public class JsonParser extends JsonParserBase {
 	/**
 	 * Consumes char at current position. If char is different, throws the exception.
 	 */
-	protected void consume(char c) {
+	protected void consume(final char c) {
 		if (input[ndx] != c) {
 			syntaxError("Invalid char: expected " + c);
 		}
@@ -986,7 +1154,7 @@ public class JsonParser extends JsonParserBase {
 	 * If char is different, return <code>0</code>.
 	 * If matched, returns matched char.
 	 */
-	protected char consumeOneOf(char c1, char c2) {
+	protected char consumeOneOf(final char c1, final char c2) {
 		char c = input[ndx];
 
 		if ((c != c1) && (c != c2)) {
@@ -1024,7 +1192,7 @@ public class JsonParser extends JsonParserBase {
 	/**
 	 * Matches char buffer with content on given location.
 	 */
-	protected final boolean match(char[] target) {
+	protected final boolean match(final char[] target) {
 		for (char c : target) {
 			if (input[ndx] != c) {
 				return false;
@@ -1041,7 +1209,7 @@ public class JsonParser extends JsonParserBase {
 	/**
 	 * Throws {@link jodd.json.JsonException} indicating a syntax error.
 	 */
-	protected void syntaxError(String message) {
+	protected void syntaxError(final String message) {
 		String left = "...";
 		String right = "...";
 		int offset = 10;
@@ -1058,7 +1226,7 @@ public class JsonParser extends JsonParserBase {
 			right = StringPool.EMPTY;
 		}
 
-		String str = String.valueOf(input, from, to - from);
+		final CharSequence str = CharArraySequence.of(input, from, to - from);
 
 		throw new JsonException(
 				"Syntax error! " + message + "\n" +

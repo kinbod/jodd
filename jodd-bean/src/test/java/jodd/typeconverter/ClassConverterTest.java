@@ -31,13 +31,14 @@ import jodd.util.fixtures.testdata.A;
 import jodd.util.fixtures.testdata.B;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
-public class ClassConverterTest {
+class ClassConverterTest {
 
 	@Test
-	public void testConversion() {
+	void testConversion() {
 		ClassConverter classConverter = new ClassConverter();
 
 		assertNull(classConverter.convert(null));
@@ -53,20 +54,20 @@ public class ClassConverterTest {
 	}
 
 	@Test
-	public void testCast() {
+	void testCast() {
 
 		String s = "123";
-		Integer d = TypeConverterManager.convertType(s, Integer.class);
+		Integer d = TypeConverterManager.get().convertType(s, Integer.class);
 		assertEquals(123, d.intValue());
 
-		s = TypeConverterManager.convertType(d, String.class);
+		s = TypeConverterManager.get().convertType(d, String.class);
 		assertEquals("123", s);
 
-		MutableInteger md = TypeConverterManager.convertType(s, MutableInteger.class);
+		MutableInteger md = TypeConverterManager.get().convertType(s, MutableInteger.class);
 		assertEquals(123, md.intValue());
 
 		B b = new B();
-		A a = TypeConverterManager.convertType(b, A.class);
+		A a = TypeConverterManager.get().convertType(b, A.class);
 		assertEquals(a, b);
 	}
 

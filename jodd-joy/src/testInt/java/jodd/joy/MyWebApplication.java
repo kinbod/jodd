@@ -27,9 +27,8 @@ package jodd.joy;
 
 import jodd.log.LoggerFactory;
 import jodd.log.impl.SimpleLogger;
-import jodd.madvoc.petite.PetiteWebApplication;
 
-public class MyWebApplication extends PetiteWebApplication {
+public class MyWebApplication extends JoyContextListener {
 
 	public MyWebApplication() {
 		LoggerFactory.setLoggerProvider(SimpleLogger.PROVIDER);

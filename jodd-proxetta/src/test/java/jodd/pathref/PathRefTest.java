@@ -32,7 +32,7 @@ import java.util.List;
 import static jodd.pathref.Pathref.ALL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class PathRefTest {
+class PathRefTest {
 
 	public static class User {
 		public String getName() {
@@ -86,7 +86,7 @@ public class PathRefTest {
 	}
 
 	@Test
-	public void testPathCollection() {
+	void testPathCollection() {
 		Pathref<User> p = Pathref.on(User.class);
 
 		assertEquals("address", p.path(p.to().getAddress()));
@@ -97,7 +97,7 @@ public class PathRefTest {
 	}
 
 	@Test
-	public void testPathAll() {
+	void testPathAll() {
 		Pathref<User> p = Pathref.on(User.class);
 
 		assertEquals("address", p.path(p.to().getAddress()));

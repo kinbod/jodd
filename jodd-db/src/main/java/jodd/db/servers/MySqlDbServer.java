@@ -25,7 +25,7 @@
 
 package jodd.db.servers;
 
-import jodd.db.oom.DbOomManager;
+import jodd.db.oom.DbOomConfig;
 
 /**
  * MySQL.
@@ -34,12 +34,22 @@ public class MySqlDbServer implements DbServer {
 
 	private final String version;
 
-	public MySqlDbServer(String version) {
+	public MySqlDbServer(final String version) {
 		this.version = version;
 	}
 
 	@Override
-	public void accept(DbOomManager dbOomManager) {
+	public void accept(final DbOomConfig dbOomConfig) {
+		// Database and table names are not case sensitive in Windows,
+		// and case sensitive in most varieties of Unix. One notable exception is Mac OS X,
+		// which is Unix-based but uses a default file system type (HFS+) that is not case sensitive.
+		dbOomConfig.getTableNames().setLowercase(true);
+
+		// Column and index names are not case sensitive on any platform, nor are column aliases.
+		dbOomConfig.getColumnNames().setLowercase(true);
+
+		// quote character
+		dbOomConfig.getColumnNames().setQuoteChar('`');
 	}
 
 	@Override

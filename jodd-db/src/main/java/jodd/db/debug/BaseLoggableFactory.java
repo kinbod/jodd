@@ -26,12 +26,12 @@
 package jodd.db.debug;
 
 import jodd.db.DbSqlException;
-import jodd.proxetta.MethodInfo;
+import jodd.proxetta.Proxetta;
 import jodd.proxetta.ProxyAspect;
 import jodd.proxetta.asm.ProxettaAsmUtil;
 import jodd.proxetta.impl.WrapperProxetta;
-import jodd.proxetta.impl.WrapperProxettaBuilder;
-import jodd.proxetta.pointcuts.ProxyPointcutSupport;
+import jodd.proxetta.impl.WrapperProxettaFactory;
+import jodd.util.ClassUtil;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -41,7 +41,7 @@ public abstract class BaseLoggableFactory<T> {
 	// ---------------------------------------------------------------- wrap
 
 	protected Class<T> wrappedStatement;
-	protected WrapperProxettaBuilder builder;
+	protected WrapperProxettaFactory builder;
 	protected Field sqlTemplateField;
 	protected Method getQueryStringMethod;
 	protected final WrapperProxetta proxetta;
@@ -51,22 +51,20 @@ public abstract class BaseLoggableFactory<T> {
 	 * Returns {@link WrapperProxetta} used for building loggable prepared statements.
 	 * Initializes proxetta when called for the first time.
 	 */
-	protected BaseLoggableFactory(Class<T> targetClass) {
+	protected BaseLoggableFactory(final Class<T> targetClass) {
 		this.targetClass = targetClass;
-		this.proxetta = WrapperProxetta.withAspects(new ProxyAspect(LoggableAdvice.class, new ProxyPointcutSupport() {
-			public boolean apply(MethodInfo methodInfo) {
-				int argumentsCount = methodInfo.getArgumentsCount();
-				char argumentType = 0;
-				if (argumentsCount >= 1) {
-					argumentType = methodInfo.getArgument(1).getOpcode();
-				}
-				return
-					methodInfo.getReturnType().getOpcode() == 'V' &&			// void-returning method
-						argumentType == 'I' &&									// first argument type
-						methodInfo.isPublicMethod() &&
-						methodInfo.getMethodName().startsWith("set") &&			// set*
-						(argumentsCount == 2 || argumentsCount == 3);			// number of arguments
+		this.proxetta = Proxetta.wrapperProxetta().withAspect(ProxyAspect.of(LoggableAdvice.class, methodInfo -> {
+			int argumentsCount = methodInfo.getArgumentsCount();
+			char argumentType = 0;
+			if (argumentsCount >= 1) {
+				argumentType = methodInfo.getArgument(1).getOpcode();
 			}
+			return
+				methodInfo.getReturnType().getOpcode() == 'V' &&			// void-returning method
+					argumentType == 'I' &&									// first argument type
+					methodInfo.isPublicMethod() &&
+					methodInfo.getMethodName().startsWith("set") &&			// set*
+					(argumentsCount == 2 || argumentsCount == 3);			// number of arguments
 		}));
 	}
 
@@ -74,9 +72,9 @@ public abstract class BaseLoggableFactory<T> {
 	 * Wraps prepared statement.
 	 */
 	@SuppressWarnings("unchecked")
-	protected T wrap(T preparedStatement, String sql) {
+	protected T wrap(final T preparedStatement, final String sql) {
 		if (wrappedStatement == null) {
-			builder = proxetta.builder();
+			builder = proxetta.proxy();
 
 			// use just interface
 			builder.setTarget(targetClass);
@@ -102,7 +100,7 @@ public abstract class BaseLoggableFactory<T> {
 
 		T wrapper;
 		try {
-			wrapper = wrappedStatement.newInstance();
+			wrapper = ClassUtil.newInstance(wrappedStatement);
 		} catch (Exception ex) {
 			throw new DbSqlException(ex);
 		}
@@ -121,7 +119,7 @@ public abstract class BaseLoggableFactory<T> {
 	/**
 	 * Returns the query string from loggable wrapped statement.
 	 */
-	public String getQueryString(T statement) {
+	public String getQueryString(final T statement) {
 		try {
 			return (String) getQueryStringMethod.invoke(statement);
 		} catch (Exception ex) {

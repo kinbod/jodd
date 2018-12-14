@@ -30,16 +30,16 @@ import jodd.util.StringUtil;
 /**
  * Path to a property from JSON root.
  */
-public class Path {
+public final class Path implements Cloneable {
 
-	protected String[] paths = new String[8];
+	protected CharSequence[] paths = new CharSequence[8];
 	protected int index = 0;
 	protected Path altPath;
 
 	/**
 	 * Parses input dot-separated string that represents a path.
 	 */
-	public static Path parse(String path) {
+	public static Path parse(final String path) {
 		if (path == null) {
 			return new Path();
 		}
@@ -52,7 +52,7 @@ public class Path {
 	/**
 	 * Creates path from given path elements.
 	 */
-	public Path(String... fields) {
+	public Path(final CharSequence... fields) {
 		if (fields.length >= paths.length) {
 			paths = fields;
 		}
@@ -60,6 +60,12 @@ public class Path {
 			System.arraycopy(fields, 0, paths, 0, fields.length);
 			index = fields.length;
 		}
+	}
+
+	private Path(CharSequence[] paths, int index, Path altPath) {
+		this.paths = paths;
+		this.index = index;
+		this.altPath = altPath;
 	}
 
 	/**
@@ -72,7 +78,7 @@ public class Path {
 	/**
 	 * Push element to the path.
 	 */
-	public Path push(String field) {
+	public Path push(final CharSequence field) {
 		_push(field);
 
 		if (altPath != null) {
@@ -81,7 +87,7 @@ public class Path {
 		return this;
 	}
 
-	public Path push(String field, String altField) {
+	public Path push(final CharSequence field, final CharSequence altField) {
 		_push(field);
 
 		if (altPath != null) {
@@ -90,9 +96,9 @@ public class Path {
 		return this;
 	}
 
-	private void _push(String field) {
+	private void _push(final CharSequence field) {
 		if (index == paths.length) {	// ensure size
-			String[] newPaths = new String[paths.length << 1];
+			CharSequence[] newPaths = new CharSequence[paths.length << 1];
 			System.arraycopy(paths, 0, newPaths, 0, paths.length);
 			paths = newPaths;
 		}
@@ -104,7 +110,7 @@ public class Path {
 	/**
 	 * Pop last element from the path.
 	 */
-	public String pop(){
+	public CharSequence pop(){
 		if (altPath != null) {
 			altPath.pop();
 		}
@@ -121,19 +127,20 @@ public class Path {
 	/**
 	 * Returns path chunk at given index.
 	 */
-	public String get(int i) {
+	public CharSequence get(final int i) {
 		if (i >= index) {
 			throw new IndexOutOfBoundsException();
 		}
 		return paths[i];
 	}
 
+	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 
 		builder.append('[');
 		for (int i = 0; i < index; i++) {
-			String current = paths[i];
+			CharSequence current = paths[i];
 			if (i > 0) {
 				builder.append('.');
 			}
@@ -144,13 +151,16 @@ public class Path {
 		return builder.toString();
 	}
 
-	public boolean equals(Object o) {
+	@Override
+	public boolean equals(final Object o) {
 		if (this == o) {
 			return true;
 		}
-		if (o == null || getClass() != o.getClass()) {
-			return false;
-		}
+
+		// correct, but aint gonna happen
+//		if (o == null || getClass() != o.getClass()) {
+//			return false;
+//		}
 
 		Path path1 = (Path) o;
 
@@ -172,15 +182,24 @@ public class Path {
 		return true;
 	}
 
+	@Override
 	public int hashCode() {
 		int result = 1;
 
 		for (int i = 0; i < index; i++) {
-			String element = paths[i];
+			CharSequence element = paths[i];
 			result = 31 * result + (element == null ? 0 : element.hashCode());
 		}
 
 		return result;
 	}
 
+	@Override
+	public Path clone() {
+		CharSequence[] clonedPaths = new CharSequence[paths.length];
+
+		System.arraycopy(paths, 0, clonedPaths, 0, paths.length);
+
+		return new Path(clonedPaths, index, altPath != null ? altPath.clone() : null);
+	}
 }
